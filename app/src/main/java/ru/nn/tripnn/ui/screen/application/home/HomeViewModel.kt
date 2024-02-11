@@ -1,6 +1,5 @@
-package ru.nn.tripnn.ui.screen
+package ru.nn.tripnn.ui.screen.application.home
 
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,69 +8,51 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.screen.HomeScreenData
-import ru.nn.tripnn.domain.entity.UserInfo
 import ru.nn.tripnn.domain.repository.ScreenDataRepository
-import ru.nn.tripnn.domain.repository.UserRepository
+import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.domain.util.Resource
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    @Fake private val userRepository: UserRepository
+class HomeViewModel @Inject constructor(
+    @Fake private val screenDataRepository: ScreenDataRepository
 ) : ViewModel() {
-    var userState by mutableStateOf(UserState())
+    var homeScreenState by mutableStateOf(HomeScreenState())
         private set
 
     init {
-        loadUserState()
+        loadHomeScreenState()
     }
 
-    fun loadUserState() {
+    fun loadHomeScreenState() {
         viewModelScope.launch {
-            userState = userState.copy(
+            homeScreenState = homeScreenState.copy(
                 isLoading = true,
                 error = null
             )
 
-            when(val result = userRepository.getUserInfo()) {
+            when(val result = screenDataRepository.getHomeScreenData()) {
                 is Resource.Success -> {
-                    userState = userState.copy(
+                    homeScreenState = homeScreenState.copy(
                         isLoading = false,
                         error = null,
-                        userInfo = result.data
+                        homeScreenData = result.data
                     )
                 }
                 is Resource.Error -> {
-                    userState = userState.copy(
+                    homeScreenState = homeScreenState.copy(
                         isLoading = false,
                         error = result.message,
-                        userInfo = null
+                        homeScreenData = null
                     )
                 }
             }
         }
     }
-
-    fun changeUserName(name: String) {
-
-    }
-
-    fun clearHistory() {
-
-    }
-
-    fun deleteAccount() {
-
-    }
-
-    fun avatarChange(uri: Uri) {
-
-    }
 }
 
-data class UserState(
+data class HomeScreenState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val userInfo: UserInfo? = null
+    val homeScreenData: HomeScreenData? = null
 )

@@ -1,31 +1,27 @@
-package ru.nn.tripnn.ui
+package ru.nn.tripnn.ui.screen.application
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import ru.nn.tripnn.ui.navigation.AUTH_GRAPH_ROUTE
-import ru.nn.tripnn.ui.navigation.TripNnNavController
-import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
-import ru.nn.tripnn.ui.navigation.AppRoutes
 import ru.nn.tripnn.ui.navigation.MAIN_GRAPH_ROUTE
-import ru.nn.tripnn.ui.screen.MainViewModel
+import ru.nn.tripnn.ui.navigation.TripNnNavController
 import ru.nn.tripnn.ui.navigation.addAppGraph
 import ru.nn.tripnn.ui.navigation.addAuthGraph
+import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
+import ru.nn.tripnn.ui.screen.application.general.GeneralUiViewModel
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 @Composable
-fun TripNnApp(viewModel: MainViewModel) {
-    var curTheme by remember { mutableIntStateOf(2) }
-    var curCurrency by remember { mutableIntStateOf(0) }
-    var curLanguage by remember { mutableIntStateOf(0) }
+fun TripNnApp(
+    generalUiViewModel: GeneralUiViewModel
+) {
+    val uiState = generalUiViewModel.uiPreferencesState
 
     TripNNTheme(
-        darkTheme = when (curTheme) {
+        darkTheme = when (uiState.theme) {
             0 -> false
             1 -> true
             else -> isSystemInDarkTheme()
@@ -39,13 +35,12 @@ fun TripNnApp(viewModel: MainViewModel) {
         ) {
             tripNnNavGraph(
                 navController = tripNnNavController,
-                viewModel = viewModel,
-                curCurrency = curCurrency,
-                curLanguage = curLanguage,
-                curTheme = curTheme,
-                onThemeChange = { curTheme = it },
-                onCurrencyChange = { curCurrency = it },
-                onLanguageChange = { curLanguage = it }
+                curCurrency = uiState.currency,
+                curLanguage = uiState.language,
+                curTheme = uiState.theme,
+                onThemeChange = generalUiViewModel::changeTheme,
+                onCurrencyChange = generalUiViewModel::changeCurrency,
+                onLanguageChange = generalUiViewModel::changeLanguage
             )
         }
     }
@@ -56,7 +51,6 @@ private fun NavGraphBuilder.tripNnNavGraph(
     onThemeChange: (Int) -> Unit,
     onCurrencyChange: (Int) -> Unit,
     onLanguageChange: (Int) -> Unit,
-    viewModel: MainViewModel,
     curTheme: Int,
     curLanguage: Int,
     curCurrency: Int
@@ -65,15 +59,15 @@ private fun NavGraphBuilder.tripNnNavGraph(
         navigateTo = navController::navigateTo,
         onSignUp = { navController.navigateTo(MAIN_GRAPH_ROUTE) },
         onLogIn = { navController.navigateTo(MAIN_GRAPH_ROUTE) },
-        onForgot = {  }
+        onForgot = { }
     )
 
     addAppGraph(
+        navController = navController.navController,
         navigateTo = navController::navigateTo,
         onBack = navController::upPress,
         onThemeChange = onThemeChange,
         onLeaveAccount = {},
-        viewModel = viewModel,
         onLanguageChange = onLanguageChange,
         onCurrencyChange = onCurrencyChange,
         currentTheme = curTheme,

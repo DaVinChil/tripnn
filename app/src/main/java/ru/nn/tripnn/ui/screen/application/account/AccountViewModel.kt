@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.screen
+package ru.nn.tripnn.ui.screen.application.account
 
 import android.net.Uri
 import androidx.compose.runtime.getValue
@@ -9,15 +9,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.screen.HomeScreenData
-import ru.nn.tripnn.domain.entity.UserInfo
-import ru.nn.tripnn.domain.repository.ScreenDataRepository
 import ru.nn.tripnn.domain.repository.UserRepository
 import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.ui.screen.UserState
 import javax.inject.Inject
 
+
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class AccountViewModel @Inject constructor(
     @Fake private val userRepository: UserRepository
 ) : ViewModel() {
     var userState by mutableStateOf(UserState())
@@ -69,9 +68,3 @@ class MainViewModel @Inject constructor(
 
     }
 }
-
-data class UserState(
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val userInfo: UserInfo? = null
-)

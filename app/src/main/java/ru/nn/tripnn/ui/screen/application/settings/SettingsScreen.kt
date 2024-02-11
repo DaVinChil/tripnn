@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.screen.application
+package ru.nn.tripnn.ui.screen.application.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

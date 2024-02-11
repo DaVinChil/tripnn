@@ -1,13 +1,16 @@
 package ru.nn.tripnn.ui.navigation
 
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import ru.nn.tripnn.ui.screen.MainViewModel
-import ru.nn.tripnn.ui.screen.application.SettingsScreen
+import ru.nn.tripnn.ui.screen.application.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.application.account.AccountScreen
+import ru.nn.tripnn.ui.screen.application.account.AccountViewModel
 import ru.nn.tripnn.ui.screen.application.home.HomeScreen
+import ru.nn.tripnn.ui.screen.application.home.HomeViewModel
 
 enum class AppRoutes(
     val route: String
@@ -26,11 +29,11 @@ enum class AppRoutes(
 }
 
 fun NavGraphBuilder.addAppGraph(
+    navController: NavController,
     navigateTo: (String) -> Unit,
     onBack: () -> Unit,
     onThemeChange: (Int) -> Unit,
     onLeaveAccount: () -> Unit,
-    viewModel: MainViewModel,
     onLanguageChange: (Int) -> Unit,
     onCurrencyChange: (Int) -> Unit,
     currentTheme: Int,
@@ -41,10 +44,12 @@ fun NavGraphBuilder.addAppGraph(
         route = MAIN_GRAPH_ROUTE,
         startDestination = AppRoutes.HOME.route
     ) {
-        composable(AppRoutes.HOME.route) {
+        composable(AppRoutes.HOME.route) { backStackEntry ->
+            val graphBack = remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+            val homeViewModel = hiltViewModel<HomeViewModel>(graphBack)
 
             HomeScreen(
-                homeScreenState  = viewModel.homeScreenState,
+                homeScreenState  = homeViewModel.homeScreenState,
                 onAccountClick   = { navigateTo(AppRoutes.ACCOUNT.route)    },
                 onHistoryClick   = { navigateTo(AppRoutes.HISTORY.route)    },
                 onFavouriteClick = { navigateTo(AppRoutes.FAVOURITE.route)  },
@@ -69,15 +74,16 @@ fun NavGraphBuilder.addAppGraph(
             )
         }
 
-        composable(AppRoutes.ACCOUNT.route) {
-            println("HELLO")
+        composable(AppRoutes.ACCOUNT.route) { backStackEntry ->
+            val graphBack = remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+            val accountViewModel = hiltViewModel<AccountViewModel>(graphBack)
             AccountScreen(
                 onBackClick = onBack,
-                userState = viewModel.userState,
-                onUserNameChange = viewModel::changeUserName,
-                onClearHistory = viewModel::clearHistory,
-                onDeleteAccount = viewModel::deleteAccount,
-                onAvatarChange = viewModel::avatarChange,
+                userState = accountViewModel.userState,
+                onUserNameChange = accountViewModel::changeUserName,
+                onClearHistory = accountViewModel::clearHistory,
+                onDeleteAccount = accountViewModel::deleteAccount,
+                onAvatarChange = accountViewModel::avatarChange,
                 onLeaveAccount = onLeaveAccount
             )
         }

@@ -28,6 +28,8 @@ abstract class RepositoryModule {
     abstract fun bindUserRepository(
         userRepositoryImpl: FakeUserRepositoryImpl
     ): UserRepository
+
+
 }
 
 @Qualifier

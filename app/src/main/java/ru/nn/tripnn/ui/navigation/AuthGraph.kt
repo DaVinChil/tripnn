@@ -20,7 +20,7 @@ fun NavGraphBuilder.addAuthGraph(
     onForgot: () -> Unit
 ) {
     navigation(
-        route = MainDestinations.AUTHENTICATION,
+        route = AUTH_GRAPH_ROUTE,
         startDestination = AuthRoutes.REGISTRATION.route
     ) {
         composable(AuthRoutes.REGISTRATION.route) {

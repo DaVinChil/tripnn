@@ -59,7 +59,6 @@ import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.HomeScreenState
 import ru.nn.tripnn.ui.screen.authentication.SystemBarsToBackgroundColor
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
