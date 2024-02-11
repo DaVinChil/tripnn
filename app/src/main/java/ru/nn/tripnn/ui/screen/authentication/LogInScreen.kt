@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.domain.entity.Credentials
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -37,7 +38,7 @@ import ru.nn.tripnn.ui.theme.montserratFamily
 @Composable
 fun LogInScreen(
     onForgotClick: () -> Unit,
-    onLogInClick: (rememeberMe: Boolean) -> Unit,
+    onLogInClick: (rememeberMe: Boolean, credentials: Credentials) -> Unit,
     onRegisterClick: () -> Unit
 ) {
     SystemBarsToBackgroundColor()
@@ -46,6 +47,9 @@ fun LogInScreen(
         mutableStateOf(false)
     }
     val onRememberClick = { rememberMe = !rememberMe }
+
+    var email by remember { mutableStateOf("") }
+    var pass by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -59,7 +63,6 @@ fun LogInScreen(
             Spacer(modifier = Modifier.height(64.dp))
 
             Column {
-                var email by remember { mutableStateOf("") }
                 InputBlock(
                     value = email,
                     title = "Эл. почта",
@@ -69,7 +72,6 @@ fun LogInScreen(
 
                 Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
 
-                var pass by remember { mutableStateOf("") }
                 PasswordInputBlock(
                     value = pass,
                     title = "Пароль",
@@ -121,7 +123,7 @@ fun LogInScreen(
             PrimaryButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = "Войти",
-                onClick = { onLogInClick(rememberMe) }
+                onClick = { onLogInClick(rememberMe, Credentials(email = email, password = pass)) }
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -186,7 +188,7 @@ fun LogInScreenPreview() {
         Surface(modifier = Modifier.fillMaxSize()) {
             LogInScreen(
                 onForgotClick = { },
-                onLogInClick = { },
+                onLogInClick = {a, b -> },
                 onRegisterClick = {}
             )
         }

@@ -7,16 +7,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import ru.nn.tripnn.ui.navigation.AUTH_GRAPH_ROUTE
 import ru.nn.tripnn.ui.navigation.MAIN_GRAPH_ROUTE
+import ru.nn.tripnn.ui.navigation.SPLASH_ROUTE
 import ru.nn.tripnn.ui.navigation.TripNnNavController
 import ru.nn.tripnn.ui.navigation.addAppGraph
 import ru.nn.tripnn.ui.navigation.addAuthGraph
 import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
 import ru.nn.tripnn.ui.screen.application.general.GeneralUiViewModel
+import ru.nn.tripnn.ui.screen.application.splash.HeartSplashScreen
+import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 @Composable
 fun TripNnApp(
-    generalUiViewModel: GeneralUiViewModel
+    generalUiViewModel: GeneralUiViewModel,
+    authViewModel: AuthenticationViewModel
 ) {
     val uiState = generalUiViewModel.uiPreferencesState
 
@@ -31,34 +35,45 @@ fun TripNnApp(
 
         NavHost(
             navController = tripNnNavController.navController,
-            startDestination = AUTH_GRAPH_ROUTE
+            startDestination = SPLASH_ROUTE
         ) {
             tripNnNavGraph(
                 navController = tripNnNavController,
-                curCurrency = uiState.currency,
-                curLanguage = uiState.language,
-                curTheme = uiState.theme,
-                onThemeChange = generalUiViewModel::changeTheme,
-                onCurrencyChange = generalUiViewModel::changeCurrency,
-                onLanguageChange = generalUiViewModel::changeLanguage
+                generalUiViewModel = generalUiViewModel,
+                authViewModel = authViewModel
             )
+
+            composable(route = SPLASH_ROUTE) {
+                HeartSplashScreen(
+                    onFinish = {
+                        if (authViewModel.isAuthenticated) {
+                            tripNnNavController.navigateTo(MAIN_GRAPH_ROUTE)
+                        } else {
+                            tripNnNavController.navigateTo(AUTH_GRAPH_ROUTE)
+                        }
+                    },
+                    isLoading = authViewModel.isLoading
+                )
+            }
         }
     }
 }
 
 private fun NavGraphBuilder.tripNnNavGraph(
     navController: TripNnNavController,
-    onThemeChange: (Int) -> Unit,
-    onCurrencyChange: (Int) -> Unit,
-    onLanguageChange: (Int) -> Unit,
-    curTheme: Int,
-    curLanguage: Int,
-    curCurrency: Int
+    generalUiViewModel: GeneralUiViewModel,
+    authViewModel: AuthenticationViewModel
 ) {
     addAuthGraph(
         navigateTo = navController::navigateTo,
-        onSignUp = { navController.navigateTo(MAIN_GRAPH_ROUTE) },
-        onLogIn = { navController.navigateTo(MAIN_GRAPH_ROUTE) },
+        onSignUp = { credentials ->
+            authViewModel.authenticate(credentials)
+            navController.navigateTo(MAIN_GRAPH_ROUTE)
+        },
+        onLogIn = { rememberMe, credentials ->
+            authViewModel.authenticate(credentials)
+            navController.navigateTo(MAIN_GRAPH_ROUTE)
+        },
         onForgot = { }
     )
 
@@ -66,12 +81,10 @@ private fun NavGraphBuilder.tripNnNavGraph(
         navController = navController.navController,
         navigateTo = navController::navigateTo,
         onBack = navController::upPress,
-        onThemeChange = onThemeChange,
-        onLeaveAccount = {},
-        onLanguageChange = onLanguageChange,
-        onCurrencyChange = onCurrencyChange,
-        currentTheme = curTheme,
-        currentLanguage = curLanguage,
-        currentCurrency = curCurrency
+        generalUiViewModel = generalUiViewModel,
+        onLeaveAccount = {
+            navController.navigateTo(AUTH_GRAPH_ROUTE)
+            authViewModel.logout()
+        }
     )
 }

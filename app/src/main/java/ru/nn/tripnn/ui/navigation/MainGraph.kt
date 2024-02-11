@@ -9,6 +9,7 @@ import androidx.navigation.navigation
 import ru.nn.tripnn.ui.screen.application.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.application.account.AccountScreen
 import ru.nn.tripnn.ui.screen.application.account.AccountViewModel
+import ru.nn.tripnn.ui.screen.application.general.GeneralUiViewModel
 import ru.nn.tripnn.ui.screen.application.home.HomeScreen
 import ru.nn.tripnn.ui.screen.application.home.HomeViewModel
 
@@ -29,16 +30,11 @@ enum class AppRoutes(
 }
 
 fun NavGraphBuilder.addAppGraph(
+    generalUiViewModel: GeneralUiViewModel,
     navController: NavController,
     navigateTo: (String) -> Unit,
     onBack: () -> Unit,
-    onThemeChange: (Int) -> Unit,
-    onLeaveAccount: () -> Unit,
-    onLanguageChange: (Int) -> Unit,
-    onCurrencyChange: (Int) -> Unit,
-    currentTheme: Int,
-    currentLanguage: Int,
-    currentCurrency: Int
+    onLeaveAccount: () -> Unit
 ) {
     navigation(
         route = MAIN_GRAPH_ROUTE,
@@ -63,14 +59,15 @@ fun NavGraphBuilder.addAppGraph(
         }
 
         composable(AppRoutes.SETTINGS.route) {
+            val preferences = generalUiViewModel.uiPreferencesState
             SettingsScreen(
                 onBackClick = onBack,
-                onThemeChange = onThemeChange,
-                onLanguageChange = onLanguageChange,
-                onCurrencyChange = onCurrencyChange,
-                currentTheme = currentTheme,
-                currentLanguage = currentLanguage,
-                currentCurrency = currentCurrency
+                onThemeChange = generalUiViewModel::changeTheme,
+                onLanguageChange = generalUiViewModel::changeLanguage,
+                onCurrencyChange = generalUiViewModel::changeCurrency,
+                currentTheme = preferences.theme,
+                currentLanguage = preferences.language,
+                currentCurrency = preferences.currency
             )
         }
 

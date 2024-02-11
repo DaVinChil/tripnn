@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -49,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import ru.nn.tripnn.R
+import ru.nn.tripnn.domain.entity.Credentials
+import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -56,7 +60,7 @@ import ru.nn.tripnn.ui.theme.montserratFamily
 val SPACE_BETWEEN_INPUT = 22.dp
 
 @Composable
-fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
+fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -> Unit) {
     SystemBarsToBackgroundColor()
 
     Column(
@@ -69,8 +73,12 @@ fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        Column {
-            var email by remember { mutableStateOf("") }
+        var email by remember { mutableStateOf("") }
+        var username by remember { mutableStateOf("") }
+        var pass by remember { mutableStateOf("") }
+        var passRep by remember { mutableStateOf("") }
+
+        Column(verticalArrangement = Arrangement.spacedBy(SPACE_BETWEEN_INPUT)) {
             InputBlock(
                 value = email,
                 title = "Эл. почта",
@@ -78,9 +86,6 @@ fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
                 placeholder = "Введите почту"
             )
 
-            Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
-
-            var username by remember { mutableStateOf("") }
             InputBlock(
                 value = username,
                 title = "Имя",
@@ -88,9 +93,6 @@ fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
                 placeholder = "Введите имя"
             )
 
-            Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
-
-            var pass by remember { mutableStateOf("") }
             PasswordInputBlock(
                 value = pass,
                 title = "Пароль",
@@ -98,9 +100,6 @@ fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
                 placeholder = "Введите пароль"
             )
 
-            Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
-
-            var passRep by remember { mutableStateOf("") }
             PasswordInputBlock(
                 value = passRep,
                 title = "Подтвердите пароль",
@@ -111,10 +110,18 @@ fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
         
         Spacer(modifier = Modifier.height(52.dp))
 
+        val onRegClick = remember(onSignUpClick) {
+            {
+                if(passRep == pass) {
+                    onSignUpClick(Credentials(name = username, email = email, password = pass))
+                }
+            }
+        }
+
         PrimaryButton(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = "Зарегистрироваться",
-            onClick = onSignUpClick
+            onClick = onRegClick
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -126,20 +133,16 @@ fun RegistrationScreen(onSignUpClick: () -> Unit, onSignInClick: () -> Unit) {
 @Composable
 fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
     Row(modifier = modifier) {
-        Text(
+        MontsText(
             text = "Уже есть аккаунт ?",
             fontSize = 12.sp,
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSecondary
         )
         Spacer(modifier = Modifier.width(5.dp))
-        Text(
+        MontsText(
             text = "Войти",
             fontSize = 12.sp,
-            fontFamily = montserratFamily,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.clickable(onClick = onSignInClick)
         )
     }
@@ -167,20 +170,15 @@ fun SystemBarsToBackgroundColor(statusColor: Color = MaterialTheme.colorScheme.b
 
 @Composable
 private fun Title() {
-    Text(
+    MontsText(
         text = "Добро пожаловать !",
-        fontSize = 19.sp,
-        fontFamily = montserratFamily,
-        fontWeight = FontWeight.Normal,
-        color = MaterialTheme.colorScheme.tertiary
+        fontSize = 19.sp
     )
     Spacer(modifier = Modifier.height(15.dp))
-    Text(
+    MontsText(
         text = "Зарегистрируйтесь",
         fontSize = 25.sp,
-        fontFamily = montserratFamily,
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.tertiary
     )
 }
 
@@ -193,24 +191,23 @@ fun InputBlock(
     trailingIcon: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
-    Text(
-        text = title,
-        fontSize = 16.sp,
-        fontFamily = montserratFamily,
-        fontWeight = FontWeight.Normal,
-        color = MaterialTheme.colorScheme.tertiary
-    )
-    Spacer(modifier = Modifier.height(14.dp))
-    AuthInputField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp),
-        value = value,
-        onValueChange = onValueChanged,
-        placeholder = placeholder,
-        trailingIcon = trailingIcon,
-        visualTransformation = visualTransformation
-    )
+    Column {
+        MontsText(
+            text = title,
+            fontSize = 16.sp
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        AuthInputField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp),
+            value = value,
+            onValueChange = onValueChanged,
+            placeholder = placeholder,
+            trailingIcon = trailingIcon,
+            visualTransformation = visualTransformation
+        )
+    }
 }
 
 @Composable
@@ -328,7 +325,3 @@ fun RegistrationScreenPreview() {
         }
     }
 }
-
-
-
-

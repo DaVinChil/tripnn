@@ -3,6 +3,7 @@ package ru.nn.tripnn.ui.navigation
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import ru.nn.tripnn.domain.entity.Credentials
 import ru.nn.tripnn.ui.screen.authentication.LogInScreen
 import ru.nn.tripnn.ui.screen.authentication.RegistrationScreen
 
@@ -15,8 +16,8 @@ enum class AuthRoutes(
 
 fun NavGraphBuilder.addAuthGraph(
     navigateTo: (String) -> Unit,
-    onSignUp: () -> Unit,
-    onLogIn: (rememberMe: Boolean) -> Unit,
+    onSignUp: (Credentials) -> Unit,
+    onLogIn: (rememberMe: Boolean, credentials: Credentials) -> Unit,
     onForgot: () -> Unit
 ) {
     navigation(

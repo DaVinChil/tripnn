@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 
 const val MAIN_GRAPH_ROUTE = "application"
 const val AUTH_GRAPH_ROUTE = "authentication"
+const val SPLASH_ROUTE = "splash"
 
 val authRoutes = authRoutesString()
 fun authRoutesString(): Set<String> = AuthRoutes.entries.map { it.route }.toSet()
@@ -35,6 +36,8 @@ class TripNnNavController(
             return
 
         if (authRoutes.contains(route) xor authRoutes.contains(currentRoute)) {
+            navigateToAndPopAll(route)
+        } else if(currentRoute == SPLASH_ROUTE) {
             navigateToAndPopAll(route)
         } else {
             navController.navigate(route) {
