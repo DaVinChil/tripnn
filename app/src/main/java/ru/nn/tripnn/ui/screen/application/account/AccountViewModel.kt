@@ -9,9 +9,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.domain.entity.UserInfo
 import ru.nn.tripnn.domain.repository.UserRepository
 import ru.nn.tripnn.domain.util.Resource
-import ru.nn.tripnn.ui.screen.UserState
 import javax.inject.Inject
 
 
@@ -68,3 +68,9 @@ class AccountViewModel @Inject constructor(
 
     }
 }
+
+data class UserState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val userInfo: UserInfo? = null
+)

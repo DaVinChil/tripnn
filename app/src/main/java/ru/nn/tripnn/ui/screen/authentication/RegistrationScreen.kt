@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -41,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -81,38 +81,38 @@ fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -
         Column(verticalArrangement = Arrangement.spacedBy(SPACE_BETWEEN_INPUT)) {
             InputBlock(
                 value = email,
-                title = "Эл. почта",
+                title = stringResource(id = R.string.email),
                 onValueChanged = { email = it },
-                placeholder = "Введите почту"
+                placeholder = stringResource(id = R.string.enter_email)
             )
 
             InputBlock(
                 value = username,
-                title = "Имя",
+                title = stringResource(id = R.string.enter_user_name),
                 onValueChanged = { username = it },
-                placeholder = "Введите имя"
+                placeholder = stringResource(id = R.string.user_name)
             )
 
             PasswordInputBlock(
                 value = pass,
-                title = "Пароль",
+                title = stringResource(id = R.string.password),
                 onValueChanged = { pass = it },
-                placeholder = "Введите пароль"
+                placeholder = stringResource(id = R.string.enter_password)
             )
 
             PasswordInputBlock(
                 value = passRep,
-                title = "Подтвердите пароль",
+                title = stringResource(id = R.string.confirm_password),
                 onValueChanged = { passRep = it },
-                placeholder = "Подтвердите пароль"
+                placeholder = stringResource(id = R.string.confirm_password)
             )
         }
-        
+
         Spacer(modifier = Modifier.height(52.dp))
 
         val onRegClick = remember(onSignUpClick) {
             {
-                if(passRep == pass) {
+                if (passRep == pass) {
                     onSignUpClick(Credentials(name = username, email = email, password = pass))
                 }
             }
@@ -120,13 +120,16 @@ fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -
 
         PrimaryButton(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = "Зарегистрироваться",
+            text = stringResource(id = R.string.register),
             onClick = onRegClick
         )
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        AlreadyHaveAccount(modifier = Modifier.align(Alignment.CenterHorizontally), onSignInClick = onSignInClick)
+        AlreadyHaveAccount(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            onSignInClick = onSignInClick
+        )
     }
 }
 
@@ -134,13 +137,13 @@ fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -
 fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
     Row(modifier = modifier) {
         MontsText(
-            text = "Уже есть аккаунт ?",
+            text = stringResource(id = R.string.have_account),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSecondary
         )
         Spacer(modifier = Modifier.width(5.dp))
         MontsText(
-            text = "Войти",
+            text = stringResource(id = R.string.login),
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable(onClick = onSignInClick)
@@ -149,20 +152,19 @@ fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
 }
 
 @Composable
-fun SystemBarsToBackgroundColor(statusColor: Color = MaterialTheme.colorScheme.background,
-                                navColor: Color = MaterialTheme.colorScheme.background) {
+fun SystemBarsToBackgroundColor(
+    statusColor: Color = MaterialTheme.colorScheme.background,
+    navColor: Color = MaterialTheme.colorScheme.background
+) {
     val view = LocalView.current
     if (!view.isInEditMode) {
         val statusColorArgb = statusColor.toArgb()
         val navColorArg = navColor.toArgb()
-        val darkTheme = isSystemInDarkTheme()
         SideEffect {
-            val activity  = view.context as Activity
+            val activity = view.context as Activity
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 activity.window.navigationBarColor = navColorArg
                 activity.window.statusBarColor = statusColorArgb
-                WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars = !darkTheme
-                WindowCompat.getInsetsController(activity.window, view).isAppearanceLightNavigationBars = !darkTheme
             }
         }
     }
@@ -171,12 +173,12 @@ fun SystemBarsToBackgroundColor(statusColor: Color = MaterialTheme.colorScheme.b
 @Composable
 private fun Title() {
     MontsText(
-        text = "Добро пожаловать !",
+        text = stringResource(id = R.string.welcome),
         fontSize = 19.sp
     )
     Spacer(modifier = Modifier.height(15.dp))
     MontsText(
-        text = "Зарегистрируйтесь",
+        text = stringResource(id = R.string.register),
         fontSize = 25.sp,
         fontWeight = FontWeight.SemiBold,
     )
@@ -230,7 +232,9 @@ fun PasswordInputBlock(
             else
                 painterResource(id = R.drawable.outline_visibility_off)
 
-            val description = if (passwordVisible) "Скрыть пароль" else "Показать пароль"
+            val description =
+                if (passwordVisible) stringResource(id = R.string.hide_password)
+                else stringResource(id = R.string.show_password)
 
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(painter = image, description)
@@ -271,7 +275,12 @@ fun AuthInputField(
         keyboardActions = keyboardActions,
         interactionSource = interactionSource,
         singleLine = true,
-        textStyle = TextStyle(color = Color.Black, fontFamily = montserratFamily, fontWeight = FontWeight.Normal, fontSize = fontSize)
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontFamily = montserratFamily,
+            fontWeight = FontWeight.Normal,
+            fontSize = fontSize
+        )
     ) { innerTextField ->
 
         val icon: (@Composable () -> Unit)? = if (trailingIcon != null) {
@@ -291,7 +300,14 @@ fun AuthInputField(
             innerTextField = innerTextField,
             singleLine = true,
             enabled = true,
-            placeholder = { Text(text = placeholder, fontFamily = montserratFamily, fontWeight = FontWeight.Normal, fontSize = fontSize) },
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    fontFamily = montserratFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = fontSize
+                )
+            },
             interactionSource = interactionSource,
             contentPadding = PaddingValues(start = 25.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
             shape = RoundedCornerShape(100),
@@ -310,7 +326,10 @@ fun InputFieldPreview() {
             placeholder = "Password",
             onValueChange = { },
             trailingIcon = {
-                Icon(painter = painterResource(id = R.drawable.outline_visibility_off), contentDescription = "Visibility")
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_visibility_off),
+                    contentDescription = "Visibility"
+                )
             }
         )
     }

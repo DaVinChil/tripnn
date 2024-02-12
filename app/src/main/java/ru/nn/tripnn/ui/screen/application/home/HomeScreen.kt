@@ -1,6 +1,7 @@
 package ru.nn.tripnn.ui.screen.application.home
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,9 +44,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -130,7 +133,11 @@ fun HomeContent(
     onCurRouteClick: (() -> Unit)? = null,
     onMenuClick: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -152,13 +159,13 @@ fun HomeContent(
                                 modifier = Modifier
                                     .clickable(onClick = onMenuClick),
                                 painter = painterResource(id = R.drawable.burger_menu),
-                                contentDescription = "menu",
+                                contentDescription = stringResource(id = R.string.menu_txt),
                             )
                         }
                         Image(
                             modifier = Modifier,
                             painter = painterResource(id = R.drawable.tripnn_logo),
-                            contentDescription = "log"
+                            contentDescription = stringResource(id = R.string.logo_txt)
                         )
                         Spacer(modifier = Modifier.weight(1f))
                     }
@@ -170,7 +177,7 @@ fun HomeContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         MontsText(
-                            text = "Рекомендованные маршруты",
+                            text = stringResource(id = R.string.recommended_routes),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -178,7 +185,7 @@ fun HomeContent(
                             modifier = Modifier.clickable(
                                 onClick = onAllRoutesClick
                             ),
-                            text = "Все",
+                            text = stringResource(id = R.string.all_txt),
                             fontSize = 16.sp
                         )
                     }
@@ -249,16 +256,16 @@ fun Menu(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.cross_menu),
-                    contentDescription = "close menu",
+                    contentDescription = stringResource(id = R.string.close_menu),
                     modifier = Modifier
                         .size(16.dp)
                 )
             }
 
-            MenuOption(onClick = onAccountClick, text = "Аккаунт")
-            MenuOption(onClick = onHistoryClick, text = "История маршрутов")
-            MenuOption(onClick = onFavouriteClick, text = "Избранные")
-            MenuOption(onClick = onSettingsClick, text = "Настройки")
+            MenuOption(onClick = onAccountClick, text = stringResource(id = R.string.account_txt))
+            MenuOption(onClick = onHistoryClick, text = stringResource(id = R.string.routes_history))
+            MenuOption(onClick = onFavouriteClick, text = stringResource(id = R.string.favourites))
+            MenuOption(onClick = onSettingsClick, text = stringResource(id = R.string.settings))
         }
     }
 }
@@ -299,10 +306,10 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.list_icon),
-                contentDescription = "all places"
+                contentDescription = stringResource(id = R.string.all_places)
             )
             MontsText(
-                text = "Все места Нижнего Новгорода",
+                text = stringResource(id = R.string.all_places_nn_txt),
                 fontSize = 14.sp,
             )
         }
@@ -311,22 +318,19 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 
 @Composable
 fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    var isFillMaxWidth by remember { mutableStateOf(true) }
+    var pressed by remember { mutableStateOf(false) }
 
-    val height by animateDpAsState(targetValue = if (isFillMaxWidth) 140.dp else 120.dp, label = "")
-    val nrTextSize by animateIntAsState(targetValue = if (isFillMaxWidth) 40 else 30, label = "")
-    val createTextSize by animateIntAsState(
-        targetValue = if (isFillMaxWidth) 12 else 9,
-        label = ""
-    )
-    val lineHeight by animateIntAsState(targetValue = if (isFillMaxWidth) 30 else 25, label = "")
-    val yOffset by animateDpAsState(
-        targetValue = if (isFillMaxWidth) (-9).dp else (-5).dp,
-        label = ""
-    )
+    val scale by animateFloatAsState(targetValue = if(pressed) 0.85f else 1f, label = "")
+
+    val height = 140.dp
+    val nrTextSize = 40.sp
+    val createTextSize = 12.sp
+    val lineHeight = 30.sp
+    val yOffset = (-9).dp
 
     Box(
         modifier = modifier
+            .scale(scale)
             .height(height)
             .width(230.dp)
             .clickable(
@@ -336,7 +340,7 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
                     .also { interactionSource ->
                         LaunchedEffect(interactionSource) {
                             interactionSource.interactions.collect {
-                                isFillMaxWidth = it !is PressInteraction.Press
+                                pressed = it is PressInteraction.Press
                             }
                         }
                     }),
@@ -359,24 +363,23 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         ) {
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = "НОВЫЙ МАРШРУТ",
+                text = stringResource(id = R.string.new_route),
                 fontFamily = montserratFamily,
-                fontSize = nrTextSize.sp,
+                fontSize = nrTextSize,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.tertiary,
                 textAlign = TextAlign.Center,
-                lineHeight = lineHeight.sp,
+                lineHeight = lineHeight,
                 letterSpacing = (-0.5).sp
             )
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
                 MontsText(
-                    text = "создать",
-                    fontSize = createTextSize.sp,
+                    text = stringResource(id = R.string.create),
+                    fontSize = createTextSize,
                     modifier = Modifier.offset(y = yOffset)
                 )
             }
         }
-
     }
 }
 
@@ -407,7 +410,7 @@ fun CurrentRouteBar(modifier: Modifier = Modifier, percent: Int, onClick: () -> 
             modifier = Modifier.fillMaxWidth()
         ) {
             MontsText(
-                text = "Текущий маршрут",
+                text = stringResource(id = R.string.current_route),
                 fontSize = 16.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Medium
@@ -417,7 +420,7 @@ fun CurrentRouteBar(modifier: Modifier = Modifier, percent: Int, onClick: () -> 
                 Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     painter = painterResource(id = R.drawable.map_icon),
-                    contentDescription = "icon",
+                    contentDescription = stringResource(id = R.string.map_desc_icon),
                     tint = Color.White
                 )
             }

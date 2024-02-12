@@ -1,17 +1,23 @@
 package ru.nn.tripnn.ui.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import ru.nn.tripnn.ui.screen.application.settings.SettingsScreen
+import ru.nn.tripnn.ui.screen.GeneralUiViewModel
 import ru.nn.tripnn.ui.screen.application.account.AccountScreen
 import ru.nn.tripnn.ui.screen.application.account.AccountViewModel
-import ru.nn.tripnn.ui.screen.application.general.GeneralUiViewModel
 import ru.nn.tripnn.ui.screen.application.home.HomeScreen
 import ru.nn.tripnn.ui.screen.application.home.HomeViewModel
+import ru.nn.tripnn.ui.screen.application.settings.SettingsScreen
+import ru.nn.tripnn.ui.screen.getIsoLang
+import ru.nn.tripnn.ui.util.changeLocales
 
 enum class AppRoutes(
     val route: String
@@ -40,30 +46,63 @@ fun NavGraphBuilder.addAppGraph(
         route = MAIN_GRAPH_ROUTE,
         startDestination = AppRoutes.HOME.route
     ) {
-        composable(AppRoutes.HOME.route) { backStackEntry ->
-            val graphBack = remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+        composable(
+            AppRoutes.HOME.route,
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { -it },
+                    animationSpec = tween(300)
+                )
+            },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(300)
+                )
+            },
+        ) { backStackEntry ->
+            val graphBack =
+                remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
             val homeViewModel = hiltViewModel<HomeViewModel>(graphBack)
 
             HomeScreen(
-                homeScreenState  = homeViewModel.homeScreenState,
-                onAccountClick   = { navigateTo(AppRoutes.ACCOUNT.route)    },
-                onHistoryClick   = { navigateTo(AppRoutes.HISTORY.route)    },
-                onFavouriteClick = { navigateTo(AppRoutes.FAVOURITE.route)  },
-                onSettingsClick  = { navigateTo(AppRoutes.SETTINGS.route)   },
-                onAllRoutesClick = { navigateTo(AppRoutes.ALL_ROUTES.route) },
-                onRouteCardClick = { navigateTo(AppRoutes.ROUTE_INFO.route) },
-                onAllPlacesClick = { navigateTo(AppRoutes.ALL_PLACES.route) },
-                onNewRouteClick  = { navigateTo(AppRoutes.NEW_ROUTE.route)  },
-                onCurRouteClick  = { navigateTo(AppRoutes.CUR_ROUTE.route)  }
+                homeScreenState = homeViewModel.homeScreenState,
+                onAccountClick = { navigateTo(AppRoutes.ACCOUNT.route) },
+                onHistoryClick = { /*navigateTo(AppRoutes.HISTORY.route)*/ },
+                onFavouriteClick = { /*navigateTo(AppRoutes.FAVOURITE.route)*/ },
+                onSettingsClick = { navigateTo(AppRoutes.SETTINGS.route) },
+                onAllRoutesClick = { /*navigateTo(AppRoutes.ALL_ROUTES.route)*/ },
+                onRouteCardClick = { /*navigateTo(AppRoutes.ROUTE_INFO.route)*/ },
+                onAllPlacesClick = { /*navigateTo(AppRoutes.ALL_PLACES.route)*/ },
+                onNewRouteClick = { /*navigateTo(AppRoutes.NEW_ROUTE.route)*/ },
+                onCurRouteClick = { /*navigateTo(AppRoutes.CUR_ROUTE.route)*/ }
             )
         }
 
-        composable(AppRoutes.SETTINGS.route) {
+        composable(
+            route = AppRoutes.SETTINGS.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
             val preferences = generalUiViewModel.uiPreferencesState
+            val context = LocalContext.current
             SettingsScreen(
                 onBackClick = onBack,
                 onThemeChange = generalUiViewModel::changeTheme,
-                onLanguageChange = generalUiViewModel::changeLanguage,
+                onLanguageChange = {
+                    generalUiViewModel.changeLanguage(it)
+                    changeLocales(context, getIsoLang(it))
+                },
                 onCurrencyChange = generalUiViewModel::changeCurrency,
                 currentTheme = preferences.theme,
                 currentLanguage = preferences.language,
@@ -71,8 +110,22 @@ fun NavGraphBuilder.addAppGraph(
             )
         }
 
-        composable(AppRoutes.ACCOUNT.route) { backStackEntry ->
-            val graphBack = remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+        composable(AppRoutes.ACCOUNT.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) { backStackEntry ->
+            val graphBack =
+                remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
             val accountViewModel = hiltViewModel<AccountViewModel>(graphBack)
             AccountScreen(
                 onBackClick = onBack,

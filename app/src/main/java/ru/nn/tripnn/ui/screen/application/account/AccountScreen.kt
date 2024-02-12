@@ -52,7 +52,6 @@ import ru.nn.tripnn.ui.common.BaseBottomSheet
 import ru.nn.tripnn.ui.common.BottomSheetState
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.screen.UserState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 

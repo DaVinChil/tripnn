@@ -2,9 +2,11 @@ package ru.nn.tripnn.ui.screen.application
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.navigation.AUTH_GRAPH_ROUTE
 import ru.nn.tripnn.ui.navigation.MAIN_GRAPH_ROUTE
 import ru.nn.tripnn.ui.navigation.SPLASH_ROUTE
@@ -12,7 +14,8 @@ import ru.nn.tripnn.ui.navigation.TripNnNavController
 import ru.nn.tripnn.ui.navigation.addAppGraph
 import ru.nn.tripnn.ui.navigation.addAuthGraph
 import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
-import ru.nn.tripnn.ui.screen.application.general.GeneralUiViewModel
+import ru.nn.tripnn.ui.screen.GeneralUiViewModel
+import ru.nn.tripnn.ui.screen.Theme
 import ru.nn.tripnn.ui.screen.application.splash.HeartSplashScreen
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -20,14 +23,15 @@ import ru.nn.tripnn.ui.theme.TripNNTheme
 @Composable
 fun TripNnApp(
     generalUiViewModel: GeneralUiViewModel,
-    authViewModel: AuthenticationViewModel
+    authViewModel: AuthenticationViewModel,
+    showSystemBars: (Boolean) -> Unit
 ) {
     val uiState = generalUiViewModel.uiPreferencesState
 
     TripNNTheme(
         darkTheme = when (uiState.theme) {
-            0 -> false
-            1 -> true
+            Theme.LIGHT.id -> false
+            Theme.DARK.id -> true
             else -> isSystemInDarkTheme()
         }
     ) {
@@ -44,8 +48,12 @@ fun TripNnApp(
             )
 
             composable(route = SPLASH_ROUTE) {
+                LaunchedEffect(Unit) {
+                    showSystemBars(false)
+                }
                 HeartSplashScreen(
                     onFinish = {
+                        showSystemBars(true)
                         if (authViewModel.isAuthenticated) {
                             tripNnNavController.navigateTo(MAIN_GRAPH_ROUTE)
                         } else {

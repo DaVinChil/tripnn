@@ -17,13 +17,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.ui.screen.authentication.SystemBarsToBackgroundColor
 
 @Composable
 fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
+    SystemBarsToBackgroundColor(
+        statusColor = Color.Transparent,
+        navColor = Color.Transparent
+    )
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -31,7 +37,7 @@ fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
                 .requiredWidth(408.dp)
                 .requiredWidth(116.dp),
             painter = painterResource(id = R.drawable.tripnn_logo),
-            contentDescription = "logo",
+            contentDescription = stringResource(id = R.string.logo_txt),
             tint = Color.Unspecified
         )
 
@@ -51,7 +57,7 @@ fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
                     .requiredWidth(408.dp)
                     .requiredWidth(116.dp),
                 painter = painterResource(id = R.drawable.tripnn_logo),
-                contentDescription = "logo",
+                contentDescription = stringResource(id = R.string.logo_txt),
                 tint = Color.White
             )
         }
@@ -70,5 +76,6 @@ fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
                 onFinish()
             }
         }
+
     }
 }

@@ -1,7 +1,9 @@
 package ru.nn.tripnn.ui.navigation
 
+import android.view.Window
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph
 import androidx.navigation.NavHostController
@@ -16,7 +18,7 @@ fun authRoutesString(): Set<String> = AuthRoutes.entries.map { it.route }.toSet(
 
 @Composable
 fun rememberTripNnNavController(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
 ): TripNnNavController = remember(navController) {
     TripNnNavController(navController)
 }

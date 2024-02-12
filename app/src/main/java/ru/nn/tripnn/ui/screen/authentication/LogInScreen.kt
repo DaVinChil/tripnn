@@ -25,12 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.entity.Credentials
+import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -38,7 +40,7 @@ import ru.nn.tripnn.ui.theme.montserratFamily
 @Composable
 fun LogInScreen(
     onForgotClick: () -> Unit,
-    onLogInClick: (rememeberMe: Boolean, credentials: Credentials) -> Unit,
+    onLogInClick: (rememberMe: Boolean, credentials: Credentials) -> Unit,
     onRegisterClick: () -> Unit
 ) {
     SystemBarsToBackgroundColor()
@@ -65,18 +67,18 @@ fun LogInScreen(
             Column {
                 InputBlock(
                     value = email,
-                    title = "Эл. почта",
+                    title = stringResource(id = R.string.email),
                     onValueChanged = { email = it },
-                    placeholder = "Введите почту"
+                    placeholder = stringResource(id = R.string.enter_email)
                 )
 
                 Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
 
                 PasswordInputBlock(
                     value = pass,
-                    title = "Пароль",
+                    title = stringResource(id = R.string.password),
                     onValueChanged = { pass = it },
-                    placeholder = "Введите пароль"
+                    placeholder = stringResource(id = R.string.enter_password)
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -95,24 +97,19 @@ fun LogInScreen(
                         else painterResource(id = R.drawable.not_selected)
                         Icon(
                             painter = painter,
-                            contentDescription = "Remember",
+                            contentDescription = stringResource(id = R.string.remember),
                             tint = Color.Unspecified
                         )
-                        Text(
-                            text = "Запомнить меня",
+                        MontsText(
+                            text = stringResource(id = R.string.remember_me),
                             fontSize = 13.sp,
-                            fontFamily = montserratFamily,
-                            fontWeight = FontWeight.Normal,
-                            color = MaterialTheme.colorScheme.tertiary,
                         )
                     }
 
-                    Text(
+                    MontsText(
                         modifier = Modifier.clickable(onClick = onForgotClick),
-                        text = "Забыли пароль ?",
+                        text = stringResource(id = R.string.forgot_password),
                         fontSize = 13.sp,
-                        fontFamily = montserratFamily,
-                        fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSecondary,
                     )
                 }
@@ -122,7 +119,7 @@ fun LogInScreen(
         Column(modifier = Modifier.align(Alignment.BottomCenter)) {
             PrimaryButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = "Войти",
+                text = stringResource(id = R.string.login),
                 onClick = { onLogInClick(rememberMe, Credentials(email = email, password = pass)) }
             )
 
@@ -140,20 +137,16 @@ fun LogInScreen(
 @Composable
 fun DontHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
     Row(modifier = modifier) {
-        Text(
-            text = "Еще нет аккаунта ?",
+        MontsText(
+            text = stringResource(id = R.string.dont_have_account),
             fontSize = 12.sp,
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSecondary
         )
         Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            text = "Создать",
+        MontsText(
+            text = stringResource(id = R.string.create),
             fontSize = 12.sp,
-            fontFamily = montserratFamily,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.clickable(onClick = onSignInClick)
         )
     }
@@ -163,20 +156,15 @@ fun DontHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
 @Composable
 private fun Title() {
     Column {
-        Text(
-            text = "С возвращением !",
-            fontSize = 19.sp,
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.tertiary
+        MontsText(
+            text = stringResource(id = R.string.welcome_back),
+            fontSize = 19.sp
         )
         Spacer(modifier = Modifier.height(15.dp))
-        Text(
-            text = "Войдите в аккаунт",
+        MontsText(
+            text = stringResource(id = R.string.enter_account),
             fontSize = 25.sp,
-            fontFamily = montserratFamily,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.tertiary
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

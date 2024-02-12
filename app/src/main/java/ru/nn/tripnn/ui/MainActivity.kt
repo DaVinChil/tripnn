@@ -4,9 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.Composable
+import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import ru.nn.tripnn.ui.screen.application.TripNnApp
-import ru.nn.tripnn.ui.screen.application.general.GeneralUiViewModel
+import ru.nn.tripnn.ui.screen.GeneralUiViewModel
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 
 @AndroidEntryPoint
@@ -18,7 +20,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            TripNnApp(generalUiViewModel, authViewModel)
+            TripNnApp(generalUiViewModel, authViewModel) {
+                WindowCompat.setDecorFitsSystemWindows(window, it)
+            }
         }
     }
 }

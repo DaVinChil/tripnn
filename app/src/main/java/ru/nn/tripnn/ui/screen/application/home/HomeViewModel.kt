@@ -14,7 +14,7 @@ import ru.nn.tripnn.domain.util.Resource
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
+class HomeViewModel @Inject public constructor(
     @Fake private val screenDataRepository: ScreenDataRepository
 ) : ViewModel() {
     var homeScreenState by mutableStateOf(HomeScreenState())
