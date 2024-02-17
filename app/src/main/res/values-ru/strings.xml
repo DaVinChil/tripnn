@@ -48,4 +48,31 @@
     <string name="new_route">НОВЫЙ МАРШРУТ</string>
     <string name="current_route">Текущий маршрут</string>
     <string name="map_desc_icon">Карта</string>
+
+    <string name="culture">Культура</string>
+    <string name="leisure">Досуг</string>
+    <string name="to_eat">Поесть</string>
+
+    <string name="all_types">Все</string>
+    <string name="home_cook">Домашняя кухня</string>
+    <string name="sushi_bars">Суши-бары</string>
+    <string name="pizzerias">Пиццерии</string>
+    <string name="fast_food">Фастфуд</string>
+    <string name="canteens">Столовые</string>
+    <string name="coffee_shops">Кофейни</string>
+    <string name="bars">Бары</string>
+    <string name="pastry_shops">Кондитерские</string>
+    <string name="shot_glasses">Рюмочные</string>
+    <string name="burgers">Бургерные</string>
+    <string name="pyshechnye">Пышечные</string>
+    <string name="khinkalnye">Хинкальные</string>
+    <string name="shawarma">Шавермы</string>
+    <string name="dumplings">Пельменные</string>
+
+    <string name="next">Далее</string>
+
+    <string name="avg_receipt">Средний чек</string>
+    <string name="place_type">Вид заведения</string>
+
+    <string name="search">Search</string>
 </resources>

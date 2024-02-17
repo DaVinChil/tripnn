@@ -23,8 +23,7 @@ import ru.nn.tripnn.ui.theme.TripNNTheme
 @Composable
 fun TripNnApp(
     generalUiViewModel: GeneralUiViewModel,
-    authViewModel: AuthenticationViewModel,
-    showSystemBars: (Boolean) -> Unit
+    authViewModel: AuthenticationViewModel
 ) {
     val uiState = generalUiViewModel.uiPreferencesState
 
@@ -48,19 +47,15 @@ fun TripNnApp(
             )
 
             composable(route = SPLASH_ROUTE) {
-                LaunchedEffect(Unit) {
-                    showSystemBars(false)
-                }
                 HeartSplashScreen(
                     onFinish = {
-                        showSystemBars(true)
                         if (authViewModel.isAuthenticated) {
                             tripNnNavController.navigateTo(MAIN_GRAPH_ROUTE)
                         } else {
                             tripNnNavController.navigateTo(AUTH_GRAPH_ROUTE)
                         }
                     },
-                    isLoading = authViewModel.isLoading
+                    isLoading = authViewModel.isLoading || generalUiViewModel.isLoading
                 )
             }
         }

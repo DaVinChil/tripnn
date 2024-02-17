@@ -1,6 +1,5 @@
 package ru.nn.tripnn.ui.navigation
 
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation

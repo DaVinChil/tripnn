@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -42,7 +43,7 @@ import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.Currency
 import ru.nn.tripnn.ui.screen.Language
 import ru.nn.tripnn.ui.screen.Theme
-import ru.nn.tripnn.ui.screen.authentication.SystemBarsToBackgroundColor
+import ru.nn.tripnn.ui.screen.getEntryById
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 @Composable
@@ -55,12 +56,13 @@ fun SettingsScreen(
     currentLanguage: Int,
     currentCurrency: Int
 ) {
-    SystemBarsToBackgroundColor(
-        MaterialTheme.colorScheme.background,
-        MaterialTheme.colorScheme.background
-    )
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background )) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+    ) {
         val bottomSheetState = rememberSettingsBottomSheetState(
             options = listOf(),
             title = ""
@@ -89,50 +91,104 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-
-                val themeTitle = stringResource(id = R.string.theme)
-                val themeOptions = Theme.toOptions(onClick = onThemeChange)
-                Option(
-                    title = themeTitle,
-                    current = stringResource(Theme.getEntryById(currentTheme).resId),
-                    onClick = {
-                        bottomSheetState.options = themeOptions
-                        bottomSheetState.title = themeTitle
-                        bottomSheetState.chosen = currentTheme
-                        bottomSheetState.isShown = true
-                    }
-                )
-
-                val languageTitle = stringResource(id = R.string.language)
-                val languageOptions = Language.toOptions(onClick = onLanguageChange)
-                Option(
-                    title = languageTitle,
-                    current = stringResource(Language.getEntryById(currentLanguage).resId),
-                    onClick = {
-                        bottomSheetState.options = languageOptions
-                        bottomSheetState.title = languageTitle
-                        bottomSheetState.chosen = currentLanguage
-                        bottomSheetState.isShown = true
-                    }
-                )
-
-                val currencyTitle = stringResource(id = R.string.currency)
-                val currencyOptions = Currency.toOptions(onClick = onCurrencyChange)
-                Option(
-                    title = currencyTitle,
-                    current = stringResource(Currency.getEntryById(currentCurrency).resId),
-                    onClick = {
-                        bottomSheetState.options = currencyOptions
-                        bottomSheetState.chosen = currentCurrency
-                        bottomSheetState.title = currencyTitle
-                        bottomSheetState.isShown = true
-                    }
-                )
-            }
+            Options(
+                bottomSheetState,
+                currentCurrency,
+                currentLanguage,
+                currentTheme,
+                onCurrencyChange,
+                onLanguageChange,
+                onThemeChange
+            )
         }
 
         SettingsBottomSheet(state = bottomSheetState)
+    }
+}
+
+@Composable
+fun Options(
+    bottomSheetState: SettingsBottomSheetState,
+    currentCurrency: Int,
+    currentLanguage: Int,
+    currentTheme: Int,
+    onCurrencyChange: (Int) -> Unit,
+    onLanguageChange: (Int) -> Unit,
+    onThemeChange: (Int) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
+        val themeTitle = stringResource(id = R.string.theme)
+        val themeOptions = toOptions(
+            entries = Theme.entries,
+            id = Theme::id,
+            resId = Theme::resId,
+            onClick = onThemeChange
+        )
+        Option(
+            title = themeTitle,
+            current = stringResource(
+                getEntryById(
+                    Theme.entries,
+                    Theme::id,
+                    currentTheme
+                ).resId
+            ),
+            onClick = {
+                bottomSheetState.options = themeOptions
+                bottomSheetState.title = themeTitle
+                bottomSheetState.chosen = currentTheme
+                bottomSheetState.isShown = true
+            }
+        )
+
+        val languageTitle = stringResource(id = R.string.language)
+        val languageOptions = toOptions(
+            entries = Language.entries,
+            id = Language::id,
+            resId = Language::resId,
+            onClick = onLanguageChange
+        )
+        Option(
+            title = languageTitle,
+            current = stringResource(
+                getEntryById(
+                    Language.entries,
+                    Language::id,
+                    currentLanguage
+                ).resId
+            ),
+            onClick = {
+                bottomSheetState.options = languageOptions
+                bottomSheetState.title = languageTitle
+                bottomSheetState.chosen = currentLanguage
+                bottomSheetState.isShown = true
+            }
+        )
+
+        val currencyTitle = stringResource(id = R.string.currency)
+        val currencyOptions = toOptions(
+            entries = Currency.entries,
+            id = Currency::id,
+            resId = Currency::resId,
+            onClick = onCurrencyChange
+        )
+        Option(
+            title = currencyTitle,
+            current = stringResource(
+                getEntryById(
+                    Currency.entries,
+                    Currency::id,
+                    currentCurrency
+                ).resId
+            ),
+            onClick = {
+                bottomSheetState.options = currencyOptions
+                bottomSheetState.chosen = currentCurrency
+                bottomSheetState.title = currencyTitle
+                bottomSheetState.isShown = true
+            }
+        )
     }
 }
 
@@ -148,6 +204,23 @@ fun Option(modifier: Modifier = Modifier, title: String, current: String, onClic
         MontsText(text = title, fontSize = 18.sp)
         MontsText(text = current, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSecondary)
     }
+}
+
+@Composable
+fun <T> toOptions(
+    entries: List<T>,
+    id: T.() -> Int,
+    resId: T.() -> Int,
+    onClick: (Int) -> Unit
+): List<Option> {
+    val options = mutableListOf<Option>()
+    for (entry in entries) {
+        options.add(Option(
+            text = stringResource(id = entry.resId()),
+            onClick = { onClick(entry.id()) }
+        ))
+    }
+    return options;
 }
 
 @Composable
@@ -255,7 +328,11 @@ fun SettingsBottomSheetStatePreview() {
     TripNNTheme {
         val state = rememberSettingsBottomSheetState(
             isShown = true,
-            options = Theme.toOptions(onClick = {}),
+            options = toOptions(
+                entries = Theme.entries,
+                id = Theme::id,
+                resId = Theme::resId,
+                onClick = {}),
             title = stringResource(id = R.string.theme)
         )
         SettingsBottomSheet(state = state)

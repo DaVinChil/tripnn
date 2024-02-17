@@ -18,87 +18,24 @@ import ru.nn.tripnn.ui.screen.application.settings.Option
 import javax.inject.Inject
 
 enum class Theme(@StringRes val resId: Int, val id: Int) {
-    LIGHT(R.string.light_theme, 0), DARK(R.string.dark_theme, 1), SYSTEM(R.string.system_theme, 2);
-
-    companion object {
-        @Composable
-        fun toOptions(onClick: (Int) -> Unit): List<Option> {
-            val options = mutableListOf<Option>()
-            for (entry in entries) {
-                options.add(
-                    Option(
-                        text = stringResource(id = entry.resId),
-                        onClick = { onClick(entry.id) })
-                )
-            }
-            return options
-        }
-
-        fun getEntryById(id: Int): Theme {
-            for (entry in entries) {
-                if (entry.id == id) {
-                    return entry
-                }
-            }
-            return entries.first()
-        }
-    }
+    LIGHT(R.string.light_theme, 0), DARK(R.string.dark_theme, 1), SYSTEM(R.string.system_theme, 2)
 }
 
 enum class Language(@StringRes val resId: Int, val id: Int) {
-    RUSSIAN(R.string.ru_lang, 0), ENGLISH(R.string.en_lang, 1);
-
-    companion object {
-        @Composable
-        fun toOptions(onClick: (Int) -> Unit): List<Option> {
-            val options = mutableListOf<Option>()
-            for (entry in entries) {
-                options.add(
-                    Option(
-                        text = stringResource(id = entry.resId),
-                        onClick = { onClick(entry.id) })
-                )
-            }
-            return options
-        }
-
-        fun getEntryById(id: Int): Language {
-            for (entry in entries) {
-                if (entry.id == id) {
-                    return entry
-                }
-            }
-            return entries.first()
-        }
-    }
+    RUSSIAN(R.string.ru_lang, 0), ENGLISH(R.string.en_lang, 1)
 }
 
 enum class Currency(@StringRes val resId: Int, val id: Int) {
-    RUB(R.string.rub, 0), USD(R.string.usd, 1);
+    RUB(R.string.rub, 0), USD(R.string.usd, 1)
+}
 
-    companion object {
-        @Composable
-        fun toOptions(onClick: (Int) -> Unit): List<Option> {
-            val options = mutableListOf<Option>()
-            for (entry in entries) {
-                options.add(
-                    Option(
-                        text = stringResource(id = entry.resId),
-                        onClick = { onClick(entry.id) })
-                )
-            }
-            return options
-        }
-
-        fun getEntryById(id: Int): Currency {
-            for (entry in entries) {
-                if (entry.id == id) {
-                    return entry
-                }
-            }
-            return entries.first()
+fun <T> getEntryById(entries: List<T>, getId: T.() -> Int, id: Int): T {
+    for(entry in entries) {
+        if(entry.getId() == id) {
+            return entry
         }
     }
+    return entries.first()
 }
 
 fun getIsoLang(id: Int) = when (id) {

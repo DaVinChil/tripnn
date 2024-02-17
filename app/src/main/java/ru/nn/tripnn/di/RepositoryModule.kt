@@ -4,8 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.nn.tripnn.data.repository.FakeScreenDataRepositoryImpl
-import ru.nn.tripnn.data.repository.FakeUserRepositoryImpl
+import ru.nn.tripnn.data.remote.repository.FakeScreenDataRepositoryImpl
+import ru.nn.tripnn.data.remote.repository.FakeUserRepositoryImpl
 import ru.nn.tripnn.domain.repository.ScreenDataRepository
 import ru.nn.tripnn.domain.repository.UserRepository
 import javax.inject.Qualifier

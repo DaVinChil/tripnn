@@ -47,4 +47,31 @@
     <string name="new_route">NEW ROUTE</string>
     <string name="current_route">Current Route</string>
     <string name="map_desc_icon">Map</string>
+
+    <string name="culture">Culture</string>
+    <string name="leisure">Leisure</string>
+    <string name="to_eat">Eat</string>
+
+    <string name="all_types">All</string>
+    <string name="home_cook">Home cook</string>
+    <string name="sushi_bars">Sushi-bars</string>
+    <string name="pizzerias">Pizzerias</string>
+    <string name="fast_food">Fast food</string>
+    <string name="canteens">Canteens</string>
+    <string name="coffee_shops">Coffee shops</string>
+    <string name="bars">Bars</string>
+    <string name="pastry_shops">Pastry shops</string>
+    <string name="shot_glasses">Shot glasses</string>
+    <string name="burgers">Burgers</string>
+    <string name="pyshechnye">Pyshechnye</string>
+    <string name="khinkalnye">Khinkalnye</string>
+    <string name="shawarma">Shawarma</string>
+    <string name="dumplings">Dumpling</string>
+
+    <string name="next">Next</string>
+
+    <string name="avg_receipt">Average receipt</string>
+    <string name="place_type">Place type</string>
+
+    <string name="search">Search</string>
 </resources>

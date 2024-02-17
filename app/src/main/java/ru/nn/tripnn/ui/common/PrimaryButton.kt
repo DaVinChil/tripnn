@@ -4,6 +4,7 @@ import android.graphics.BlurMaskFilter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,11 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
@@ -34,6 +37,7 @@ fun PrimaryButton(
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     textColor: Color = Color.White,
     onClick: () -> Unit = {},
+    paddingValues: PaddingValues = PaddingValues(vertical = 15.dp, horizontal = 20.dp)
 ) {
     Box(
         modifier = modifier
@@ -41,7 +45,7 @@ fun PrimaryButton(
             .clip(RoundedCornerShape(100))
             .clickable(onClick = onClick)
             .background(containerColor)
-            .padding(vertical = 15.dp, horizontal = 20.dp),
+            .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -64,7 +68,7 @@ fun PrimaryButtonPreview() {
                 .size(100.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                PrimaryButton(text = "Next")
+                PrimaryButton(text = stringResource(id = R.string.next))
             }
         }
     }

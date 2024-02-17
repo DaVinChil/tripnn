@@ -1,8 +1,6 @@
 package ru.nn.tripnn.ui.screen.application.home
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,10 +16,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTES
@@ -62,7 +63,7 @@ import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.authentication.SystemBarsToBackgroundColor
+import ru.nn.tripnn.ui.screen.application.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
@@ -75,16 +76,10 @@ fun HomeScreen(
     onSettingsClick: () -> Unit,
     onAllRoutesClick: () -> Unit,
     onRouteCardClick: (Route) -> Unit,
-    onAllPlacesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
     onCurRouteClick: (() -> Unit)? = null
 ) {
     val screenData = homeScreenState.homeScreenData
-
-    SystemBarsToBackgroundColor(
-        statusColor = MaterialTheme.colorScheme.onSurface,
-        navColor = Color.White
-    )
 
     if (!homeScreenState.isLoading && screenData != null) {
         val scope = rememberCoroutineScope()
@@ -108,7 +103,6 @@ fun HomeScreen(
                 onCurRouteClick = onCurRouteClick,
                 onAllRoutesClick = onAllRoutesClick,
                 onRouteCardClick = onRouteCardClick,
-                onAllPlacesClick = onAllPlacesClick,
                 onNewRouteClick = onNewRouteClick,
                 onMenuClick = {
                     scope.launch {
@@ -127,109 +121,111 @@ fun HomeContent(
     recRoutes: List<Route>,
     onAllRoutesClick: () -> Unit,
     onRouteCardClick: (Route) -> Unit,
-    onAllPlacesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
     curRoutePercent: Int = 0,
     onCurRouteClick: (() -> Unit)? = null,
     onMenuClick: () -> Unit
 ) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
+        var showSearch by remember { mutableStateOf(false) }
+
+        Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.onSurface)
+                .statusBarsPadding()
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.onSurface)
-                    .padding(16.dp)
-            ) {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(modifier = Modifier.weight(1f)) {
-                            Icon(
-                                modifier = Modifier
-                                    .clickable(onClick = onMenuClick),
-                                painter = painterResource(id = R.drawable.burger_menu),
-                                contentDescription = stringResource(id = R.string.menu_txt),
-                            )
-                        }
-                        Image(
-                            modifier = Modifier,
-                            painter = painterResource(id = R.drawable.tripnn_logo),
-                            contentDescription = stringResource(id = R.string.logo_txt)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-
-                    Spacer(modifier = Modifier.height(30.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        MontsText(
-                            text = stringResource(id = R.string.recommended_routes),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        MontsText(
-                            modifier = Modifier.clickable(
-                                onClick = onAllRoutesClick
-                            ),
-                            text = stringResource(id = R.string.all_txt),
-                            fontSize = 16.sp
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        Icon(
+                            modifier = Modifier
+                                .clickable(onClick = onMenuClick),
+                            painter = painterResource(id = R.drawable.burger_menu),
+                            contentDescription = stringResource(id = R.string.menu_txt),
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    LazyRow(
-                        modifier = Modifier.requiredWidth(LocalConfiguration.current.screenWidthDp.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) {
-                        items(items = recRoutes, key = Route::id) {
-                            RouteCard(
-                                route = it,
-                                onCardClick = { onRouteCardClick(it) },
-                                shadowColor = Color.Black.copy(alpha = 0.2f)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    AllPlacesButton(onClick = onAllPlacesClick)
-
-                    Spacer(modifier = Modifier.height(30.dp))
+                    Image(
+                        modifier = Modifier,
+                        painter = painterResource(id = R.drawable.tripnn_logo),
+                        contentDescription = stringResource(id = R.string.logo_txt)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    NewRouteButton(
-                        modifier = Modifier.align(Alignment.Center),
-                        onClick = onNewRouteClick
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    MontsText(
+                        text = stringResource(id = R.string.recommended_routes),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    MontsText(
+                        modifier = Modifier.clickable(
+                            onClick = onAllRoutesClick
+                        ),
+                        text = stringResource(id = R.string.all_txt),
+                        fontSize = 16.sp
                     )
                 }
-                if (onCurRouteClick != null) {
-                    CurrentRouteBar(percent = curRoutePercent, onClick = onCurRouteClick)
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                LazyRow(
+                    modifier = Modifier.requiredWidth(LocalConfiguration.current.screenWidthDp.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(items = recRoutes, key = Route::id) {
+                        RouteCard(
+                            route = it,
+                            onCardClick = { onRouteCardClick(it) },
+                            shadowColor = Color.Black.copy(alpha = 0.2f)
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                AllPlacesButton(onClick = { showSearch = true })
+
+                Spacer(modifier = Modifier.height(30.dp))
             }
+        }
+
+        Column(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                NewRouteButton(
+                    modifier = Modifier.align(Alignment.Center),
+                    onClick = onNewRouteClick
+                )
+            }
+            if (onCurRouteClick != null) {
+                CurrentRouteBar(percent = curRoutePercent, onClick = onCurRouteClick)
+            }
+        }
+
+        if (showSearch) {
+//            val searchViewModel = hiltViewModel<SearchViewModel>()
+            SearchPlaceBottomSheet(onDismissRequest = { showSearch = false }, onSearch = {})
         }
     }
 }
@@ -246,10 +242,11 @@ fun Menu(
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth(0.8f)
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
             .padding(16.dp)
     ) {
-        Column() {
+        Column {
             IconButton(
                 onClick = onClose,
                 modifier = Modifier.offset(x = (-14).dp)
@@ -257,8 +254,7 @@ fun Menu(
                 Icon(
                     painter = painterResource(id = R.drawable.cross_menu),
                     contentDescription = stringResource(id = R.string.close_menu),
-                    modifier = Modifier
-                        .size(16.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
 
@@ -291,11 +287,11 @@ fun MenuOption(text: String, onClick: () -> Unit) {
 fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Box(
         modifier = modifier
+            .shadow(borderRadius = 6.dp, blurRadius = 10.dp, spread = (-5).dp)
+            .clip(RoundedCornerShape(6.dp))
             .fillMaxWidth()
             .height(50.dp)
             .clickable(onClick = onClick)
-            .shadow(borderRadius = 6.dp, blurRadius = 10.dp, spread = (-5).dp)
-            .clip(RoundedCornerShape(6.dp))
             .background(Color.White)
             .padding(vertical = 10.dp, horizontal = 20.dp),
         contentAlignment = Alignment.Center
@@ -320,7 +316,7 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     var pressed by remember { mutableStateOf(false) }
 
-    val scale by animateFloatAsState(targetValue = if(pressed) 0.85f else 1f, label = "")
+    val scale by animateFloatAsState(targetValue = if (pressed) 0.85f else 1f, label = "")
 
     val height = 140.dp
     val nrTextSize = 40.sp
@@ -470,7 +466,6 @@ fun HomeScreenPreview() {
                     ),
                     onAllRoutesClick = {},
                     onRouteCardClick = {},
-                    onAllPlacesClick = {},
                     onCurRouteClick = {},
                     onNewRouteClick = {},
                     onAccountClick = {},

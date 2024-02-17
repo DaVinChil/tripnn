@@ -1,4 +1,4 @@
-package ru.nn.tripnn.data.repository
+package ru.nn.tripnn.data.remote.repository
 
 import ru.nn.tripnn.data.stub_data.homeScreenData
 import ru.nn.tripnn.domain.repository.ScreenDataRepository

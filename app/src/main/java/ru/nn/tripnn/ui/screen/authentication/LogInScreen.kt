@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +44,6 @@ fun LogInScreen(
     onLogInClick: (rememberMe: Boolean, credentials: Credentials) -> Unit,
     onRegisterClick: () -> Unit
 ) {
-    SystemBarsToBackgroundColor()
-
     var rememberMe by remember {
         mutableStateOf(false)
     }
@@ -57,6 +56,7 @@ fun LogInScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
             .padding(start = 25.dp, end = 25.dp, top = 40.dp, bottom = 40.dp)
     ) {
         Column {

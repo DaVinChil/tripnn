@@ -30,7 +30,6 @@ enum class AppRoutes(
     ALL_ROUTES("all_routes_route"),
     NEW_ROUTE("new_route_route"),
     ROUTE_INFO("route_info_route"),
-    ALL_PLACES("all_places_route"),
     PLACE_INFO("place_info_route"),
     CUR_ROUTE("cur_route_route")
 }
@@ -73,7 +72,6 @@ fun NavGraphBuilder.addAppGraph(
                 onSettingsClick = { navigateTo(AppRoutes.SETTINGS.route) },
                 onAllRoutesClick = { /*navigateTo(AppRoutes.ALL_ROUTES.route)*/ },
                 onRouteCardClick = { /*navigateTo(AppRoutes.ROUTE_INFO.route)*/ },
-                onAllPlacesClick = { /*navigateTo(AppRoutes.ALL_PLACES.route)*/ },
                 onNewRouteClick = { /*navigateTo(AppRoutes.NEW_ROUTE.route)*/ },
                 onCurRouteClick = { /*navigateTo(AppRoutes.CUR_ROUTE.route)*/ }
             )

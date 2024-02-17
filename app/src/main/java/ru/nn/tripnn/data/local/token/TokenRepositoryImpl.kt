@@ -7,6 +7,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.withTimeout
 import ru.nn.tripnn.domain.repository.TokenRepository
 import javax.inject.Inject
@@ -16,16 +19,18 @@ val TOKEN_KEY = stringPreferencesKey("token_key")
 
 class TokenRepositoryImpl @Inject constructor(
     @ApplicationContext private val ctx: Context
-) : TokenRepository{
+) : TokenRepository {
     override suspend fun getToken(): String? {
         var token: String? = null
         try {
             withTimeout(3000) {
-                ctx.dataStore.data.collect { preferences ->
+                ctx.dataStore.data.cancellable().collect { preferences ->
                     token = preferences[TOKEN_KEY]
+                    currentCoroutineContext().cancel()
                 }
             }
         } catch (ignored: Exception) {}
+
         return token
     }
 
