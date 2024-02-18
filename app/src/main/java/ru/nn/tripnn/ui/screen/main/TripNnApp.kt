@@ -1,12 +1,10 @@
-package ru.nn.tripnn.ui.screen.application
+package ru.nn.tripnn.ui.screen.main
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.navigation.AUTH_GRAPH_ROUTE
 import ru.nn.tripnn.ui.navigation.MAIN_GRAPH_ROUTE
 import ru.nn.tripnn.ui.navigation.SPLASH_ROUTE
@@ -16,7 +14,7 @@ import ru.nn.tripnn.ui.navigation.addAuthGraph
 import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
 import ru.nn.tripnn.ui.screen.GeneralUiViewModel
 import ru.nn.tripnn.ui.screen.Theme
-import ru.nn.tripnn.ui.screen.application.splash.HeartSplashScreen
+import ru.nn.tripnn.ui.screen.main.splash.HeartSplashScreen
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.theme.TripNNTheme
 

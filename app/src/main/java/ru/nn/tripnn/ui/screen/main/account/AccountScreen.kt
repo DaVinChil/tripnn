@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.screen.application.account
+package ru.nn.tripnn.ui.screen.main.account
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult

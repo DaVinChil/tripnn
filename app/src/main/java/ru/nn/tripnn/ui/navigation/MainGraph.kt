@@ -11,11 +11,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import ru.nn.tripnn.ui.screen.GeneralUiViewModel
-import ru.nn.tripnn.ui.screen.application.account.AccountScreen
-import ru.nn.tripnn.ui.screen.application.account.AccountViewModel
-import ru.nn.tripnn.ui.screen.application.home.HomeScreen
-import ru.nn.tripnn.ui.screen.application.home.HomeViewModel
-import ru.nn.tripnn.ui.screen.application.settings.SettingsScreen
+import ru.nn.tripnn.ui.screen.main.account.AccountScreen
+import ru.nn.tripnn.ui.screen.main.account.AccountViewModel
+import ru.nn.tripnn.ui.screen.main.favourite.FavouriteScreen
+import ru.nn.tripnn.ui.screen.main.favourite.FavouriteViewModel
+import ru.nn.tripnn.ui.screen.main.history.HistoryScreen
+import ru.nn.tripnn.ui.screen.main.history.HistoryViewModel
+import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsScreen
+import ru.nn.tripnn.ui.screen.main.home.HomeScreen
+import ru.nn.tripnn.ui.screen.main.home.HomeViewModel
+import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsViewModel
+import ru.nn.tripnn.ui.screen.main.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.getIsoLang
 import ru.nn.tripnn.ui.util.changeLocales
 
@@ -29,7 +35,6 @@ enum class AppRoutes(
     HISTORY("history_route"),
     ALL_ROUTES("all_routes_route"),
     NEW_ROUTE("new_route_route"),
-    ROUTE_INFO("route_info_route"),
     PLACE_INFO("place_info_route"),
     CUR_ROUTE("cur_route_route")
 }
@@ -46,7 +51,7 @@ fun NavGraphBuilder.addAppGraph(
         startDestination = AppRoutes.HOME.route
     ) {
         composable(
-            AppRoutes.HOME.route,
+            route = AppRoutes.HOME.route,
             exitTransition = {
                 slideOutHorizontally(
                     targetOffsetX = { -it },
@@ -67,13 +72,20 @@ fun NavGraphBuilder.addAppGraph(
             HomeScreen(
                 homeScreenState = homeViewModel.homeScreenState,
                 onAccountClick = { navigateTo(AppRoutes.ACCOUNT.route) },
-                onHistoryClick = { /*navigateTo(AppRoutes.HISTORY.route)*/ },
-                onFavouriteClick = { /*navigateTo(AppRoutes.FAVOURITE.route)*/ },
+                onHistoryClick = { navigateTo(AppRoutes.HISTORY.route) },
+                onFavouriteClick = { navigateTo(AppRoutes.FAVOURITE.route) },
                 onSettingsClick = { navigateTo(AppRoutes.SETTINGS.route) },
-                onAllRoutesClick = { /*navigateTo(AppRoutes.ALL_ROUTES.route)*/ },
-                onRouteCardClick = { /*navigateTo(AppRoutes.ROUTE_INFO.route)*/ },
+                onAllRoutesClick = { navigateTo(AppRoutes.ALL_ROUTES.route) },
                 onNewRouteClick = { /*navigateTo(AppRoutes.NEW_ROUTE.route)*/ },
-                onCurRouteClick = { /*navigateTo(AppRoutes.CUR_ROUTE.route)*/ }
+                onCurRouteClick = { /*navigateTo(AppRoutes.CUR_ROUTE.route)*/ },
+                routeFull = homeViewModel.routeFull,
+                placeFull = homeViewModel.placeFull,
+                removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,
+                addRouteToFavourite = homeViewModel::addRouteToFavourite,
+                removePlaceFromFavourite = homeViewModel::removePlaceFromFavourite,
+                addPlaceToFavourite = homeViewModel::addPlaceToFavourite,
+                getPlaceFullInfo = homeViewModel::getFullPlaceInfo,
+                getRouteFullInfo = homeViewModel::getFullRouteInfo
             )
         }
 
@@ -108,7 +120,8 @@ fun NavGraphBuilder.addAppGraph(
             )
         }
 
-        composable(AppRoutes.ACCOUNT.route,
+        composable(
+            route = AppRoutes.ACCOUNT.route,
             enterTransition = {
                 slideInHorizontally(
                     initialOffsetX = { it },
@@ -133,6 +146,113 @@ fun NavGraphBuilder.addAppGraph(
                 onDeleteAccount = accountViewModel::deleteAccount,
                 onAvatarChange = accountViewModel::avatarChange,
                 onLeaveAccount = onLeaveAccount
+            )
+        }
+
+        composable(
+            route = AppRoutes.FAVOURITE.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {backStackEntry ->
+            val graphBack =
+                remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+            val favouriteViewModel = hiltViewModel<FavouriteViewModel>(graphBack)
+            FavouriteScreen(
+                filterPlaces = favouriteViewModel::filterPlaces,
+                filterRoutes = favouriteViewModel::filterRoutes,
+                isLoading = favouriteViewModel.isLoading,
+                favouritePlaces = favouriteViewModel.favouritePlaces,
+                favouriteRoutes = favouriteViewModel.favouriteRoutes,
+                placeFull = favouriteViewModel.placeFull,
+                routeFull = favouriteViewModel.routeFull,
+                getPlaceFullInfo = favouriteViewModel::getFullPlaceInfo,
+                getRouteFullInfo = favouriteViewModel::getFullRouteInfo,
+                removePlaceFromFavourite = favouriteViewModel::removePlaceFromFavourite,
+                removeRouteFromFavourite = favouriteViewModel::removeRouteFromFavourite,
+                addPlaceToFavourite = favouriteViewModel::addPlaceToFavourite,
+                addRouteToFavourite = favouriteViewModel::addRouteToFavourite,
+                onBack = onBack
+            )
+        }
+
+        composable(
+            route = AppRoutes.ALL_ROUTES.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) { backStackEntry ->
+            val graphBack =
+                remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+            val homeViewModel = hiltViewModel<RecommendationsViewModel>(graphBack)
+
+            RecommendationsScreen(
+                onBack = onBack,
+                filterRoutes = homeViewModel::filterRoutes,
+                routes = homeViewModel.recommendedRoutes,
+                routeFull = homeViewModel.routeFull,
+                placeFull = homeViewModel.placeFull,
+                getRouteFullInfo = homeViewModel::getFullRouteInfo,
+                getPlaceFullInfo = homeViewModel::getFullPlaceInfo,
+                removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,
+                addRouteToFavourite = homeViewModel::addRouteToFavourite,
+                removePlaceFromFavourite = homeViewModel::removePlaceFromFavourite,
+                addPlaceToFavourite = homeViewModel::addPlaceToFavourite
+            )
+        }
+
+        composable(
+            route = AppRoutes.HISTORY.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {backStackEntry ->
+            val graphBack =
+                remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+            val homeViewModel = hiltViewModel<HistoryViewModel>(graphBack)
+
+            HistoryScreen(
+                filterPlaces = homeViewModel::filterPlaces,
+                filterRoutes = homeViewModel::filterRoutes,
+                isLoading = homeViewModel.isLoading,
+                places = homeViewModel.visitedPlaces,
+                routes = homeViewModel.takenRoutes,
+                placeFull = homeViewModel.placeFull,
+                routeFull = homeViewModel.routeFull,
+                getPlaceFullInfo = homeViewModel::getFullPlaceInfo,
+                getRouteFullInfo = homeViewModel::getFullRouteInfo,
+                removePlaceFromFavourite = homeViewModel::removePlaceFromFavourite,
+                removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,
+                addPlaceToFavourite = homeViewModel::addPlaceToFavourite,
+                addRouteToFavourite = homeViewModel::addRouteToFavourite,
+                onBack = onBack
             )
         }
     }

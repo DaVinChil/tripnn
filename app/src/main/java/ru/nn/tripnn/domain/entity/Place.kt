@@ -7,5 +7,6 @@ data class Place(
     val rating: Double,
     val name: String,
     val type: String,
-    val cost: String
+    val cost: String,
+    val favourite: Boolean
 )

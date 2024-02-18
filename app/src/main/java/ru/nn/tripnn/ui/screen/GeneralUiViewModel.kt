@@ -1,11 +1,9 @@
 package ru.nn.tripnn.ui.screen
 
 import androidx.annotation.StringRes
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +12,6 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.local.preferences.UiPreferences
 import ru.nn.tripnn.domain.repository.UiPreferencesRepository
 import ru.nn.tripnn.domain.util.Resource
-import ru.nn.tripnn.ui.screen.application.settings.Option
 import javax.inject.Inject
 
 enum class Theme(@StringRes val resId: Int, val id: Int) {

@@ -58,7 +58,7 @@ fun CatalogNavigation(
                 .offset(x = selectorOffset)
                 .clip(RoundedCornerShape(100))
                 .fillMaxHeight()
-                .fillMaxWidth(1f / 3f)
+                .fillMaxWidth(1f / catalogs.size)
                 .background(MaterialTheme.colorScheme.primary)
         )
         Row(
@@ -73,7 +73,7 @@ fun CatalogNavigation(
                             interactionSource = remember { MutableInteractionSource() },
                             onClick = { if (chosen != i) onCatalogChange(i) }
                         )
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 5.dp)
                         .onGloballyPositioned { catalogSize = it.size.width }
                 ) {
                     MontsText(
@@ -104,7 +104,6 @@ fun CatalogNavigationPreview() {
             catalogs = listOf(
                 stringResource(id = R.string.culture),
                 stringResource(id = R.string.leisure),
-                stringResource(id = R.string.to_eat)
             ),
             onCatalogChange = { chosen = it },
             chosen = chosen

@@ -74,4 +74,7 @@
     <string name="place_type">Place type</string>
 
     <string name="search">Search</string>
+
+    <string name="by_price">by price</string>
+    <string name="by_rating">by rating</string>
 </resources>

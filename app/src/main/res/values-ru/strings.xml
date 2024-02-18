@@ -75,4 +75,7 @@
     <string name="place_type">Вид заведения</string>
 
     <string name="search">Search</string>
+
+    <string name="by_price">по цене</string>
+    <string name="by_rating">по рейтенгу</string>
 </resources>

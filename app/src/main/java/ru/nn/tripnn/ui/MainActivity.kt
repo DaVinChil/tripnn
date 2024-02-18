@@ -7,11 +7,9 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.runtime.Composable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
-import ru.nn.tripnn.ui.screen.application.TripNnApp
+import ru.nn.tripnn.ui.screen.main.TripNnApp
 import ru.nn.tripnn.ui.screen.GeneralUiViewModel
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 

@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.screen.application.splash
+package ru.nn.tripnn.ui.screen.main.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween

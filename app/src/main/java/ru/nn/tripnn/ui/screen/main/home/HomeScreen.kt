@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.screen.application.home
+package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -27,13 +27,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,16 +57,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
+import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
 import ru.nn.tripnn.data.stub_data.ROUTES
+import ru.nn.tripnn.data.stub_data.ROUTE_FULL
+import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.domain.entity.Route
+import ru.nn.tripnn.domain.entity.RouteFull
 import ru.nn.tripnn.domain.screen.HomeScreenData
+import ru.nn.tripnn.ui.common.CARD_WIDTH
+import ru.nn.tripnn.ui.common.DragHandler
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.application.search.SearchPlaceBottomSheet
+import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheet
+import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
@@ -75,9 +84,16 @@ fun HomeScreen(
     onFavouriteClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onAllRoutesClick: () -> Unit,
-    onRouteCardClick: (Route) -> Unit,
     onNewRouteClick: () -> Unit,
-    onCurRouteClick: (() -> Unit)? = null
+    onCurRouteClick: (() -> Unit)? = null,
+    routeFull: RouteFull,
+    placeFull: PlaceFull,
+    removeRouteFromFavourite: (String) -> Unit,
+    addRouteToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (String) -> Unit,
+    addPlaceToFavourite: (String) -> Unit,
+    getPlaceFullInfo: (String) -> Unit,
+    getRouteFullInfo: (String) -> Unit
 ) {
     val screenData = homeScreenState.homeScreenData
 
@@ -102,13 +118,20 @@ fun HomeScreen(
                 recRoutes = screenData.recommendedRoutes,
                 onCurRouteClick = onCurRouteClick,
                 onAllRoutesClick = onAllRoutesClick,
-                onRouteCardClick = onRouteCardClick,
                 onNewRouteClick = onNewRouteClick,
                 onMenuClick = {
                     scope.launch {
                         drawerState.open()
                     }
-                }
+                },
+                routeFull = routeFull,
+                placeFull = placeFull,
+                removeRouteFromFavourite = { removeRouteFromFavourite(routeFull.id) },
+                addRouteToFavourite = { addRouteToFavourite(routeFull.id) },
+                removePlaceFromFavourite = removePlaceFromFavourite,
+                addPlaceToFavourite = addPlaceToFavourite,
+                getPlaceFullInfo = getPlaceFullInfo,
+                getRouteFullInfo = getRouteFullInfo
             )
         }
     }
@@ -116,21 +139,30 @@ fun HomeScreen(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
     recRoutes: List<Route>,
     onAllRoutesClick: () -> Unit,
-    onRouteCardClick: (Route) -> Unit,
     onNewRouteClick: () -> Unit,
     curRoutePercent: Int = 0,
     onCurRouteClick: (() -> Unit)? = null,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    routeFull: RouteFull,
+    placeFull: PlaceFull,
+    removeRouteFromFavourite: (String) -> Unit,
+    addRouteToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (String) -> Unit,
+    addPlaceToFavourite: (String) -> Unit,
+    getPlaceFullInfo: (String) -> Unit,
+    getRouteFullInfo: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         var showSearch by remember { mutableStateOf(false) }
+        var showRouteInfo by remember { mutableStateOf(false) }
 
         Box(
             modifier = Modifier
@@ -191,8 +223,12 @@ fun HomeContent(
                     items(items = recRoutes, key = Route::id) {
                         RouteCard(
                             route = it,
-                            onCardClick = { onRouteCardClick(it) },
-                            shadowColor = Color.Black.copy(alpha = 0.2f)
+                            onCardClick = {
+                                getRouteFullInfo(it.id)
+                                showRouteInfo = true
+                            },
+                            shadowColor = Color.Black.copy(alpha = 0.2f),
+                            modifier = Modifier.width(CARD_WIDTH)
                         )
                     }
                 }
@@ -224,8 +260,27 @@ fun HomeContent(
         }
 
         if (showSearch) {
-//            val searchViewModel = hiltViewModel<SearchViewModel>()
-            SearchPlaceBottomSheet(onDismissRequest = { showSearch = false }, onSearch = {})
+            SearchPlaceBottomSheet(onDismissRequest = { showSearch = false })
+        }
+
+        if (showRouteInfo) {
+            val sheetState = rememberModalBottomSheetState()
+            ModalBottomSheet(
+                onDismissRequest = { showRouteInfo = false },
+                dragHandle = { DragHandler() },
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.background
+            ) {
+                RouteInfoBottomSheet(
+                    routeFull = routeFull,
+                    placeFull = placeFull,
+                    removeRouteFromFavourite = { removeRouteFromFavourite(routeFull.id) },
+                    addRouteToFavourite = { addRouteToFavourite(routeFull.id) },
+                    removePlaceFromFavourite = removePlaceFromFavourite,
+                    addPlaceToFavourite = addPlaceToFavourite,
+                    getPlaceFullInfo = getPlaceFullInfo
+                )
+            }
         }
     }
 }
@@ -259,7 +314,10 @@ fun Menu(
             }
 
             MenuOption(onClick = onAccountClick, text = stringResource(id = R.string.account_txt))
-            MenuOption(onClick = onHistoryClick, text = stringResource(id = R.string.routes_history))
+            MenuOption(
+                onClick = onHistoryClick,
+                text = stringResource(id = R.string.routes_history)
+            )
             MenuOption(onClick = onFavouriteClick, text = stringResource(id = R.string.favourites))
             MenuOption(onClick = onSettingsClick, text = stringResource(id = R.string.settings))
         }
@@ -465,13 +523,20 @@ fun HomeScreenPreview() {
                         )
                     ),
                     onAllRoutesClick = {},
-                    onRouteCardClick = {},
                     onCurRouteClick = {},
                     onNewRouteClick = {},
                     onAccountClick = {},
                     onFavouriteClick = {},
                     onSettingsClick = {},
-                    onHistoryClick = {}
+                    onHistoryClick = {},
+                    getPlaceFullInfo = {},
+                    placeFull = PLACE_FULL_1,
+                    addPlaceToFavourite = {},
+                    addRouteToFavourite = {},
+                    removePlaceFromFavourite = {},
+                    removeRouteFromFavourite = {},
+                    routeFull = ROUTE_FULL,
+                    getRouteFullInfo = {}
                 )
             }
         }
