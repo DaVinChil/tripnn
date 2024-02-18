@@ -35,25 +35,3 @@ fun MontsText(
         overflow = TextOverflow.Ellipsis
     )
 }
-
-
-@Composable
-fun MontsText(
-    modifier: Modifier = Modifier,
-    text: AnnotatedString,
-    fontSize: TextUnit,
-    fontWeight: FontWeight = FontWeight.Normal,
-    color: Color = MaterialTheme.colorScheme.tertiary,
-    textAlign: TextAlign? = null
-) {
-    Text(
-        modifier = modifier,
-        text = text,
-        fontSize = fontSize,
-        fontFamily = montserratFamily,
-        fontWeight = fontWeight,
-        color = color,
-        lineHeight = fontSize.times(4f/3f),
-        textAlign = textAlign
-    )
-}

@@ -77,5 +77,21 @@
     <string name="search">Search</string>
 
     <string name="by_price">по цене</string>
-    <string name="by_rating">по рейтенгу</string>
+    <string name="by_rating">по рейтингу</string>
+    <string name="cancel">Отменить</string>
+
+    <string name="avatar">Аватар</string>
+    <string name="edit_name_txt">Редактировать имя</string>
+    <string name="change_email">Изменить адрес эл. почты</string>
+    <string name="change_password">Изменить пароль</string>
+    <string name="clear_history">Очистить историю</string>
+    <string name="clear_txt">Очистить</string>
+    <string name="sure_to_delete_histroy_txt">Вы уверены, что хотите очистить историю? Будут удалены все сведенья о посещенных местах и пройденных маршрутах</string>
+
+    <string name="sure_to_delete_account_txt">Вы уверены, что хотите удалить аккаунт?</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="delete">Удалить</string>
+
+    <string name="exit">Выйти</string>
+    <string name="sure_to_exit">Вы уверены, что хотите выйти из аккаунта?</string>
 </resources>

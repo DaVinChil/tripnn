@@ -110,18 +110,14 @@ fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -
 
         Spacer(modifier = Modifier.height(52.dp))
 
-        val onRegClick = remember(onSignUpClick) {
-            {
+        PrimaryButton(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = stringResource(id = R.string.register),
+            onClick = {
                 if (passRep == pass) {
                     onSignUpClick(Credentials(name = username, email = email, password = pass))
                 }
             }
-        }
-
-        PrimaryButton(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = stringResource(id = R.string.register),
-            onClick = onRegClick
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -148,25 +144,6 @@ fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.clickable(onClick = onSignInClick)
         )
-    }
-}
-
-@Composable
-fun SystemBarsToBackgroundColor(
-    statusColor: Color = MaterialTheme.colorScheme.background,
-    navColor: Color = MaterialTheme.colorScheme.background
-) {
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        val statusColorArgb = statusColor.toArgb()
-        val navColorArg = navColor.toArgb()
-        SideEffect {
-            val activity = view.context as Activity
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                activity.window.navigationBarColor = navColorArg
-                activity.window.statusBarColor = statusColorArgb
-            }
-        }
     }
 }
 

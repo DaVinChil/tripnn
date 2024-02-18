@@ -27,12 +27,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -90,7 +96,9 @@ fun BaseCard(
                 contentScale = ContentScale.Crop
             )
 
-            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.SpaceBetween) {
                 MontsText(text = type, fontSize = 10.sp)
                 MontsText(text = name, fontSize = 16.sp, maxLines = 2)
                 if (info != null) {
@@ -127,6 +135,70 @@ fun PlaceCard(
     }
 }
 
+@Composable
+fun RouteCard(
+    modifier: Modifier = Modifier,
+    route: Route,
+    onCardClick: () -> Unit,
+    shadowColor: Color = Color(0x00FFFFFF)
+) {
+    BaseCard(
+        modifier = modifier,
+        imageUrl = route.imageUrl,
+        name = route.name,
+        type = "Маршрут",
+        onCardClick = onCardClick,
+        shadowColor = shadowColor
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            if(route.cost != null) {
+                CostInfo(cost = route.cost)
+            }
+            if(route.rating != null) {
+                RatingInfo(rating = route.rating)
+            }
+        }
+    }
+}
+
+@Composable
+fun CostInfo(cost: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(15.dp),
+            painter = painterResource(id = R.drawable.wallet),
+            contentDescription = "Cost"
+        )
+        MontsText(
+            text = "$cost ₽",
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+fun RatingInfo(rating: Double) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(15.dp),
+            painter = painterResource(id = R.drawable.outlined_gray_star),
+            contentDescription = "Rating"
+        )
+        MontsText(
+            text = rating.toString(),
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DraggableCard(
@@ -135,11 +207,12 @@ fun DraggableCard(
     card: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    val maxWidth = (LocalView.current.width / density.density).dp
+    var maxWidth by remember { mutableFloatStateOf(0f) }
+
     val endOfDragging = if (option2 != null) {
-        -(maxWidth / 2 * density.density).value
+        -(maxWidth / 2)
     } else {
-        -(maxWidth / 4 * density.density).value
+        -(maxWidth / 4)
     }
 
     val anchores = remember {
@@ -163,8 +236,7 @@ fun DraggableCard(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(CARD_HEIGHT)
+            .onGloballyPositioned { maxWidth = it.size.width.toFloat() }
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             option1()
@@ -254,70 +326,6 @@ fun ReplaceCardOption(onClick: () -> Unit) {
         text = "Заменить место",
         onClick = onClick
     )
-}
-
-@Composable
-fun RouteCard(
-    modifier: Modifier = Modifier,
-    route: Route,
-    onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF)
-) {
-    BaseCard(
-        modifier = modifier,
-        imageUrl = route.imageUrl,
-        name = route.name,
-        type = "Маршрут",
-        onCardClick = onCardClick,
-        shadowColor = shadowColor
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            if(route.cost != null) {
-                CostInfo(cost = route.cost)
-            }
-            if(route.rating != null) {
-                RatingInfo(rating = route.rating)
-            }
-        }
-    }
-}
-
-@Composable
-fun CostInfo(cost: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp)
-    ) {
-        Icon(
-            modifier = Modifier.size(15.dp),
-            painter = painterResource(id = R.drawable.wallet),
-            contentDescription = "Cost"
-        )
-        MontsText(
-            text = "$cost ₽",
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-@Composable
-fun RatingInfo(rating: Double) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp)
-    ) {
-        Icon(
-            modifier = Modifier.size(15.dp),
-            painter = painterResource(id = R.drawable.outlined_gray_star),
-            contentDescription = "Rating"
-        )
-        MontsText(
-            text = rating.toString(),
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Medium,
-        )
-    }
 }
 
 @Preview

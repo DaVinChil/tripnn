@@ -20,14 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.ui.screen.authentication.SystemBarsToBackgroundColor
 
 @Composable
 fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
-    SystemBarsToBackgroundColor(
-        statusColor = Color.Transparent,
-        navColor = Color.Transparent
-    )
     Box(
         modifier = Modifier.fillMaxSize().background(Color.White),
         contentAlignment = Alignment.Center
@@ -76,6 +71,5 @@ fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
                 onFinish()
             }
         }
-
     }
 }
