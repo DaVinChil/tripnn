@@ -73,9 +73,8 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
+import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DraggableCard
@@ -84,6 +83,7 @@ import ru.nn.tripnn.ui.common.PlaceCard
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
+import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 val TYPES = listOf(
@@ -175,8 +175,6 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
                     popBack = navController::popBackStack,
-                    getFullPlaceInfo = placesViewModel::getFullInfo,
-                    placeFull = placesViewModel.placeFull
                 )
             }
         }
@@ -390,17 +388,17 @@ fun SliderPointer(sliderWidth: Float, valueOnSlider: Float, max: Float, infoPref
 @Composable
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
-    result: List<Place>,
+    result: ResourceListState<Place>,
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit,
-    placeFull: PlaceFull,
-    getFullPlaceInfo: (String) -> Unit,
     popBack: () -> Unit
 ) {
     var sortState by remember { mutableStateOf(SortState()) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
+    var pickedPlace by remember { mutableStateOf(result.list[0]) }
+
     Box {
         Column(
             modifier = Modifier
@@ -454,7 +452,7 @@ fun SearchResultScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
-                items(items = result, key = Place::id) { place ->
+                items(items = result.list, key = Place::id) { place ->
                     val option: @Composable () -> Unit = if (place.favourite) {
                         @Composable {
                             RemoveFromFavouriteGoldCardOption(
@@ -467,7 +465,7 @@ fun SearchResultScreen(
                         PlaceCard(
                             place = place,
                             onCardClick = {
-                                getFullPlaceInfo(place.id)
+                                pickedPlace = place
                                 showCardInfo = true
                             },
                             shadowColor = Color.Black.copy(alpha = 0.2f),
@@ -487,14 +485,14 @@ fun SearchResultScreen(
                 containerColor = MaterialTheme.colorScheme.background
             ) {
                 PlaceInfoBottomSheet(
-                    placeFull = placeFull,
+                    place = pickedPlace,
                     onClose = {
                         cor.launch {
                             sheetState.hide()
                         }.invokeOnCompletion { showCardInfo = false }
                     },
-                    removeFromFavourite = { removeFromFavourite(placeFull.id) },
-                    addToFavourite = { addToFavourite(placeFull.id) }
+                    removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
+                    addToFavourite = { addToFavourite(pickedPlace.id) }
                 )
             }
         }
@@ -503,7 +501,7 @@ fun SearchResultScreen(
 
 @Composable
 fun PlaceInfoBottomSheet(
-    placeFull: PlaceFull,
+    place: Place,
     onClose: () -> Unit,
     removeFromFavourite: () -> Unit,
     addToFavourite: () -> Unit
@@ -516,7 +514,7 @@ fun PlaceInfoBottomSheet(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { uriHandler.openUri(placeFull.doubleGisLink) }
+                modifier = Modifier.clickable { uriHandler.openUri(place.doubleGisLink) }
             ) {
                 MontsText(
                     text = "2GIS",
@@ -544,7 +542,7 @@ fun PlaceInfoBottomSheet(
             contentPadding = PaddingValues(10.dp),
             horizontalArrangement = Arrangement.spacedBy(15.dp)
         ) {
-            items(items = placeFull.photos, key = { it }) {
+            items(items = place.photos, key = { it }) {
                 AsyncImage(
                     model = it,
                     contentDescription = "image",
@@ -567,14 +565,14 @@ fun PlaceInfoBottomSheet(
                 .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            var favourite by remember { mutableStateOf(placeFull.favourite) }
+            var favourite by remember { mutableStateOf(place.favourite) }
             Column(modifier = Modifier.fillMaxHeight()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     MontsText(
-                        text = placeFull.name,
+                        text = place.name,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 24.sp
                     )
@@ -599,19 +597,19 @@ fun PlaceInfoBottomSheet(
 
                 }
 
-                MontsText(text = placeFull.type, fontSize = 13.sp)
+                MontsText(text = place.type, fontSize = 13.sp)
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Row {
                     MontsText(
-                        text = placeFull.rating.toString(),
+                        text = place.rating.toString(),
                         fontSize = 12.sp,
                         color = Color(0xFF1DAB4D),
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.width(5.dp))
-                    MontsText(text = placeFull.reviews.toString() + " оценок", fontSize = 12.sp)
+                    MontsText(text = place.reviews.toString() + " оценок", fontSize = 12.sp)
                 }
             }
             Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
@@ -620,19 +618,19 @@ fun PlaceInfoBottomSheet(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    MontsText(text = placeFull.address, fontSize = 11.sp)
+                    MontsText(text = place.address, fontSize = 11.sp)
                     Icon(
                         painter = painterResource(id = R.drawable.copy_icon),
                         contentDescription = "copy",
                         tint = MaterialTheme.colorScheme.onSecondary,
                         modifier = Modifier.clickable {
                             clipboardManager.setText(
-                                buildAnnotatedString { append(placeFull.address) })
+                                buildAnnotatedString { append(place.address) })
                         })
                 }
-                MontsText(text = placeFull.workTime, fontSize = 11.sp)
-                MontsText(text = placeFull.phone, fontSize = 11.sp)
-                MontsText(text = "Средний чек " + placeFull.cost + "₽", fontSize = 11.sp)
+                MontsText(text = place.workTime, fontSize = 11.sp)
+                MontsText(text = place.phone, fontSize = 11.sp)
+                MontsText(text = "Средний чек " + place.cost + "₽", fontSize = 11.sp)
             }
         }
 
@@ -646,7 +644,7 @@ fun CardInfoBottomSheetPreview() {
     TripNNTheme {
         Box(modifier = Modifier.background(Color.White)) {
             PlaceInfoBottomSheet(
-                placeFull = PLACE_FULL_1,
+                place = PLACE_1,
                 onClose = { },
                 removeFromFavourite = { },
                 addToFavourite = {}

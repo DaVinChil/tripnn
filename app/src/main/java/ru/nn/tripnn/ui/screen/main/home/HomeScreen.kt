@@ -59,12 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
 import ru.nn.tripnn.data.stub_data.ROUTES
-import ru.nn.tripnn.data.stub_data.ROUTE_FULL
-import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.entity.RouteFull
 import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.ui.common.CARD_WIDTH
 import ru.nn.tripnn.ui.common.DragHandler
@@ -86,14 +82,10 @@ fun HomeScreen(
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
     onCurRouteClick: (() -> Unit)? = null,
-    routeFull: RouteFull,
-    placeFull: PlaceFull,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    getPlaceFullInfo: (String) -> Unit,
-    getRouteFullInfo: (String) -> Unit
 ) {
     val screenData = homeScreenState.homeScreenData
 
@@ -124,14 +116,10 @@ fun HomeScreen(
                         drawerState.open()
                     }
                 },
-                routeFull = routeFull,
-                placeFull = placeFull,
-                removeRouteFromFavourite = { removeRouteFromFavourite(routeFull.id) },
-                addRouteToFavourite = { addRouteToFavourite(routeFull.id) },
+                removeRouteFromFavourite = removeRouteFromFavourite,
+                addRouteToFavourite = addRouteToFavourite,
                 removePlaceFromFavourite = removePlaceFromFavourite,
                 addPlaceToFavourite = addPlaceToFavourite,
-                getPlaceFullInfo = getPlaceFullInfo,
-                getRouteFullInfo = getRouteFullInfo
             )
         }
     }
@@ -148,14 +136,10 @@ fun HomeContent(
     curRoutePercent: Int = 0,
     onCurRouteClick: (() -> Unit)? = null,
     onMenuClick: () -> Unit,
-    routeFull: RouteFull,
-    placeFull: PlaceFull,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    getPlaceFullInfo: (String) -> Unit,
-    getRouteFullInfo: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -163,6 +147,7 @@ fun HomeContent(
     ) {
         var showSearch by remember { mutableStateOf(false) }
         var showRouteInfo by remember { mutableStateOf(false) }
+        var pickedRoute by remember { mutableStateOf(recRoutes[0]) }
 
         Box(
             modifier = Modifier
@@ -224,7 +209,7 @@ fun HomeContent(
                         RouteCard(
                             route = it,
                             onCardClick = {
-                                getRouteFullInfo(it.id)
+                                pickedRoute = it
                                 showRouteInfo = true
                             },
                             shadowColor = Color.Black.copy(alpha = 0.2f),
@@ -272,13 +257,11 @@ fun HomeContent(
                 containerColor = MaterialTheme.colorScheme.background
             ) {
                 RouteInfoBottomSheet(
-                    routeFull = routeFull,
-                    placeFull = placeFull,
-                    removeRouteFromFavourite = { removeRouteFromFavourite(routeFull.id) },
-                    addRouteToFavourite = { addRouteToFavourite(routeFull.id) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
+                    addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    getPlaceFullInfo = getPlaceFullInfo
+                    route = pickedRoute
                 )
             }
         }
@@ -529,14 +512,10 @@ fun HomeScreenPreview() {
                     onFavouriteClick = {},
                     onSettingsClick = {},
                     onHistoryClick = {},
-                    getPlaceFullInfo = {},
-                    placeFull = PLACE_FULL_1,
                     addPlaceToFavourite = {},
                     addRouteToFavourite = {},
                     removePlaceFromFavourite = {},
-                    removeRouteFromFavourite = {},
-                    routeFull = ROUTE_FULL,
-                    getRouteFullInfo = {}
+                    removeRouteFromFavourite = {}
                 )
             }
         }

@@ -11,7 +11,8 @@ enum class AuthRoutes(
     val route: String
 ) {
     REGISTRATION("registration"),
-    LOGIN("login")
+    LOGIN("login"),
+    AUTHENTICATION(AUTH_GRAPH_ROUTE)
 }
 
 fun NavGraphBuilder.addAuthGraph(

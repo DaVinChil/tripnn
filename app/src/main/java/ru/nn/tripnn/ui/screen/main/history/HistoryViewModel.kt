@@ -8,8 +8,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
-import ru.nn.tripnn.data.stub_data.ROUTE_FULL
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Place
 import ru.nn.tripnn.domain.entity.Route
@@ -17,6 +15,7 @@ import ru.nn.tripnn.domain.repository.HistoryRepository
 import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.repository.RouteRepository
 import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,21 +25,13 @@ class HistoryViewModel @Inject constructor(
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
     val isLoading
-        get() = isPlacesLoading || isRoutesLoading
+        get() = visitedPlaces.isLoading || takenRoutes.isLoading
 
-    var visitedPlaces by mutableStateOf(immutableListOf<Place>())
-    var placeFull by mutableStateOf(PLACE_FULL_1)
-        private set
-
+    var visitedPlaces by mutableStateOf(ResourceListState<Place>())
     private var savedPlaces = immutableListOf<Place>()
-    private var isPlacesLoading by mutableStateOf(false)
 
-    var takenRoutes by mutableStateOf(immutableListOf<Route>())
-    var routeFull by mutableStateOf(ROUTE_FULL)
-        private set
-
+    var takenRoutes by mutableStateOf(ResourceListState<Route>())
     private var savedRoutes = immutableListOf<Route>()
-    private var isRoutesLoading by mutableStateOf(false)
 
     init {
         loadVisitedPlaces()
@@ -49,35 +40,35 @@ class HistoryViewModel @Inject constructor(
 
     private fun loadVisitedPlaces() {
         viewModelScope.launch {
-            isPlacesLoading = true
+            visitedPlaces = visitedPlaces.copy(isLoading = true)
             when (val result = historyRepository.getPlaces()) {
                 is Resource.Success -> {
-                    visitedPlaces = result.data ?: listOf()
-                    savedPlaces = visitedPlaces
+                    visitedPlaces = visitedPlaces.copy(list = result.data ?: listOf())
+                    savedPlaces = visitedPlaces.list
                 }
 
                 is Resource.Error -> {
 
                 }
             }
-            isPlacesLoading = false
+            visitedPlaces = visitedPlaces.copy(isLoading = false)
         }
     }
 
     private fun loadTakenRoutes() {
         viewModelScope.launch {
-            isRoutesLoading = true
+            takenRoutes = takenRoutes.copy(isLoading = true)
             when (val result = historyRepository.getRoutes()) {
                 is Resource.Success -> {
-                    takenRoutes = result.data ?: listOf()
-                    savedRoutes = takenRoutes
+                    takenRoutes = takenRoutes.copy(list = result.data ?: listOf())
+                    savedRoutes = takenRoutes.list
                 }
 
                 is Resource.Error -> {
 
                 }
             }
-            isRoutesLoading = false
+            takenRoutes = takenRoutes.copy(isLoading = true)
         }
     }
 
@@ -112,7 +103,7 @@ class HistoryViewModel @Inject constructor(
                 filtered.add(it)
             }
         }
-        takenRoutes = filtered
+        takenRoutes = takenRoutes.copy(list = filtered)
     }
 
     fun filterPlaces(word: String) {
@@ -122,34 +113,6 @@ class HistoryViewModel @Inject constructor(
                 filtered.add(it)
             }
         }
-        visitedPlaces = filtered
-    }
-
-    fun getFullPlaceInfo(id: String) {
-        viewModelScope.launch {
-            when (val result = placeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    placeFull = result.data ?: placeFull
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-        }
-    }
-
-    fun getFullRouteInfo(id: String) {
-        viewModelScope.launch {
-            when (val result = routeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    routeFull = result.data ?: routeFull
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-        }
+        visitedPlaces = visitedPlaces.copy(list = filtered)
     }
 }

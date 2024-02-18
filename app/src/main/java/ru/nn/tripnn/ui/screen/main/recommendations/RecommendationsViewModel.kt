@@ -8,13 +8,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
-import ru.nn.tripnn.data.stub_data.ROUTE_FULL
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.repository.RouteRepository
 import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,17 +21,9 @@ class RecommendationsViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
-    var isLoading by mutableStateOf(false)
-        private set
-
-    var recommendedRoutes by mutableStateOf(immutableListOf<Route>())
+    var recommendedRoutes by mutableStateOf(ResourceListState<Route>())
         private set
     private var savedRoutes = immutableListOf<Route>()
-
-    var placeFull by mutableStateOf(PLACE_FULL_1)
-        private set
-    var routeFull by mutableStateOf(ROUTE_FULL)
-        private set
 
     init {
         loadRecommended()
@@ -40,17 +31,17 @@ class RecommendationsViewModel @Inject constructor(
 
     private fun loadRecommended() {
         viewModelScope.launch {
-            isLoading = true
+            recommendedRoutes = recommendedRoutes.copy(isLoading = true)
             when(val resource = routeRepository.getRecommendations()) {
                 is Resource.Success -> {
-                    recommendedRoutes = resource.data ?: recommendedRoutes
+                    recommendedRoutes = recommendedRoutes.copy(list = resource.data ?: listOf())
                 }
 
                 is Resource.Error -> {
 
                 }
             }
-            isLoading = false
+            recommendedRoutes = recommendedRoutes.copy(isLoading = true)
         }
     }
 
@@ -85,34 +76,6 @@ class RecommendationsViewModel @Inject constructor(
                 filtered.add(it)
             }
         }
-        recommendedRoutes = filtered
-    }
-
-    fun getFullPlaceInfo(id: String) {
-        viewModelScope.launch {
-            when (val result = placeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    placeFull = result.data ?: placeFull
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-        }
-    }
-
-    fun getFullRouteInfo(id: String) {
-        viewModelScope.launch {
-            when (val result = routeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    routeFull = result.data ?: routeFull
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-        }
+        recommendedRoutes = recommendedRoutes.copy(list = filtered)
     }
 }

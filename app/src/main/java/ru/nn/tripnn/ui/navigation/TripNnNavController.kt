@@ -1,11 +1,10 @@
 package ru.nn.tripnn.ui.navigation
 
-import android.view.Window
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 
@@ -54,9 +53,21 @@ class TripNnNavController(
     private fun navigateToAndPopAll(route: String) {
         navController.navigate(route) {
             launchSingleTop = true
-            popUpTo(findStartDestination(navController.graph).id) {
-                inclusive = true
+
+            if (authRoutes.contains(currentRoute)) {
+                popUpTo(AUTH_GRAPH_ROUTE) {
+                    inclusive = true
+                }
+            } else if (currentRoute == SPLASH_ROUTE) {
+                popUpTo(SPLASH_ROUTE) {
+                    inclusive = true
+                }
+            } else {
+                popUpTo(MAIN_GRAPH_ROUTE) {
+                    inclusive = true
+                }
             }
+
         }
     }
 }

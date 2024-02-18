@@ -32,14 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.entity.RouteFull
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
+import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,11 +46,7 @@ import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheet
 fun RecommendationsScreen(
     onBack: () -> Unit,
     filterRoutes: (String) -> Unit,
-    routes: List<Route>,
-    routeFull: RouteFull,
-    placeFull: PlaceFull,
-    getRouteFullInfo: (String) -> Unit,
-    getPlaceFullInfo: (String) -> Unit,
+    routes: ResourceListState<Route>,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
@@ -62,6 +57,7 @@ fun RecommendationsScreen(
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState()
     var showRouteInfo by remember { mutableStateOf(false) }
+    var pickedRoute by remember { mutableStateOf(routes.list[0]) }
 
     Column(
         modifier = Modifier
@@ -101,7 +97,7 @@ fun RecommendationsScreen(
             contentPadding = PaddingValues(vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            items(items = routes, key = Route::id) { route ->
+            items(items = routes.list, key = Route::id) { route ->
                 val option: @Composable () -> Unit =
                     @Composable {
                         RemoveFromFavouriteRedCardOption(
@@ -111,7 +107,7 @@ fun RecommendationsScreen(
                     RouteCard(
                         route = route,
                         onCardClick = {
-                            getRouteFullInfo(route.id)
+                            pickedRoute = route
                             showRouteInfo = true
                         },
                         shadowColor = Color.Black.copy(alpha = 0.2f),
@@ -128,13 +124,11 @@ fun RecommendationsScreen(
                 containerColor = MaterialTheme.colorScheme.background
             ) {
                 RouteInfoBottomSheet(
-                    routeFull = routeFull,
-                    placeFull = placeFull,
-                    removeRouteFromFavourite = { removeRouteFromFavourite(routeFull.id) },
-                    addRouteToFavourite = { addRouteToFavourite(routeFull.id) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
+                    addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    getPlaceFullInfo = getPlaceFullInfo
+                    route = pickedRoute
                 )
             }
         }

@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
-import ru.nn.tripnn.data.stub_data.ROUTE_FULL
+import ru.nn.tripnn.data.stub_data.PLACE_1
+import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Place
 import ru.nn.tripnn.domain.entity.Route
@@ -24,21 +24,14 @@ class FavouriteViewModel @Inject constructor(
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
     val isLoading
-        get() = isPlacesLoading || isRoutesLoading
+        get() = favouritePlaces.isLoading || favouriteRoutes.isLoading
 
-    var favouritePlaces by mutableStateOf(immutableListOf<Place>())
-    var placeFull by mutableStateOf(PLACE_FULL_1)
-        private set
-
+    var favouritePlaces by mutableStateOf(ResourceListState<Place>())
     private var savedFavouritePlaces = immutableListOf<Place>()
-    private var isPlacesLoading by mutableStateOf(false)
 
-    var favouriteRoutes by mutableStateOf(immutableListOf<Route>())
-    var routeFull by mutableStateOf(ROUTE_FULL)
-        private set
 
+    var favouriteRoutes by mutableStateOf(ResourceListState<Route>())
     private var savedFavouriteRoutes = immutableListOf<Route>()
-    private var isRoutesLoading by mutableStateOf(false)
 
     init {
         loadFavouritePlaces()
@@ -47,35 +40,35 @@ class FavouriteViewModel @Inject constructor(
 
     private fun loadFavouritePlaces() {
         viewModelScope.launch {
-            isPlacesLoading = true
+            favouritePlaces = favouritePlaces.copy(isLoading = true)
             when (val result = placeRepository.getFavourite()) {
                 is Resource.Success -> {
-                    favouritePlaces = result.data ?: listOf()
-                    savedFavouritePlaces = favouritePlaces
+                    favouritePlaces = favouritePlaces.copy(list = result.data ?: listOf())
+                    savedFavouritePlaces = favouritePlaces.list ?: listOf()
                 }
 
                 is Resource.Error -> {
 
                 }
             }
-            isPlacesLoading = false
+            favouritePlaces = favouritePlaces.copy(isLoading = false)
         }
     }
 
     private fun loadFavouriteRoutes() {
         viewModelScope.launch {
-            isRoutesLoading = true
+            favouriteRoutes = favouriteRoutes.copy(isLoading = true)
             when (val result = routeRepository.getFavourite()) {
                 is Resource.Success -> {
-                    favouriteRoutes = result.data ?: listOf()
-                    savedFavouriteRoutes = favouriteRoutes
+                    favouriteRoutes = favouriteRoutes.copy(list = result.data ?: listOf())
+                    savedFavouriteRoutes = favouriteRoutes.list
                 }
 
                 is Resource.Error -> {
 
                 }
             }
-            isRoutesLoading = false
+            favouritePlaces = favouritePlaces.copy(isLoading = false)
         }
     }
 
@@ -110,7 +103,7 @@ class FavouriteViewModel @Inject constructor(
                 filtered.add(it)
             }
         }
-        favouriteRoutes = filtered
+        favouriteRoutes = favouriteRoutes.copy(list = filtered)
     }
 
     fun filterPlaces(word: String) {
@@ -120,34 +113,12 @@ class FavouriteViewModel @Inject constructor(
                 filtered.add(it)
             }
         }
-        favouritePlaces = filtered
-    }
-
-    fun getFullPlaceInfo(id: String) {
-        viewModelScope.launch {
-            when (val result = placeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    placeFull = result.data ?: placeFull
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-        }
-    }
-
-    fun getFullRouteInfo(id: String) {
-        viewModelScope.launch {
-            when (val result = routeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    routeFull = result.data ?: routeFull
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-        }
+        favouritePlaces = favouritePlaces.copy(list = filtered)
     }
 }
+
+data class ResourceListState<T>(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val list: List<T> = listOf()
+)

@@ -50,13 +50,10 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
 import ru.nn.tripnn.data.stub_data.ROUTES
-import ru.nn.tripnn.data.stub_data.ROUTE_FULL
+import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.entity.RouteFull
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DraggableCard
@@ -79,12 +76,8 @@ fun FavouriteScreen(
     filterPlaces: (String) -> Unit,
     filterRoutes: (String) -> Unit,
     isLoading: Boolean,
-    favouritePlaces: List<Place>,
-    favouriteRoutes: List<Route>,
-    placeFull: PlaceFull,
-    routeFull: RouteFull,
-    getPlaceFullInfo: (String) -> Unit,
-    getRouteFullInfo: (String) -> Unit,
+    favouritePlaces: ResourceListState<Place>,
+    favouriteRoutes: ResourceListState<Route>,
     removePlaceFromFavourite: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
@@ -155,9 +148,7 @@ fun FavouriteScreen(
             composable(route = DESTINATION[PLACES_INDEX]) {
                 chosen = PLACES_INDEX
                 FavouritePlacesContent(
-                    places = favouritePlaces,
-                    placeFull = placeFull,
-                    getPlaceFullInfo = getPlaceFullInfo,
+                    places = favouritePlaces.list,
                     removeFromFavourite = removePlaceFromFavourite,
                     addToFavourite = addPlaceToFavourite
                 )
@@ -165,11 +156,7 @@ fun FavouriteScreen(
             composable(route = DESTINATION[ROUTES_INDEX]) {
                 chosen = ROUTES_INDEX
                 FavouriteRoutesContent(
-                    routes = favouriteRoutes,
-                    routeFull = routeFull,
-                    placeFull = placeFull,
-                    getRouteFullInfo = getRouteFullInfo,
-                    getPlaceFullInfo = getPlaceFullInfo,
+                    routes = favouriteRoutes.list,
                     removeRouteFromFavourite = removeRouteFromFavourite,
                     addRouteToFavourite = addRouteToFavourite,
                     removePlaceFromFavourite = removePlaceFromFavourite,
@@ -184,14 +171,13 @@ fun FavouriteScreen(
 @Composable
 fun FavouritePlacesContent(
     places: List<Place>,
-    placeFull: PlaceFull,
-    getPlaceFullInfo: (String) -> Unit,
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit
 ) {
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
+    var pickedPlace by remember { mutableStateOf(places[0]) }
 
     LazyColumn(
         state = lazyState,
@@ -208,7 +194,7 @@ fun FavouritePlacesContent(
                 PlaceCard(
                     place = place,
                     onCardClick = {
-                        getPlaceFullInfo(place.id)
+                        pickedPlace = place
                         showCardInfo = true
                     },
                     shadowColor = Color.Black.copy(alpha = 0.2f),
@@ -227,14 +213,14 @@ fun FavouritePlacesContent(
             containerColor = MaterialTheme.colorScheme.background
         ) {
             PlaceInfoBottomSheet(
-                placeFull = placeFull,
+                place = pickedPlace,
                 onClose = {
                     cor.launch {
                         sheetState.hide()
                     }.invokeOnCompletion { showCardInfo = false }
                 },
-                removeFromFavourite = { removeFromFavourite(placeFull.id) },
-                addToFavourite = { addToFavourite(placeFull.id) }
+                removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
+                addToFavourite = { addToFavourite(pickedPlace.id) }
             )
         }
     }
@@ -244,10 +230,6 @@ fun FavouritePlacesContent(
 @Composable
 fun FavouriteRoutesContent(
     routes: List<Route>,
-    routeFull: RouteFull,
-    placeFull: PlaceFull,
-    getRouteFullInfo: (String) -> Unit,
-    getPlaceFullInfo: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
@@ -256,6 +238,7 @@ fun FavouriteRoutesContent(
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState()
     var showRouteInfo by remember { mutableStateOf(false) }
+    var pickedRoute by remember { mutableStateOf(routes[0]) }
 
     LazyColumn(
         state = lazyState,
@@ -272,7 +255,7 @@ fun FavouriteRoutesContent(
                 RouteCard(
                     route = route,
                     onCardClick = {
-                        getRouteFullInfo(route.id)
+                        pickedRoute = route
                         showRouteInfo = true
                     },
                     shadowColor = Color.Black.copy(alpha = 0.2f),
@@ -289,13 +272,11 @@ fun FavouriteRoutesContent(
             containerColor = MaterialTheme.colorScheme.background
         ) {
             RouteInfoBottomSheet(
-                routeFull = routeFull,
-                placeFull = placeFull,
-                removeRouteFromFavourite = { removeRouteFromFavourite(routeFull.id) },
-                addRouteToFavourite = { addRouteToFavourite(routeFull.id) },
+                route = pickedRoute,
+                removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
+                addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                 removePlaceFromFavourite = removePlaceFromFavourite,
-                addPlaceToFavourite = addPlaceToFavourite,
-                getPlaceFullInfo = getPlaceFullInfo
+                addPlaceToFavourite = addPlaceToFavourite
             )
         }
     }
@@ -306,18 +287,17 @@ fun FavouriteRoutesContent(
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RouteInfoBottomSheet(
-    routeFull: RouteFull,
-    placeFull: PlaceFull,
+    route: Route,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
-    getPlaceFullInfo: (String) -> Unit
+    addPlaceToFavourite: (String) -> Unit
 ) {
-    var favourite by remember { mutableStateOf(routeFull.favourite) }
+    var favourite by remember { mutableStateOf(route.favourite) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
+    var pickedPlace by remember { mutableStateOf(route.places[0]) }
 
     Column(
         modifier = Modifier
@@ -330,14 +310,14 @@ fun RouteInfoBottomSheet(
             verticalAlignment = Alignment.CenterVertically
         ) {
             MontsText(
-                text = routeFull.name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+                text = route.name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .fillMaxWidth(4f / 6f)
                     .basicMarquee()
             )
             Spacer(modifier = Modifier.width(5.dp))
 
-            if (routeFull.rating != null) {
+            if (route.rating != null) {
                 Icon(
                     painter = painterResource(id = R.drawable.gold_small_start),
                     contentDescription = "gold star",
@@ -345,7 +325,7 @@ fun RouteInfoBottomSheet(
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 MontsText(
-                    text = routeFull.rating.toString(),
+                    text = route.rating.toString(),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1DAB4D),
@@ -355,21 +335,23 @@ fun RouteInfoBottomSheet(
             Spacer(modifier = Modifier.weight(1f))
 
             Icon(
-                modifier = Modifier.size(20.dp).clickable(
-                    indication = null,
-                    interactionSource = remember {
-                        MutableInteractionSource()
-                    },
-                    onClick = {
-                        favourite = if (favourite) {
-                            removeRouteFromFavourite(routeFull.id)
-                            false
-                        } else {
-                            addRouteToFavourite(routeFull.id)
-                            true
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember {
+                            MutableInteractionSource()
+                        },
+                        onClick = {
+                            favourite = if (favourite) {
+                                removeRouteFromFavourite(route.id)
+                                false
+                            } else {
+                                addRouteToFavourite(route.id)
+                                true
+                            }
                         }
-                    }
-                ),
+                    ),
                 painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
                 contentDescription = "bookmark",
                 tint = Color.Unspecified
@@ -379,9 +361,10 @@ fun RouteInfoBottomSheet(
         LazyColumn(
             state = lazyState,
             contentPadding = PaddingValues(vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp)
+            verticalArrangement = Arrangement.spacedBy(15.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            items(items = routeFull.places, key = Place::id) { place ->
+            items(items = route.places, key = Place::id) { place ->
                 val option: @Composable () -> Unit = if (place.favourite) {
                     @Composable {
                         RemoveFromFavouriteGoldCardOption(
@@ -393,7 +376,7 @@ fun RouteInfoBottomSheet(
                 DraggableCard(option1 = option) {
                     PlaceCard(
                         place = place,
-                        onCardClick = { showCardInfo = true; getPlaceFullInfo(place.id) },
+                        onCardClick = { showCardInfo = true; pickedPlace = place },
                         shadowColor = Color.Black.copy(alpha = 0.2f),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -411,14 +394,14 @@ fun RouteInfoBottomSheet(
             containerColor = MaterialTheme.colorScheme.background
         ) {
             PlaceInfoBottomSheet(
-                placeFull = placeFull,
+                place = pickedPlace,
                 onClose = {
                     cor.launch {
                         sheetState.hide()
                     }.invokeOnCompletion { showCardInfo = false }
                 },
-                removeFromFavourite = { removePlaceFromFavourite(placeFull.id) },
-                addToFavourite = { addPlaceToFavourite(placeFull.id) }
+                removeFromFavourite = { removePlaceFromFavourite(pickedPlace.id) },
+                addToFavourite = { addPlaceToFavourite(pickedPlace.id) }
             )
         }
     }
@@ -433,12 +416,8 @@ fun FavouriteScreenPreview() {
             filterPlaces = { /*TODO*/ },
             filterRoutes = { /*TODO*/ },
             isLoading = false,
-            favouritePlaces = listOf(PLACE_1),
-            favouriteRoutes = ROUTES,
-            placeFull = PLACE_FULL_1,
-            routeFull = ROUTE_FULL,
-            getPlaceFullInfo = { /*TODO*/ },
-            getRouteFullInfo = { /*TODO*/ },
+            favouritePlaces = ResourceListState(list = listOf(PLACE_1)),
+            favouriteRoutes = ResourceListState(list = ROUTES),
             removePlaceFromFavourite = { /*TODO*/ },
             removeRouteFromFavourite = { /*TODO*/ },
             addPlaceToFavourite = { /*TODO*/ },
@@ -457,13 +436,11 @@ fun RouteInfoPreview() {
                 .background(Color.White)
         ) {
             RouteInfoBottomSheet(
-                routeFull = ROUTE_FULL,
+                route = ROUTE_1,
                 removeRouteFromFavourite = { },
                 addRouteToFavourite = { },
                 removePlaceFromFavourite = {},
-                addPlaceToFavourite = {},
-                placeFull = PLACE_FULL_1,
-                getPlaceFullInfo = {}
+                addPlaceToFavourite = {}
             )
         }
     }

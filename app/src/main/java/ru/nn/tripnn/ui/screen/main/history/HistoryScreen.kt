@@ -28,9 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.entity.RouteFull
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.Search
@@ -39,6 +37,7 @@ import ru.nn.tripnn.ui.screen.main.favourite.FavouritePlacesContent
 import ru.nn.tripnn.ui.screen.main.favourite.FavouriteRoutesContent
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
+import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 
 @Composable
 fun HistoryScreen(
@@ -46,12 +45,8 @@ fun HistoryScreen(
     filterPlaces: (String) -> Unit,
     filterRoutes: (String) -> Unit,
     isLoading: Boolean,
-    places: List<Place>,
-    routes: List<Route>,
-    placeFull: PlaceFull,
-    routeFull: RouteFull,
-    getPlaceFullInfo: (String) -> Unit,
-    getRouteFullInfo: (String) -> Unit,
+    places: ResourceListState<Place>,
+    routes: ResourceListState<Route>,
     removePlaceFromFavourite: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
@@ -122,9 +117,7 @@ fun HistoryScreen(
             composable(route = DESTINATION[PLACES_INDEX]) {
                 chosen = PLACES_INDEX
                 FavouritePlacesContent(
-                    places = places,
-                    placeFull = placeFull,
-                    getPlaceFullInfo = getPlaceFullInfo,
+                    places = places.list,
                     removeFromFavourite = removePlaceFromFavourite,
                     addToFavourite = addPlaceToFavourite
                 )
@@ -132,11 +125,7 @@ fun HistoryScreen(
             composable(route = DESTINATION[ROUTES_INDEX]) {
                 chosen = ROUTES_INDEX
                 FavouriteRoutesContent(
-                    routes = routes,
-                    routeFull = routeFull,
-                    placeFull = placeFull,
-                    getRouteFullInfo = getRouteFullInfo,
-                    getPlaceFullInfo = getPlaceFullInfo,
+                    routes = routes.list,
                     removeRouteFromFavourite = removeRouteFromFavourite,
                     addRouteToFavourite = addRouteToFavourite,
                     removePlaceFromFavourite = removePlaceFromFavourite,

@@ -26,7 +26,7 @@ class AccountViewModel @Inject constructor(
         loadUserState()
     }
 
-    fun loadUserState() {
+    private fun loadUserState() {
         viewModelScope.launch {
             userState = userState.copy(
                 isLoading = true,

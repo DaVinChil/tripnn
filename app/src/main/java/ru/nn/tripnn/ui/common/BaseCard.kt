@@ -9,19 +9,16 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsEndWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -96,9 +91,12 @@ fun BaseCard(
                 contentScale = ContentScale.Crop
             )
 
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 8.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
                 MontsText(text = type, fontSize = 10.sp)
                 MontsText(text = name, fontSize = 16.sp, maxLines = 2)
                 if (info != null) {
@@ -122,7 +120,7 @@ fun PlaceCard(
 ) {
     BaseCard(
         modifier = modifier,
-        imageUrl = place.imageUrl,
+        imageUrl = place.photos[0],
         type = place.type,
         name = place.name,
         onCardClick = onCardClick,
@@ -151,10 +149,10 @@ fun RouteCard(
         shadowColor = shadowColor
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            if(route.cost != null) {
+            if (route.cost != null) {
                 CostInfo(cost = route.cost)
             }
-            if(route.rating != null) {
+            if (route.rating != null) {
                 RatingInfo(rating = route.rating)
             }
         }
@@ -202,6 +200,7 @@ fun RatingInfo(rating: Double) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DraggableCard(
+    modifier: Modifier = Modifier,
     option1: @Composable () -> Unit,
     option2: (@Composable () -> Unit)? = null,
     card: @Composable () -> Unit
@@ -215,11 +214,13 @@ fun DraggableCard(
         -(maxWidth / 4)
     }
 
-    val anchores = remember {
-        DraggableAnchors {
-            DragValue.Start at 0f
-            DragValue.End at endOfDragging
-        }
+    val anchores by remember(endOfDragging) {
+        mutableStateOf(
+            DraggableAnchors {
+                DragValue.Start at 0f
+                DragValue.End at endOfDragging
+            }
+        )
     }
     val dragState = remember {
         AnchoredDraggableState(
@@ -235,8 +236,7 @@ fun DraggableCard(
     }
 
     Box(
-        modifier = Modifier
-            .onGloballyPositioned { maxWidth = it.size.width.toFloat() }
+        modifier = modifier
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             option1()
@@ -253,7 +253,7 @@ fun DraggableCard(
                     )
                 }
                 .anchoredDraggable(dragState, Orientation.Horizontal)
-
+                .onGloballyPositioned { maxWidth = it.size.width.toFloat() }
         ) {
             card()
         }
@@ -359,9 +359,14 @@ fun DraggablePlaceCardPreview() {
             DraggableCard(
                 option1 = { AddToFavouriteCardOption(onClick = {}) },
                 option2 = { RemoveFromRouteCardOption(onClick = {}) },
-            ) {
-                PlaceCard(place = PLACE_1, onCardClick = { /*TODO*/ }, shadowColor = Color.Black)
-            }
+                card = {
+                    PlaceCard(
+                        place = PLACE_1,
+                        onCardClick = { /*TODO*/ },
+                        shadowColor = Color.Black
+                    )
+                }
+            )
         }
     }
 }

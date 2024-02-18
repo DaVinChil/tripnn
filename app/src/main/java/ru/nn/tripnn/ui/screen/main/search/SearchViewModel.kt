@@ -8,12 +8,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.data.stub_data.PLACE_FULL_1
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.PlaceFull
 import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,49 +20,24 @@ class AllPlacesViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository
 ) : ViewModel() {
 
-    var isSearchLoading by mutableStateOf(false)
+    var searchResult by mutableStateOf(ResourceListState<Place>())
         private set
-
-    var searchResult: List<Place> by mutableStateOf(immutableListOf())
-        private set
-
     private var savedSearchResult: List<Place> by mutableStateOf(immutableListOf())
-
-    var isFullPlaceLoading by mutableStateOf(false)
-        private set
-
-    var placeFull: PlaceFull by mutableStateOf(PLACE_FULL_1)
-
-    fun getFullInfo(id: String) {
-        viewModelScope.launch {
-            isFullPlaceLoading = true
-            when (val resource = placeRepository.getFullInfo(id)) {
-                is Resource.Success -> {
-                    placeFull = resource.data ?: PLACE_FULL_1
-                }
-
-                is Resource.Error -> {
-
-                }
-            }
-            isFullPlaceLoading = false
-        }
-    }
 
     fun search(searchState: SearchState) {
         viewModelScope.launch {
-            isSearchLoading = true
+            searchResult = searchResult.copy(isLoading = true)
             when (val resource = placeRepository.find(searchState)) {
                 is Resource.Success -> {
-                    searchResult = resource.data ?: listOf()
-                    savedSearchResult = searchResult
+                    searchResult = searchResult.copy(list = resource.data ?: listOf())
+                    savedSearchResult = searchResult.list
                 }
 
                 is Resource.Error -> {
 
                 }
             }
-            isSearchLoading = false
+            searchResult = searchResult.copy(isLoading = true)
         }
     }
 
@@ -85,7 +59,7 @@ class AllPlacesViewModel @Inject constructor(
             }
             0
         }
-        searchResult = sorted
+        searchResult = searchResult.copy(list = sorted)
     }
 
     fun removeFromFavourite(id: String) {
