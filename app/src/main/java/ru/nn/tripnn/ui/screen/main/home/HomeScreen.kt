@@ -261,7 +261,8 @@ fun HomeContent(
                     addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    route = pickedRoute
+                    route = pickedRoute,
+                    onTakeTheRoute = { TODO() }
                 )
             }
         }

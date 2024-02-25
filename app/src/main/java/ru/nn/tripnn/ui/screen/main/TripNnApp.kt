@@ -12,18 +12,18 @@ import ru.nn.tripnn.ui.navigation.TripNnNavController
 import ru.nn.tripnn.ui.navigation.addAppGraph
 import ru.nn.tripnn.ui.navigation.addAuthGraph
 import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
-import ru.nn.tripnn.ui.screen.GeneralUiViewModel
+import ru.nn.tripnn.ui.screen.AuthenticationViewModel
 import ru.nn.tripnn.ui.screen.Theme
+import ru.nn.tripnn.ui.screen.UiPreferencesViewModel
 import ru.nn.tripnn.ui.screen.main.splash.HeartSplashScreen
-import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 @Composable
 fun TripNnApp(
-    generalUiViewModel: GeneralUiViewModel,
+    uiPreferencesViewModel: UiPreferencesViewModel,
     authViewModel: AuthenticationViewModel
 ) {
-    val uiState = generalUiViewModel.uiPreferencesState
+    val uiState = uiPreferencesViewModel.uiPreferencesState
 
     TripNNTheme(
         darkTheme = when (uiState.theme) {
@@ -40,7 +40,7 @@ fun TripNnApp(
         ) {
             tripNnNavGraph(
                 navController = tripNnNavController,
-                generalUiViewModel = generalUiViewModel,
+                uiPreferencesViewModel = uiPreferencesViewModel,
                 authViewModel = authViewModel
             )
 
@@ -53,7 +53,7 @@ fun TripNnApp(
                             tripNnNavController.navigateTo(AUTH_GRAPH_ROUTE)
                         }
                     },
-                    isLoading = authViewModel.isLoading || generalUiViewModel.isLoading
+                    isLoading = authViewModel.isLoading || uiPreferencesViewModel.isLoading
                 )
             }
         }
@@ -62,27 +62,20 @@ fun TripNnApp(
 
 private fun NavGraphBuilder.tripNnNavGraph(
     navController: TripNnNavController,
-    generalUiViewModel: GeneralUiViewModel,
+    uiPreferencesViewModel: UiPreferencesViewModel,
     authViewModel: AuthenticationViewModel
 ) {
     addAuthGraph(
         navigateTo = navController::navigateTo,
-        onSignUp = { credentials ->
-            authViewModel.authenticate(credentials)
-            navController.navigateTo(MAIN_GRAPH_ROUTE)
-        },
-        onLogIn = { rememberMe, credentials ->
-            authViewModel.authenticate(credentials)
-            navController.navigateTo(MAIN_GRAPH_ROUTE)
-        },
-        onForgot = { }
+        authViewModel = authViewModel,
+        navController = navController
     )
 
     addAppGraph(
         navController = navController.navController,
         navigateTo = navController::navigateTo,
         onBack = navController::upPress,
-        generalUiViewModel = generalUiViewModel,
+        uiPreferencesViewModel = uiPreferencesViewModel,
         onLeaveAccount = {
             navController.navigateTo(AUTH_GRAPH_ROUTE)
             authViewModel.logout()

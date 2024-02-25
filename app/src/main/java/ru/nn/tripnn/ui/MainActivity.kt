@@ -9,18 +9,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
+import ru.nn.tripnn.ui.screen.AuthenticationViewModel
+import ru.nn.tripnn.ui.screen.UiPreferencesViewModel
 import ru.nn.tripnn.ui.screen.main.TripNnApp
-import ru.nn.tripnn.ui.screen.GeneralUiViewModel
-import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val generalUiViewModel by viewModels<GeneralUiViewModel>()
+    private val generalUiViewModel by viewModels<UiPreferencesViewModel>()
     private val authViewModel by viewModels<AuthenticationViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+
+        generalUiViewModel.loadPreferences()
+        authViewModel.authenticate()
 
         installSplashScreen()
 

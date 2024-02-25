@@ -1,8 +1,6 @@
 package ru.nn.tripnn.ui.screen.main.favourite
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,6 +58,7 @@ import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlaceCard
+import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
@@ -81,7 +81,8 @@ fun FavouriteScreen(
     removePlaceFromFavourite: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit
+    addRouteToFavourite: (String) -> Unit,
+    onTakeTheRoute: (String) -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -99,17 +100,24 @@ fun FavouriteScreen(
         IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
-                contentDescription = "back",
+                contentDescription = stringResource(id = R.string.back_txt),
                 tint = MaterialTheme.colorScheme.tertiary
             )
         }
 
-        MontsText(text = "Избранные", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+        MontsText(
+            text = stringResource(id = R.string.favourites),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         CatalogNavigation(
-            catalogs = listOf("Места", "Маршруты"),
+            catalogs = listOf(
+                stringResource(id = R.string.places),
+                stringResource(id = R.string.routes)
+            ),
             onCatalogChange = {
                 if (it == 0) {
                     filterPlaces(word)
@@ -155,12 +163,13 @@ fun FavouriteScreen(
             }
             composable(route = DESTINATION[ROUTES_INDEX]) {
                 chosen = ROUTES_INDEX
-                FavouriteRoutesContent(
+                RoutesContent(
                     routes = favouriteRoutes.list,
                     removeRouteFromFavourite = removeRouteFromFavourite,
                     addRouteToFavourite = addRouteToFavourite,
                     removePlaceFromFavourite = removePlaceFromFavourite,
-                    addPlaceToFavourite = addPlaceToFavourite
+                    addPlaceToFavourite = addPlaceToFavourite,
+                    onTakeTheRoute = onTakeTheRoute
                 )
             }
         }
@@ -228,12 +237,13 @@ fun FavouritePlacesContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavouriteRoutesContent(
+fun RoutesContent(
     routes: List<Route>,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit
+    addPlaceToFavourite: (String) -> Unit,
+    onTakeTheRoute: (String) -> Unit
 ) {
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState()
@@ -276,7 +286,8 @@ fun FavouriteRoutesContent(
                 removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
                 addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                 removePlaceFromFavourite = removePlaceFromFavourite,
-                addPlaceToFavourite = addPlaceToFavourite
+                addPlaceToFavourite = addPlaceToFavourite,
+                onTakeTheRoute = onTakeTheRoute
             )
         }
     }
@@ -284,105 +295,123 @@ fun FavouriteRoutesContent(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RouteInfoBottomSheet(
     route: Route,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit
+    addPlaceToFavourite: (String) -> Unit,
+    onTakeTheRoute: (String) -> Unit
 ) {
     var favourite by remember { mutableStateOf(route.favourite) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
     var pickedPlace by remember { mutableStateOf(route.places[0]) }
-
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(5f / 6f)
-            .padding(horizontal = 10.dp)
+            .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            MontsText(
-                text = route.name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier
-                    .fillMaxWidth(4f / 6f)
-                    .basicMarquee()
-            )
-            Spacer(modifier = Modifier.width(5.dp))
+        Column(
+            modifier = Modifier
 
-            if (route.rating != null) {
-                Icon(
-                    painter = painterResource(id = R.drawable.gold_small_start),
-                    contentDescription = "gold star",
-                    tint = Color.Unspecified
-                )
-                Spacer(modifier = Modifier.width(5.dp))
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 MontsText(
-                    text = route.rating.toString(),
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1DAB4D),
+                    text = route.name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.fillMaxWidth(4f / 6f)
                 )
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(5.dp))
 
-            Icon(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        onClick = {
-                            favourite = if (favourite) {
-                                removeRouteFromFavourite(route.id)
-                                false
-                            } else {
-                                addRouteToFavourite(route.id)
-                                true
-                            }
-                        }
-                    ),
-                painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
-                contentDescription = "bookmark",
-                tint = Color.Unspecified
-            )
-        }
-
-        LazyColumn(
-            state = lazyState,
-            contentPadding = PaddingValues(vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            items(items = route.places, key = Place::id) { place ->
-                val option: @Composable () -> Unit = if (place.favourite) {
-                    @Composable {
-                        RemoveFromFavouriteGoldCardOption(
-                            onClick = { removePlaceFromFavourite(place.id) })
-                    }
-                } else {
-                    @Composable { AddToFavouriteCardOption(onClick = { addPlaceToFavourite(place.id) }) }
-                }
-                DraggableCard(option1 = option) {
-                    PlaceCard(
-                        place = place,
-                        onCardClick = { showCardInfo = true; pickedPlace = place },
-                        shadowColor = Color.Black.copy(alpha = 0.2f),
-                        modifier = Modifier.fillMaxWidth()
+                if (route.rating != null) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.gold_small_start),
+                        contentDescription = stringResource(id = R.string.gold_star),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    MontsText(
+                        text = route.rating.toString(),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1DAB4D),
                     )
                 }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Icon(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember {
+                                MutableInteractionSource()
+                            },
+                            onClick = {
+                                favourite = if (favourite) {
+                                    removeRouteFromFavourite(route.id)
+                                    false
+                                } else {
+                                    addRouteToFavourite(route.id)
+                                    true
+                                }
+                            }
+                        ),
+                    painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
+                    contentDescription = stringResource(id = R.string.bookmark),
+                    tint = Color.Unspecified
+                )
+            }
+
+            if (route.desc != null) {
+                MontsText(
+                    text = route.desc,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
+            }
+
+            LazyColumn(
+                state = lazyState,
+                contentPadding = PaddingValues(top = 20.dp, bottom = 80.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(items = route.places, key = Place::id) { place ->
+                    val option: @Composable () -> Unit = if (place.favourite) {
+                        @Composable {
+                            RemoveFromFavouriteGoldCardOption(
+                                onClick = { removePlaceFromFavourite(place.id) })
+                        }
+                    } else {
+                        @Composable { AddToFavouriteCardOption(onClick = { addPlaceToFavourite(place.id) }) }
+                    }
+                    DraggableCard(option1 = option) {
+                        PlaceCard(
+                            place = place,
+                            onCardClick = { showCardInfo = true; pickedPlace = place },
+                            shadowColor = Color.Black.copy(alpha = 0.2f),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
         }
+
+        PrimaryButton(
+            text = stringResource(id = R.string.take_the_route),
+            onClick = { onTakeTheRoute(route.id) },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 
     if (showCardInfo) {
@@ -421,7 +450,8 @@ fun FavouriteScreenPreview() {
             removePlaceFromFavourite = { /*TODO*/ },
             removeRouteFromFavourite = { /*TODO*/ },
             addPlaceToFavourite = { /*TODO*/ },
-            addRouteToFavourite = { /*TODO*/ }
+            addRouteToFavourite = { /*TODO*/ },
+            onTakeTheRoute = {}
         )
     }
 }
@@ -440,7 +470,8 @@ fun RouteInfoPreview() {
                 removeRouteFromFavourite = { },
                 addRouteToFavourite = { },
                 removePlaceFromFavourite = {},
-                addPlaceToFavourite = {}
+                addPlaceToFavourite = {},
+                onTakeTheRoute = {}
             )
         }
     }

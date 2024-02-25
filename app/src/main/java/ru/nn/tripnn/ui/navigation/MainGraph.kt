@@ -10,19 +10,20 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import ru.nn.tripnn.ui.screen.GeneralUiViewModel
+import ru.nn.tripnn.ui.screen.UiPreferencesViewModel
+import ru.nn.tripnn.ui.screen.getIsoLang
 import ru.nn.tripnn.ui.screen.main.account.AccountScreen
 import ru.nn.tripnn.ui.screen.main.account.AccountViewModel
+import ru.nn.tripnn.ui.screen.main.constructor.ConstructorScreen
 import ru.nn.tripnn.ui.screen.main.favourite.FavouriteScreen
 import ru.nn.tripnn.ui.screen.main.favourite.FavouriteViewModel
 import ru.nn.tripnn.ui.screen.main.history.HistoryScreen
 import ru.nn.tripnn.ui.screen.main.history.HistoryViewModel
-import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsScreen
 import ru.nn.tripnn.ui.screen.main.home.HomeScreen
 import ru.nn.tripnn.ui.screen.main.home.HomeViewModel
+import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsScreen
 import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsViewModel
 import ru.nn.tripnn.ui.screen.main.settings.SettingsScreen
-import ru.nn.tripnn.ui.screen.getIsoLang
 import ru.nn.tripnn.ui.util.changeLocales
 
 enum class AppRoutes(
@@ -35,12 +36,11 @@ enum class AppRoutes(
     HISTORY("history_route"),
     ALL_ROUTES("all_routes_route"),
     NEW_ROUTE("new_route_route"),
-    PLACE_INFO("place_info_route"),
     CUR_ROUTE("cur_route_route")
 }
 
 fun NavGraphBuilder.addAppGraph(
-    generalUiViewModel: GeneralUiViewModel,
+    uiPreferencesViewModel: UiPreferencesViewModel,
     navController: NavController,
     navigateTo: (String) -> Unit,
     onBack: () -> Unit,
@@ -76,7 +76,7 @@ fun NavGraphBuilder.addAppGraph(
                 onFavouriteClick = { navigateTo(AppRoutes.FAVOURITE.route) },
                 onSettingsClick = { navigateTo(AppRoutes.SETTINGS.route) },
                 onAllRoutesClick = { navigateTo(AppRoutes.ALL_ROUTES.route) },
-                onNewRouteClick = { /*navigateTo(AppRoutes.NEW_ROUTE.route)*/ },
+                onNewRouteClick = { navigateTo(AppRoutes.NEW_ROUTE.route) },
                 onCurRouteClick = { /*navigateTo(AppRoutes.CUR_ROUTE.route)*/ },
                 removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,
                 addRouteToFavourite = homeViewModel::addRouteToFavourite,
@@ -100,16 +100,16 @@ fun NavGraphBuilder.addAppGraph(
                 )
             }
         ) {
-            val preferences = generalUiViewModel.uiPreferencesState
+            val preferences = uiPreferencesViewModel.uiPreferencesState
             val context = LocalContext.current
             SettingsScreen(
                 onBackClick = onBack,
-                onThemeChange = generalUiViewModel::changeTheme,
+                onThemeChange = uiPreferencesViewModel::changeTheme,
                 onLanguageChange = {
-                    generalUiViewModel.changeLanguage(it)
+                    uiPreferencesViewModel.changeLanguage(it)
                     changeLocales(context, getIsoLang(it))
                 },
-                onCurrencyChange = generalUiViewModel::changeCurrency,
+                onCurrencyChange = uiPreferencesViewModel::changeCurrency,
                 currentTheme = preferences.theme,
                 currentLanguage = preferences.language,
                 currentCurrency = preferences.currency
@@ -173,7 +173,8 @@ fun NavGraphBuilder.addAppGraph(
                 removeRouteFromFavourite = favouriteViewModel::removeRouteFromFavourite,
                 addPlaceToFavourite = favouriteViewModel::addPlaceToFavourite,
                 addRouteToFavourite = favouriteViewModel::addRouteToFavourite,
-                onBack = onBack
+                onBack = onBack,
+                onTakeTheRoute = { TODO() }
             )
         }
 
@@ -236,8 +237,30 @@ fun NavGraphBuilder.addAppGraph(
                 removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,
                 addPlaceToFavourite = homeViewModel::addPlaceToFavourite,
                 addRouteToFavourite = homeViewModel::addRouteToFavourite,
-                onBack = onBack
+                onBack = onBack,
+                onTakeTheRoute = { TODO() }
             )
+        }
+
+        composable(
+            route = AppRoutes.NEW_ROUTE.route,
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(300)
+                )
+            }
+        ) {backStackEntry ->
+            val graphBack =
+                remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
+            
+            ConstructorScreen(onBack = onBack, onContinue = {})
         }
     }
 }

@@ -225,7 +225,7 @@ fun AccountScreen(
                         }
                     )
                     MontsText(
-                        text = "Выйти",
+                        text = stringResource(id = R.string.exit),
                         fontSize = 16.sp,
                         color = Color.Red,
                         modifier = Modifier.clickable {

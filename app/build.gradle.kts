@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "ru.nn.tripnn"
-        minSdk = 31
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -75,6 +75,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-compiler:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
+
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
 
     testImplementation("junit:junit:4.13.2")
 

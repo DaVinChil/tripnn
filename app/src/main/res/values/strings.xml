@@ -84,10 +84,50 @@
     <string name="change_password">Change password</string>
     <string name="clear_history">Clear history</string>
     <string name="clear_txt">Clear</string>
-    <string name="sure_to_delete_histroy_txt">Are you sure you want to clear history? All visited places and taken routes would be deleted.</string>
+    <string name="sure_to_delete_history_txt">Are you sure you want to clear history? All visited places and taken routes would be deleted.</string>
     <string name="sure_to_delete_account_txt">Are you sure you want to delete the account?</string>
     <string name="delete_account">Delete account</string>
     <string name="delete">Delete</string>
     <string name="exit">Exit</string>
     <string name="sure_to_exit">Are you sure you want to quit the account?</string>
+
+    <string name="take_the_route">Take the route</string>
+
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="from">From</string>
+    <string name="until">until</string>
+    <string name="ok">OK</string>
+    <string name="calendar">calendar</string>
+    <string name="pick_a_date">pick a date</string>
+    <string name="pick_the_time">pick a time</string>
+    <string name="max_dist">The longest distance between places</string>
+    <string name="metre_short">m</string>
+    <string name="consider_location">Consider current location</string>
+    <string name="consider_location_full">This option will allow to offer you places closest to your location</string>
+    <string name="info">info</string>
+    <string name="customize_the_route">Customize the route</string>
+
+    <string name="gold_star">Gold star</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="favourite">Favourite</string>
+    <string name="history">History</string>
+    <string name="places">Places</string>
+    <string name="routes">Routes</string>
+
+    <string name="museums">Museums</string>
+    <string name="exhibitions">Exhibitions</string>
+    <string name="parks">Parks</string>
+    <string name="theaters">Theaters</string>
+
+    <string name="zoos">Zoos</string>
+    <string name="river_trips">River trips</string>
+    <string name="anti_cafe">Anti cafe</string>
+    <string name="attractions">Attractions</string>
+    <string name="karaoke">Karaoke</string>
+    <string name="table_games">Table games</string>
+    <string name="water_parks">Water parks</string>
+    <string name="circuses">Circuses</string>
+    <string name="quests">Quests</string>
+    <string name="cinemas">cinemas</string>
 </resources>

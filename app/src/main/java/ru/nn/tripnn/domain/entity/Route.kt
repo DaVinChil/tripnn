@@ -6,7 +6,7 @@ data class Route (
     val id: String,
     val name: String,
     val cost: (String)?,
-    val desc: String,
+    val desc: (String)?,
     val imageUrl: String,
     val favourite: Boolean,
     val rating: (Double)?,

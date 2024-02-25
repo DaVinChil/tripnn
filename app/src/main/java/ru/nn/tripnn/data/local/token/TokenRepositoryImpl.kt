@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.withTimeout
 import ru.nn.tripnn.domain.repository.TokenRepository
@@ -22,6 +23,7 @@ class TokenRepositoryImpl @Inject constructor(
 ) : TokenRepository {
     override suspend fun getToken(): String? {
         var token: String? = null
+        delay(1000)
         try {
             withTimeout(3000) {
                 ctx.dataStore.data.cancellable().collect { preferences ->

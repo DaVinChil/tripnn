@@ -1,7 +1,8 @@
 package ru.nn.tripnn.data.remote
 
 import kotlinx.coroutines.delay
-import ru.nn.tripnn.domain.entity.Credentials
+import ru.nn.tripnn.domain.entity.LogInData
+import ru.nn.tripnn.domain.entity.RegistrationData
 import ru.nn.tripnn.domain.repository.AuthenticationService
 import ru.nn.tripnn.domain.util.Resource
 import javax.inject.Inject
@@ -9,7 +10,7 @@ import javax.inject.Inject
 class FakeAuthenticationServiceImpl @Inject constructor(
 
 ) : AuthenticationService {
-    override suspend fun authenticate(credentials: Credentials): Resource<String> {
+    override suspend fun login(credentials: LogInData): Resource<String> {
         delay(2000)
         return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")
     }
@@ -19,7 +20,7 @@ class FakeAuthenticationServiceImpl @Inject constructor(
         return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")
     }
 
-    override suspend fun register(credentials: Credentials): Resource<String> {
+    override suspend fun register(credentials: RegistrationData): Resource<String> {
         delay(2000)
         return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")
     }

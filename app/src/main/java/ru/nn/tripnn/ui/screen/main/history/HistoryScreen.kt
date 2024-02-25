@@ -34,10 +34,10 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.main.favourite.DESTINATION
 import ru.nn.tripnn.ui.screen.main.favourite.FavouritePlacesContent
-import ru.nn.tripnn.ui.screen.main.favourite.FavouriteRoutesContent
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
+import ru.nn.tripnn.ui.screen.main.favourite.RoutesContent
 
 @Composable
 fun HistoryScreen(
@@ -50,7 +50,8 @@ fun HistoryScreen(
     removePlaceFromFavourite: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit
+    addRouteToFavourite: (String) -> Unit,
+    onTakeTheRoute: (String) -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -73,7 +74,7 @@ fun HistoryScreen(
             )
         }
 
-        MontsText(text = "Избранные", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+        MontsText(text = "История", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -124,12 +125,13 @@ fun HistoryScreen(
             }
             composable(route = DESTINATION[ROUTES_INDEX]) {
                 chosen = ROUTES_INDEX
-                FavouriteRoutesContent(
+                RoutesContent(
                     routes = routes.list,
                     removeRouteFromFavourite = removeRouteFromFavourite,
                     addRouteToFavourite = addRouteToFavourite,
                     removePlaceFromFavourite = removePlaceFromFavourite,
-                    addPlaceToFavourite = addPlaceToFavourite
+                    addPlaceToFavourite = addPlaceToFavourite,
+                    onTakeTheRoute = onTakeTheRoute
                 )
             }
         }

@@ -1,11 +1,12 @@
 package ru.nn.tripnn.ui.screen.authentication
 
-import android.app.Activity
-import android.os.Build
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -30,7 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,8 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -50,18 +51,33 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowCompat
 import ru.nn.tripnn.R
-import ru.nn.tripnn.domain.entity.Credentials
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.event.Dismiss
+import ru.nn.tripnn.ui.screen.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
 val SPACE_BETWEEN_INPUT = 22.dp
 
 @Composable
-fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -> Unit) {
+fun RegistrationScreen(
+    authenticate: (
+        rememberMe: Boolean,
+        email: String,
+        userName: String,
+        password: String,
+        confirmPassword: String
+    ) -> Unit,
+    onSignInClick: () -> Unit,
+    dismissError: (Dismiss) -> Unit,
+    authenticated: RemoteResource<Boolean>,
+    emailState: ResourceState<*>,
+    userNameState: ResourceState<*>,
+    passwordState: ResourceState<*>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,36 +91,44 @@ fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -
 
         var email by remember { mutableStateOf("") }
         var username by remember { mutableStateOf("") }
-        var pass by remember { mutableStateOf("") }
-        var passRep by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var confirmPassword by remember { mutableStateOf("") }
 
         Column(verticalArrangement = Arrangement.spacedBy(SPACE_BETWEEN_INPUT)) {
             InputBlock(
                 value = email,
                 title = stringResource(id = R.string.email),
                 onValueChanged = { email = it },
-                placeholder = stringResource(id = R.string.enter_email)
+                placeholder = stringResource(id = R.string.enter_email),
+                dismissError = { dismissError(Dismiss.EmailError) },
+                isError = emailState.isError
             )
 
             InputBlock(
                 value = username,
                 title = stringResource(id = R.string.enter_user_name),
                 onValueChanged = { username = it },
-                placeholder = stringResource(id = R.string.user_name)
+                placeholder = stringResource(id = R.string.user_name),
+                dismissError = { dismissError(Dismiss.UserNameError) },
+                isError = userNameState.isError
             )
 
             PasswordInputBlock(
-                value = pass,
+                value = password,
                 title = stringResource(id = R.string.password),
-                onValueChanged = { pass = it },
-                placeholder = stringResource(id = R.string.enter_password)
+                onValueChanged = { password = it },
+                placeholder = stringResource(id = R.string.enter_password),
+                dismissError = { dismissError(Dismiss.PasswordError) },
+                isError = passwordState.isError
             )
 
             PasswordInputBlock(
-                value = passRep,
+                value = confirmPassword,
                 title = stringResource(id = R.string.confirm_password),
-                onValueChanged = { passRep = it },
-                placeholder = stringResource(id = R.string.confirm_password)
+                onValueChanged = { confirmPassword = it },
+                placeholder = stringResource(id = R.string.confirm_password),
+                dismissError = { dismissError(Dismiss.PasswordError) },
+                isError = passwordState.isError
             )
         }
 
@@ -114,10 +138,15 @@ fun RegistrationScreen(onSignUpClick: (Credentials) -> Unit, onSignInClick: () -
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = stringResource(id = R.string.register),
             onClick = {
-                if (passRep == pass) {
-                    onSignUpClick(Credentials(name = username, email = email, password = pass))
-                }
-            }
+                authenticate(
+                    false,
+                    email,
+                    username,
+                    password,
+                    confirmPassword
+                )
+            },
+            isLoading = authenticated.isLoading || authenticated.value == true
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -168,8 +197,20 @@ fun InputBlock(
     onValueChanged: (String) -> Unit,
     placeholder: String,
     trailingIcon: @Composable (() -> Unit)? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    dismissError: () -> Unit = {},
+    isError: Boolean
 ) {
+    val border = remember(isError) {
+        if (isError) {
+            Modifier.border(1.dp, Color.Red, shape = RoundedCornerShape(100))
+        } else {
+            Modifier
+        }
+    }
+
+    val shake by shakeAnimation(shake = isError, shakeOffset = 7f)
+
     Column {
         MontsText(
             text = title,
@@ -178,15 +219,37 @@ fun InputBlock(
         Spacer(modifier = Modifier.height(14.dp))
         AuthInputField(
             modifier = Modifier
+                .offset(x = shake.dp)
+                .then(border)
                 .fillMaxWidth()
                 .height(60.dp),
             value = value,
-            onValueChange = onValueChanged,
+            onValueChange = { onValueChanged(it); if (isError) dismissError() },
             placeholder = placeholder,
             trailingIcon = trailingIcon,
-            visualTransformation = visualTransformation
+            visualTransformation = visualTransformation,
+            isError = isError
         )
     }
+}
+
+@Composable
+fun shakeAnimation(shake: Boolean, shakeOffset: Float): State<Float> {
+    val anim = remember { Animatable(0f) }
+
+    if (shake) {
+        LaunchedEffect(Unit) {
+            var offset = shakeOffset
+            var dir = -1
+            while (offset > 0) {
+                anim.animateTo(offset * dir, tween(70, easing = LinearEasing))
+                offset -= 1
+                dir *= -1
+            }
+        }
+    }
+
+    return anim.asState()
 }
 
 @Composable
@@ -194,7 +257,9 @@ fun PasswordInputBlock(
     value: String,
     title: String,
     onValueChanged: (String) -> Unit,
-    placeholder: String
+    placeholder: String,
+    dismissError: () -> Unit = {},
+    isError: Boolean
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
     InputBlock(
@@ -216,7 +281,9 @@ fun PasswordInputBlock(
             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                 Icon(painter = image, description)
             }
-        }
+        },
+        dismissError = dismissError,
+        isError = isError
     )
 }
 
@@ -233,13 +300,17 @@ fun AuthInputField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     colors: TextFieldColors = TextFieldDefaults.colors(
-        unfocusedIndicatorColor = Color.Transparent,
         focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
         focusedContainerColor = MaterialTheme.colorScheme.secondary,
         unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
         focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary
-    )
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary,
+        errorTextColor = Color.Red,
+        errorIndicatorColor = Color.Transparent,
+        errorContainerColor = MaterialTheme.colorScheme.secondary
+    ),
+    isError: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -289,7 +360,8 @@ fun AuthInputField(
             contentPadding = PaddingValues(start = 25.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
             shape = RoundedCornerShape(100),
             colors = colors,
-            trailingIcon = icon
+            trailingIcon = icon,
+            isError = isError
         )
     }
 }
@@ -317,7 +389,15 @@ fun InputFieldPreview() {
 fun RegistrationScreenPreview() {
     TripNNTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            RegistrationScreen({}, {})
+            RegistrationScreen(
+                { _, _, _, _, _ -> },
+                {},
+                {},
+                RemoteResource(),
+                ResourceState<Unit>(),
+                ResourceState<Unit>(),
+                ResourceState<Unit>()
+            )
         }
     }
 }

@@ -86,7 +86,7 @@
     <string name="change_password">Изменить пароль</string>
     <string name="clear_history">Очистить историю</string>
     <string name="clear_txt">Очистить</string>
-    <string name="sure_to_delete_histroy_txt">Вы уверены, что хотите очистить историю? Будут удалены все сведенья о посещенных местах и пройденных маршрутах</string>
+    <string name="sure_to_delete_history_txt">Вы уверены, что хотите очистить историю? Будут удалены все сведенья о посещенных местах и пройденных маршрутах</string>
 
     <string name="sure_to_delete_account_txt">Вы уверены, что хотите удалить аккаунт?</string>
     <string name="delete_account">Удалить аккаунт</string>
@@ -94,4 +94,43 @@
 
     <string name="exit">Выйти</string>
     <string name="sure_to_exit">Вы уверены, что хотите выйти из аккаунта?</string>
+
+    <string name="take_the_route">Начать маршрут</string>
+    <string name="today">Сегодня</string>
+    <string name="yesterday">Завтра</string>
+    <string name="from">С</string>
+    <string name="until">до</string>
+    <string name="ok">ок</string>
+    <string name="calendar">каледаль</string>
+    <string name="pick_a_date">выберите дату</string>
+    <string name="pick_the_time">выберите время</string>
+    <string name="max_dist">Максимальное расстояние между точками</string>
+    <string name="metre_short">м</string>
+    <string name="consider_location">"Учесть текущее местоположение "</string>
+    <string name="consider_location_full">Данная опция позволит предлагать места наиболее близкие к вашему местоположению</string>
+    <string name="info">информация</string>
+    <string name="customize_the_route">Настройте маршрут</string>
+
+    <string name="gold_star">Золотая звезда</string>
+    <string name="bookmark">Закладка</string>
+    <string name="favourite">Избранные</string>
+    <string name="history">История</string>
+    <string name="places">Места</string>
+    <string name="routes">Маршруты</string>
+
+    <string name="museums">Музеи</string>
+    <string name="exhibitions">Выставки</string>
+    <string name="parks">Парки</string>
+    <string name="theaters">Театры</string>
+
+    <string name="zoos">Зоопарки</string>
+    <string name="river_trips">Речные прогулки</string>
+    <string name="anti_cafe">Антикафе</string>
+    <string name="attractions">Аттракционы</string>
+    <string name="karaoke">Караоке</string>
+    <string name="table_games">Настольные игры</string>
+    <string name="water_parks">Аквапарки</string>
+    <string name="circuses">Цирки</string>
+    <string name="quests">Квесты</string>
+    <string name="cinemas">Кинотеатры</string>
 </resources>

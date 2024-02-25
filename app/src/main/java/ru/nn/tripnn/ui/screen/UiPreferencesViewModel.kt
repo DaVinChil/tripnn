@@ -42,7 +42,7 @@ fun getIsoLang(id: Int) = when (id) {
 }
 
 @HiltViewModel
-class GeneralUiViewModel @Inject constructor(
+class UiPreferencesViewModel @Inject constructor(
     private val uiPreferencesRepository: UiPreferencesRepository
 ) : ViewModel() {
     var isLoading by mutableStateOf(false)
@@ -58,11 +58,7 @@ class GeneralUiViewModel @Inject constructor(
     )
         private set
 
-    init {
-        loadPreferences()
-    }
-
-    private fun loadPreferences() {
+    fun loadPreferences() {
         viewModelScope.launch {
             isLoading = true
             when (val result = uiPreferencesRepository.getUiPreferences()) {

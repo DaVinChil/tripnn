@@ -86,59 +86,50 @@ import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
-val TYPES = listOf(
-    listOf(
-        R.string.all_types,
-        R.string.home_cook,
-        R.string.sushi_bars,
-        R.string.pizzerias,
-        R.string.fast_food,
-        R.string.canteens,
-        R.string.coffee_shops,
-        R.string.bars,
-        R.string.pastry_shops,
-        R.string.shot_glasses,
-        R.string.burgers,
-        R.string.pyshechnye,
-        R.string.khinkalnye,
-        R.string.shawarma,
-        R.string.dumplings,
-    ),
-    listOf(
-        R.string.all_types,
-        R.string.home_cook,
-        R.string.sushi_bars,
-        R.string.pizzerias,
-        R.string.fast_food,
-        R.string.canteens,
-        R.string.coffee_shops,
-        R.string.bars,
-        R.string.pastry_shops,
-        R.string.shot_glasses,
-        R.string.burgers,
-        R.string.pyshechnye,
-        R.string.khinkalnye,
-        R.string.shawarma,
-        R.string.dumplings,
-    ),
-    listOf(
-        R.string.all_types,
-        R.string.home_cook,
-        R.string.sushi_bars,
-        R.string.pizzerias,
-        R.string.fast_food,
-        R.string.canteens,
-        R.string.coffee_shops,
-        R.string.bars,
-        R.string.pastry_shops,
-        R.string.shot_glasses,
-        R.string.burgers,
-        R.string.pyshechnye,
-        R.string.khinkalnye,
-        R.string.shawarma,
-        R.string.dumplings,
-    )
+val LEISURE_TYPES = listOf(
+    R.string.zoos,
+    R.string.river_trips,
+    R.string.anti_cafe,
+    R.string.attractions,
+    R.string.karaoke,
+    R.string.table_games,
+    R.string.water_parks,
+    R.string.circuses,
+    R.string.quests,
+    R.string.cinemas
 )
+
+val CULTURE_TYPES = listOf(
+    R.string.museums,
+    R.string.exhibitions,
+    R.string.parks,
+    R.string.theaters
+)
+
+val EAT_TYPES = listOf(
+    R.string.all_types,
+    R.string.home_cook,
+    R.string.sushi_bars,
+    R.string.pizzerias,
+    R.string.fast_food,
+    R.string.canteens,
+    R.string.coffee_shops,
+    R.string.bars,
+    R.string.pastry_shops,
+    R.string.shot_glasses,
+    R.string.burgers,
+    R.string.pyshechnye,
+    R.string.khinkalnye,
+    R.string.shawarma,
+    R.string.dumplings,
+)
+
+const val LEISURE = 1
+const val CULTURE = 0
+const val EAT = 2
+
+const val SEARCH_ROUTE = "search"
+const val SEARCH_RESULT_ROUTE = "search_result"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,20 +143,20 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
         sheetState = sheetState
     ) {
         val navController = rememberNavController()
-        NavHost(navController = navController, startDestination = "search") {
+        NavHost(navController = navController, startDestination = SEARCH_ROUTE) {
             composable(
-                route = "search",
+                route = SEARCH_ROUTE,
                 exitTransition = { slideOutHorizontally { -it } },
                 popEnterTransition = { slideInHorizontally { -it } }
             ) {
                 SearchPlaceScreen(onSearch = placesViewModel::search, toResultScreen = {
-                    navController.navigate("search_result") {
+                    navController.navigate(SEARCH_RESULT_ROUTE) {
                         launchSingleTop = true
                     }
                 })
             }
             composable(
-                route = "search_result",
+                route = SEARCH_RESULT_ROUTE,
                 popExitTransition = { slideOutHorizontally { it } },
                 enterTransition = { slideInHorizontally { it } }
             ) {
@@ -186,7 +177,8 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
 @Composable
 fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Unit) {
     val scrollState = rememberScrollState()
-    var chosen by remember { mutableIntStateOf(0) }
+    var chosenCategory by remember { mutableIntStateOf(CULTURE) }
+    var currentCategoryTypes by remember { mutableStateOf(CULTURE_TYPES) }
     var searchInput by remember { mutableStateOf("") }
     var sliderPosition by remember { mutableStateOf(0f..100f) }
     val catalogs = listOf(
@@ -194,9 +186,9 @@ fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Uni
         stringResource(id = R.string.leisure),
         stringResource(id = R.string.to_eat)
     )
-    val picked = remember(chosen) {
+    val picked = remember(chosenCategory) {
         mutableStateListOf<Boolean>().apply {
-            for (i in TYPES[chosen].indices) {
+            for (i in currentCategoryTypes.indices) {
                 add(false)
             }
         }
@@ -216,8 +208,16 @@ fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Uni
         ) {
             CatalogNavigation(
                 catalogs = catalogs,
-                onCatalogChange = { chosen = it },
-                chosen = chosen
+                onCatalogChange = {
+                    currentCategoryTypes = when (it) {
+                        CULTURE -> CULTURE_TYPES
+                        LEISURE -> LEISURE_TYPES
+                        EAT -> EAT_TYPES
+                        else -> listOf()
+                    }
+                    chosenCategory = it
+                },
+                chosen = chosenCategory
             )
 
             Spacer(modifier = Modifier.height(13.dp))
@@ -253,7 +253,7 @@ fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Uni
                 verticalArrangement = Arrangement.spacedBy(17.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                TYPES[chosen].forEachIndexed { i, type ->
+                currentCategoryTypes.forEachIndexed { i, type ->
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
@@ -290,9 +290,9 @@ fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Uni
                     onSearch(
                         SearchState(
                             input = searchInput,
-                            catalog = catalogs[chosen],
+                            catalog = catalogs[chosenCategory],
                             types = mutableListOf<Int>().apply {
-                                picked.forEachIndexed { index, b -> if (b) add(TYPES[chosen][index]) }
+                                picked.forEachIndexed { index, b -> if (b) add(currentCategoryTypes[index]) }
                             },
                             priceRange = sliderPosition
                         )
@@ -577,19 +577,21 @@ fun PlaceInfoBottomSheet(
                         fontSize = 24.sp
                     )
                     Icon(
-                        modifier = Modifier.size(20.dp).clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-                                favourite = if (favourite) {
-                                    removeFromFavourite()
-                                    false
-                                } else {
-                                    addToFavourite()
-                                    true
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() },
+                                onClick = {
+                                    favourite = if (favourite) {
+                                        removeFromFavourite()
+                                        false
+                                    } else {
+                                        addToFavourite()
+                                        true
+                                    }
                                 }
-                            }
-                        ),
+                            ),
                         painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
                         contentDescription = "is favourite",
                         tint = Color.Unspecified

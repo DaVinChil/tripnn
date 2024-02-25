@@ -1,7 +1,7 @@
 package ru.nn.tripnn.domain.entity
 
-data class Credentials(
-    val name: String? = null,
+data class RegistrationData (
+    val name: String,
     val password: String,
     val email: String
 )

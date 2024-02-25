@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,23 +31,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.domain.entity.Credentials
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.event.Dismiss
+import ru.nn.tripnn.ui.screen.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
-import ru.nn.tripnn.ui.theme.montserratFamily
 
 @Composable
 fun LogInScreen(
     onForgotClick: () -> Unit,
-    onLogInClick: (rememberMe: Boolean, credentials: Credentials) -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    authenticate: (rememberMe: Boolean, email: String, password: String) -> Unit,
+    authenticated: RemoteResource<Boolean>,
+    emailState: ResourceState<*>,
+    passwordState: ResourceState<*>,
+    dismissError: (Dismiss) -> Unit
 ) {
-    var rememberMe by remember {
-        mutableStateOf(false)
-    }
-    val onRememberClick = { rememberMe = !rememberMe }
-
+    var rememberMe by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var pass by remember { mutableStateOf("") }
 
@@ -69,7 +69,9 @@ fun LogInScreen(
                     value = email,
                     title = stringResource(id = R.string.email),
                     onValueChanged = { email = it },
-                    placeholder = stringResource(id = R.string.enter_email)
+                    placeholder = stringResource(id = R.string.enter_email),
+                    dismissError = { dismissError(Dismiss.EmailError) },
+                    isError = emailState.isError
                 )
 
                 Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
@@ -78,7 +80,9 @@ fun LogInScreen(
                     value = pass,
                     title = stringResource(id = R.string.password),
                     onValueChanged = { pass = it },
-                    placeholder = stringResource(id = R.string.enter_password)
+                    placeholder = stringResource(id = R.string.enter_password),
+                    dismissError = { dismissError(Dismiss.PasswordError) },
+                    isError = passwordState.isError
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -89,7 +93,7 @@ fun LogInScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
-                        modifier = Modifier.clickable(onClick = onRememberClick),
+                        modifier = Modifier.clickable(onClick = { rememberMe = !rememberMe }),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
@@ -120,7 +124,8 @@ fun LogInScreen(
             PrimaryButton(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = stringResource(id = R.string.login),
-                onClick = { onLogInClick(rememberMe, Credentials(email = email, password = pass)) }
+                onClick = { authenticate(rememberMe, email, pass) },
+                isLoading = authenticated.isLoading
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -176,8 +181,12 @@ fun LogInScreenPreview() {
         Surface(modifier = Modifier.fillMaxSize()) {
             LogInScreen(
                 onForgotClick = { },
-                onLogInClick = {a, b -> },
-                onRegisterClick = {}
+                authenticate = {_, _, _ -> },
+                authenticated = RemoteResource(),
+                onRegisterClick = {},
+                dismissError = {},
+                emailState = ResourceState<Unit>(),
+                passwordState = ResourceState<Unit>()
             )
         }
     }
