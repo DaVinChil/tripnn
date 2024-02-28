@@ -1,6 +1,7 @@
 package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +26,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerSnapDistance
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -78,6 +85,7 @@ import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
+import kotlin.math.absoluteValue
 
 @Composable
 fun HomeScreen(
@@ -133,8 +141,6 @@ fun HomeScreen(
             )
         }
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,26 +174,7 @@ fun HomeContent(
                 .padding(16.dp)
         ) {
             Column {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        Icon(
-                            modifier = Modifier
-                                .clickable(onClick = onMenuClick),
-                            painter = painterResource(id = R.drawable.burger_menu),
-                            contentDescription = stringResource(id = R.string.menu_txt),
-                        )
-                    }
-                    Image(
-                        modifier = Modifier,
-                        painter = painterResource(id = R.drawable.tripnn_logo),
-                        contentDescription = stringResource(id = R.string.logo_txt)
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+                TopAppBar(onMenuClick = onMenuClick)
 
                 Spacer(modifier = Modifier.height(30.dp))
 
@@ -201,9 +188,7 @@ fun HomeContent(
                         fontWeight = FontWeight.Medium
                     )
                     MontsText(
-                        modifier = Modifier.clickable(
-                            onClick = onAllRoutesClick
-                        ),
+                        modifier = Modifier.clickable(onClick = onAllRoutesClick),
                         text = stringResource(id = R.string.all_txt),
                         fontSize = 16.sp
                     )
@@ -211,32 +196,16 @@ fun HomeContent(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                LazyRow(
-                    modifier = Modifier.requiredWidth(LocalConfiguration.current.screenWidthDp.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) {
-                    if (isLoading) {
-                        items(count = 3) {
-                            LoadingCard(
-                                modifier = Modifier.width(CARD_WIDTH),
-                                shadowColor = Color.Black.copy(alpha = 0.2f)
-                            )
+                if (isLoading) {
+                    LoadingRecommendedRoutes()
+                } else {
+                    RecommendedRoutes(
+                        routes = recRoutes,
+                        onRouteClick = {
+                            pickedRoute = recRoutes[it]
+                            showRouteInfo = true
                         }
-                    } else {
-                        items(items = recRoutes, key = Route::id) {
-                            RouteCard(
-                                route = it,
-                                onCardClick = {
-                                    pickedRoute = it
-                                    showRouteInfo = true
-                                },
-                                shadowColor = Color.Black.copy(alpha = 0.2f),
-                                modifier = Modifier.width(CARD_WIDTH)
-                            )
-                        }
-                    }
-
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -275,7 +244,7 @@ fun HomeContent(
         }
 
         if (showRouteInfo) {
-            val sheetState = rememberModalBottomSheetState()
+            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { showRouteInfo = false },
                 dragHandle = { DragHandler() },
@@ -292,6 +261,30 @@ fun HomeContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TopAppBar(onMenuClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            Icon(
+                modifier = Modifier
+                    .clickable(onClick = onMenuClick),
+                painter = painterResource(id = R.drawable.burger_menu),
+                contentDescription = stringResource(id = R.string.menu_txt),
+            )
+        }
+        Image(
+            modifier = Modifier,
+            painter = painterResource(id = R.drawable.tripnn_logo),
+            contentDescription = stringResource(id = R.string.logo_txt)
+        )
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -348,6 +341,65 @@ fun MenuOption(text: String, onClick: () -> Unit) {
             text = text,
             fontSize = 18.sp,
         )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
+    val pagerState =
+        rememberPagerState(pageCount = { Int.MAX_VALUE }, initialPage = 500)
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val fling = PagerDefaults.flingBehavior(
+        state = pagerState,
+        pagerSnapDistance = PagerSnapDistance.atMost(10)
+    )
+    HorizontalPager(
+        modifier = Modifier.requiredWidth(screenWidth),
+        state = pagerState,
+        pageSpacing = 0.dp,
+        pageSize = PageSize.Fixed(CARD_WIDTH),
+        contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
+        flingBehavior = fling
+    ) {
+        RouteCard(
+            route = routes[it % routes.size],
+            onCardClick = { onRouteClick(it % routes.size) },
+            shadowColor = Color.Black.copy(alpha = 0.2f),
+            modifier = Modifier
+                .scale(
+                    if (pagerState.currentPage == it) {
+                        1 - pagerState.currentPageOffsetFraction.absoluteValue / 4
+                    } else if ((pagerState.currentPage - it).absoluteValue == 1 &&
+                        (pagerState.currentPage < it && pagerState.currentPageOffsetFraction > 0
+                                || pagerState.currentPage > it && pagerState.currentPageOffsetFraction < 0)
+                    ) {
+                        0.750f + pagerState.currentPageOffsetFraction.absoluteValue / 4
+                    } else {
+                        0.75f
+                    }
+                )
+                .width(CARD_WIDTH)
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun LoadingRecommendedRoutes() {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    Box(modifier = Modifier.requiredWidth(screenWidth)) {
+        val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 1)
+        HorizontalPager(
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            pageSpacing = 20.dp
+        ) {
+            LoadingCard()
+        }
+        Box(modifier = Modifier
+            .matchParentSize()
+            .pointerInput(false) {})
     }
 }
 
@@ -543,7 +595,6 @@ fun NewRouteButtonPreview() {
         }
     }
 }
-
 
 @Preview
 @Composable

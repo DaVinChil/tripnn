@@ -246,7 +246,7 @@ fun RoutesContent(
     onTakeTheRoute: (String) -> Unit
 ) {
     val lazyState = rememberLazyListState()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showRouteInfo by remember { mutableStateOf(false) }
     var pickedRoute by remember { mutableStateOf(routes[0]) }
 
@@ -319,54 +319,55 @@ fun RouteInfoBottomSheetContent(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 MontsText(
                     text = route.name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.fillMaxWidth(4f / 6f)
                 )
-
                 Spacer(modifier = Modifier.width(5.dp))
 
-                if (route.rating != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (route.rating != null) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.gold_small_start),
+                            contentDescription = stringResource(id = R.string.gold_star),
+                            tint = Color.Unspecified
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        MontsText(
+                            text = route.rating.toString(),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF1DAB4D),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
                     Icon(
-                        painter = painterResource(id = R.drawable.gold_small_start),
-                        contentDescription = stringResource(id = R.string.gold_star),
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember {
+                                    MutableInteractionSource()
+                                },
+                                onClick = {
+                                    favourite = if (favourite) {
+                                        removeRouteFromFavourite(route.id)
+                                        false
+                                    } else {
+                                        addRouteToFavourite(route.id)
+                                        true
+                                    }
+                                }
+                            ),
+                        painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
+                        contentDescription = stringResource(id = R.string.bookmark),
                         tint = Color.Unspecified
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    MontsText(
-                        text = route.rating.toString(),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1DAB4D),
-                    )
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Icon(
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember {
-                                MutableInteractionSource()
-                            },
-                            onClick = {
-                                favourite = if (favourite) {
-                                    removeRouteFromFavourite(route.id)
-                                    false
-                                } else {
-                                    addRouteToFavourite(route.id)
-                                    true
-                                }
-                            }
-                        ),
-                    painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
-                    contentDescription = stringResource(id = R.string.bookmark),
-                    tint = Color.Unspecified
-                )
             }
 
             if (route.desc != null) {
@@ -376,10 +377,12 @@ fun RouteInfoBottomSheetContent(
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             }
+            
+            Spacer(modifier = Modifier.height(15.dp))
 
             LazyColumn(
                 state = lazyState,
-                contentPadding = PaddingValues(top = 20.dp, bottom = 90.dp),
+                contentPadding = PaddingValues(top = 10.dp, bottom = 90.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {

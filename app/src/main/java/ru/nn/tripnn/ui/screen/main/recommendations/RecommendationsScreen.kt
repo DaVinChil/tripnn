@@ -55,7 +55,7 @@ fun RecommendationsScreen(
     var word by remember { mutableStateOf("") }
 
     val lazyState = rememberLazyListState()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showRouteInfo by remember { mutableStateOf(false) }
     var pickedRoute by remember { mutableStateOf(routes.list[0]) }
 
