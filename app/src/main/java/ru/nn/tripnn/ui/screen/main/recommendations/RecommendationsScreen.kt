@@ -39,7 +39,7 @@ import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
-import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheet
+import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +123,7 @@ fun RecommendationsScreen(
                 sheetState = sheetState,
                 containerColor = MaterialTheme.colorScheme.background
             ) {
-                RouteInfoBottomSheet(
+                RouteInfoBottomSheetContent(
                     removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
                     addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,

@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,17 +70,17 @@ fun HistoryScreen(
         IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
-                contentDescription = "back",
+                contentDescription = stringResource(id = R.string.back_txt),
                 tint = MaterialTheme.colorScheme.tertiary
             )
         }
 
-        MontsText(text = "История", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+        MontsText(text = stringResource(id = R.string.history), fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
 
         Spacer(modifier = Modifier.height(10.dp))
 
         CatalogNavigation(
-            catalogs = listOf("Места", "Маршруты"),
+            catalogs = listOf(stringResource(id = R.string.places), stringResource(id = R.string.routes)),
             onCatalogChange = {
                 if (it == 0) {
                     filterPlaces(word)

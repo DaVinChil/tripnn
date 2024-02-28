@@ -57,24 +57,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTES
+import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.ui.common.CARD_WIDTH
 import ru.nn.tripnn.ui.common.DragHandler
+import ru.nn.tripnn.ui.common.LoadingCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
+import ru.nn.tripnn.ui.common.lightShimmer
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheet
+import ru.nn.tripnn.ui.screen.RemoteResource
+import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
 @Composable
 fun HomeScreen(
-    homeScreenState: HomeScreenState,
+    homeScreenState: RemoteResource<HomeScreenData>,
     onAccountClick: () -> Unit,
     onHistoryClick: () -> Unit,
     onFavouriteClick: () -> Unit,
@@ -87,9 +94,11 @@ fun HomeScreen(
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
 ) {
-    val screenData = homeScreenState.homeScreenData
+    val screenData = homeScreenState.value
 
-    if (!homeScreenState.isLoading && screenData != null) {
+    if (homeScreenState.isError) {
+
+    } else {
         val scope = rememberCoroutineScope()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -106,8 +115,8 @@ fun HomeScreen(
             drawerState = drawerState
         ) {
             HomeContent(
-                curRoutePercent = screenData.curRoutePercent,
-                recRoutes = screenData.recommendedRoutes,
+                curRoutePercent = screenData?.curRoutePercent,
+                recRoutes = screenData?.recommendedRoutes ?: listOf(),
                 onCurRouteClick = onCurRouteClick,
                 onAllRoutesClick = onAllRoutesClick,
                 onNewRouteClick = onNewRouteClick,
@@ -120,6 +129,7 @@ fun HomeScreen(
                 addRouteToFavourite = addRouteToFavourite,
                 removePlaceFromFavourite = removePlaceFromFavourite,
                 addPlaceToFavourite = addPlaceToFavourite,
+                isLoading = homeScreenState.isLoading
             )
         }
     }
@@ -130,10 +140,11 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
+    isLoading: Boolean,
     recRoutes: List<Route>,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
-    curRoutePercent: Int = 0,
+    curRoutePercent: Int?,
     onCurRouteClick: (() -> Unit)? = null,
     onMenuClick: () -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
@@ -147,7 +158,7 @@ fun HomeContent(
     ) {
         var showSearch by remember { mutableStateOf(false) }
         var showRouteInfo by remember { mutableStateOf(false) }
-        var pickedRoute by remember { mutableStateOf(recRoutes[0]) }
+        var pickedRoute by remember { mutableStateOf(ROUTE_1) }
 
         Box(
             modifier = Modifier
@@ -205,17 +216,27 @@ fun HomeContent(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
-                    items(items = recRoutes, key = Route::id) {
-                        RouteCard(
-                            route = it,
-                            onCardClick = {
-                                pickedRoute = it
-                                showRouteInfo = true
-                            },
-                            shadowColor = Color.Black.copy(alpha = 0.2f),
-                            modifier = Modifier.width(CARD_WIDTH)
-                        )
+                    if (isLoading) {
+                        items(count = 3) {
+                            LoadingCard(
+                                modifier = Modifier.width(CARD_WIDTH),
+                                shadowColor = Color.Black.copy(alpha = 0.2f)
+                            )
+                        }
+                    } else {
+                        items(items = recRoutes, key = Route::id) {
+                            RouteCard(
+                                route = it,
+                                onCardClick = {
+                                    pickedRoute = it
+                                    showRouteInfo = true
+                                },
+                                shadowColor = Color.Black.copy(alpha = 0.2f),
+                                modifier = Modifier.width(CARD_WIDTH)
+                            )
+                        }
                     }
+
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -239,8 +260,13 @@ fun HomeContent(
                     onClick = onNewRouteClick
                 )
             }
-            if (onCurRouteClick != null) {
-                CurrentRouteBar(percent = curRoutePercent, onClick = onCurRouteClick)
+            if (onCurRouteClick != null && curRoutePercent != null) {
+                CurrentRouteBar(
+                    percent = curRoutePercent,
+                    onClick = onCurRouteClick
+                )
+            } else if (isLoading) {
+                LoadingCurrentRouteBar()
             }
         }
 
@@ -256,7 +282,7 @@ fun HomeContent(
                 sheetState = sheetState,
                 containerColor = MaterialTheme.colorScheme.background
             ) {
-                RouteInfoBottomSheet(
+                RouteInfoBottomSheetContent(
                     removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
                     addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
@@ -422,7 +448,36 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun CurrentRouteBar(modifier: Modifier = Modifier, percent: Int, onClick: () -> Unit) {
+fun LoadingCurrentRouteBar() {
+    val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View, theme = lightShimmer)
+
+    Box(
+        modifier = Modifier
+            .shadow(
+                borderRadius = 6.dp,
+                blurRadius = 10.dp,
+                spread = (-5).dp,
+                color = Color.Black.copy(alpha = 0.3f)
+            )
+            .clip(RoundedCornerShape(6.dp))
+            .fillMaxWidth()
+            .height(60.dp)
+            .shimmer(shimmer)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.tertiary)
+        )
+    }
+}
+
+@Composable
+fun CurrentRouteBar(
+    modifier: Modifier = Modifier,
+    percent: Int,
+    onClick: () -> Unit
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -499,9 +554,8 @@ fun HomeScreenPreview() {
         ) {
             Box {
                 HomeScreen(
-                    homeScreenState = HomeScreenState(
-                        isLoading = false,
-                        homeScreenData = HomeScreenData(
+                    homeScreenState = RemoteResource(
+                        value = HomeScreenData(
                             recommendedRoutes = ROUTES,
                             curRoutePercent = 33
                         )

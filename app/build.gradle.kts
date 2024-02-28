@@ -66,6 +66,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
 
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
+
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation-android:1.6.1")
 

@@ -281,7 +281,7 @@ fun RoutesContent(
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.background
         ) {
-            RouteInfoBottomSheet(
+            RouteInfoBottomSheetContent(
                 route = pickedRoute,
                 removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
                 addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
@@ -291,13 +291,11 @@ fun RoutesContent(
             )
         }
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RouteInfoBottomSheet(
+fun RouteInfoBottomSheetContent(
     route: Route,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
@@ -318,7 +316,6 @@ fun RouteInfoBottomSheet(
     ) {
         Column(
             modifier = Modifier
-
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -382,7 +379,7 @@ fun RouteInfoBottomSheet(
 
             LazyColumn(
                 state = lazyState,
-                contentPadding = PaddingValues(top = 20.dp, bottom = 80.dp),
+                contentPadding = PaddingValues(top = 20.dp, bottom = 90.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -465,7 +462,7 @@ fun RouteInfoPreview() {
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            RouteInfoBottomSheet(
+            RouteInfoBottomSheetContent(
                 route = ROUTE_1,
                 removeRouteFromFavourite = { },
                 addRouteToFavourite = { },

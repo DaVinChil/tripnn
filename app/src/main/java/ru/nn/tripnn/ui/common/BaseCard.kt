@@ -1,6 +1,8 @@
 package ru.nn.tripnn.ui.common
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -13,12 +15,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -44,6 +50,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.defaultShimmerTheme
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.entity.Place
@@ -55,6 +65,42 @@ val CARD_HEIGHT = 140.dp
 val CARD_WIDTH = 340.dp
 
 enum class DragValue { Start, End }
+
+val lightShimmer = defaultShimmerTheme.copy(
+    animationSpec = infiniteRepeatable(
+        animation = tween(
+            durationMillis = 1000,
+            delayMillis = 1_200,
+            easing = LinearEasing,
+        ),
+    ),
+    blendMode = BlendMode.Hardlight,
+    rotation = 25f,
+    shaderColors = listOf(
+        Color.White.copy(alpha = 0.0f),
+        Color.White.copy(alpha = 0.2f),
+        Color.White.copy(alpha = 0.0f),
+    ),
+    shaderColorStops = null
+)
+
+val darkShimmer = defaultShimmerTheme.copy(
+    animationSpec = infiniteRepeatable(
+        animation = tween(
+            durationMillis = 1000,
+            delayMillis = 1_200,
+            easing = LinearEasing,
+        ),
+    ),
+    blendMode = BlendMode.Hardlight,
+    rotation = 25f,
+    shaderColors = listOf(
+        Color.Black.copy(alpha = 0.0f),
+        Color.Black.copy(alpha = 0.2f),
+        Color.Black.copy(alpha = 0.0f),
+    ),
+    shaderColorStops = null
+)
 
 @Composable
 fun BaseCard(
@@ -105,6 +151,77 @@ fun BaseCard(
                     ) {
                         info()
                     }
+                } else {
+                    Spacer(modifier = Modifier)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LoadingCard(
+    modifier: Modifier = Modifier,
+    shadowColor: Color = Color(0x00FFFFFF)
+) {
+    val shimmerInstance =
+        rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = darkShimmer)
+
+    Box(
+        modifier = modifier
+            .shadow(
+                color = shadowColor,
+                borderRadius = 10.dp,
+                blurRadius = 10.dp
+            )
+            .clip(RoundedCornerShape(10.dp))
+            .height(CARD_HEIGHT)
+            .background(Color.White)
+    ) {
+        Row {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .fillMaxWidth(0.5f)
+                    .fillMaxHeight()
+                    .shimmer(shimmerInstance)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.secondary)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(17.dp)
+                        .width(60.dp)
+                        .shimmer(shimmerInstance)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.secondary)
+                    )
+                }
+                Spacer(modifier = Modifier.height(30.dp))
+                Box(
+                    modifier = Modifier
+                        .height(22.dp)
+                        .width(99.dp)
+                        .shimmer(shimmerInstance)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.secondary)
+                    )
                 }
             }
         }
@@ -116,20 +233,25 @@ fun PlaceCard(
     modifier: Modifier = Modifier,
     place: Place,
     onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF)
+    shadowColor: Color = Color(0x00FFFFFF),
+    isLoading: Boolean = false
 ) {
-    BaseCard(
-        modifier = modifier,
-        imageUrl = place.photos[0],
-        type = place.type,
-        name = place.name,
-        onCardClick = onCardClick,
-        shadowColor = shadowColor
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            RatingInfo(rating = place.rating)
-            CostInfo(cost = place.cost)
+    if (!isLoading) {
+        BaseCard(
+            modifier = modifier,
+            imageUrl = place.photos[0],
+            type = place.type,
+            name = place.name,
+            onCardClick = onCardClick,
+            shadowColor = shadowColor
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                RatingInfo(rating = place.rating)
+                CostInfo(cost = place.cost)
+            }
         }
+    } else {
+        LoadingCard(modifier, shadowColor)
     }
 }
 
@@ -138,24 +260,29 @@ fun RouteCard(
     modifier: Modifier = Modifier,
     route: Route,
     onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF)
+    shadowColor: Color = Color(0x00FFFFFF),
+    isLoading: Boolean = false
 ) {
-    BaseCard(
-        modifier = modifier,
-        imageUrl = route.imageUrl,
-        name = route.name,
-        type = "Маршрут",
-        onCardClick = onCardClick,
-        shadowColor = shadowColor
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            if (route.cost != null) {
-                CostInfo(cost = route.cost)
-            }
-            if (route.rating != null) {
-                RatingInfo(rating = route.rating)
+    if (!isLoading) {
+        BaseCard(
+            modifier = modifier,
+            imageUrl = route.imageUrl,
+            name = route.name,
+            type = "Маршрут",
+            onCardClick = onCardClick,
+            shadowColor = shadowColor
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                if (route.cost != null) {
+                    CostInfo(cost = route.cost)
+                }
+                if (route.rating != null) {
+                    RatingInfo(rating = route.rating)
+                }
             }
         }
+    } else {
+        LoadingCard(modifier, shadowColor)
     }
 }
 
@@ -367,6 +494,20 @@ fun DraggablePlaceCardPreview() {
                     )
                 }
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun LoadingCardPreview() {
+    TripNNTheme {
+        Box(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(10.dp)
+        ) {
+            LoadingCard(shadowColor = Color.Black)
         }
     }
 }

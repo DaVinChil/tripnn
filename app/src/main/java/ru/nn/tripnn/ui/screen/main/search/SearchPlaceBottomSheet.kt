@@ -404,7 +404,7 @@ fun SearchResultScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(5f / 6f)
-                .padding(horizontal = 10.dp),
+                .padding(horizontal = 10.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

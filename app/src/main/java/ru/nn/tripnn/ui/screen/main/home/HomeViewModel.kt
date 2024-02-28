@@ -13,6 +13,7 @@ import ru.nn.tripnn.domain.repository.RouteRepository
 import ru.nn.tripnn.domain.repository.ScreenDataRepository
 import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.ui.screen.RemoteResource
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,7 +22,7 @@ class HomeViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
-    var homeScreenState by mutableStateOf(HomeScreenState())
+    var homeScreenState by mutableStateOf(RemoteResource<HomeScreenData>())
 
     init {
         loadHomeScreenState()
@@ -31,22 +32,24 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             homeScreenState = homeScreenState.copy(
                 isLoading = true,
-                error = null
+                isError = false,
+                message = null
             )
 
             when(val result = screenDataRepository.getHomeScreenData()) {
                 is Resource.Success -> {
                     homeScreenState = homeScreenState.copy(
                         isLoading = false,
-                        error = null,
-                        homeScreenData = result.data
+                        isError = false,
+                        value = result.data
                     )
                 }
                 is Resource.Error -> {
                     homeScreenState = homeScreenState.copy(
                         isLoading = false,
-                        error = result.message,
-                        homeScreenData = null
+                        isError = true,
+                        message = result.message,
+                        value = null
                     )
                 }
             }
@@ -77,9 +80,3 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
-
-data class HomeScreenState(
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val homeScreenData: HomeScreenData? = null
-)

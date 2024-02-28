@@ -50,6 +50,7 @@ fun PrimaryButton(
             .clip(RoundedCornerShape(100))
             .wrapContentSize()
     ) {
+
         Box(
             modifier = modifier
                 .clickable(onClick = onClick)
@@ -72,15 +73,15 @@ fun PrimaryButton(
                     .matchParentSize()
                     .background(Color.White.copy(alpha = 0.3f))
                     .pointerInput(false) {}
-            ) {}
-
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(35.dp)
-                    .align(Alignment.Center),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.tertiary,
-            )
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(35.dp)
+                        .align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.tertiary,
+                )
+            }
         }
     }
 
