@@ -122,9 +122,7 @@ fun BaseCard(
             .clip(RoundedCornerShape(10.dp))
             .height(CARD_HEIGHT)
             .background(Color.White)
-            .clickable(
-                onClick = onCardClick,
-            )
+            .clickable(onClick = onCardClick)
     ) {
         Row {
             AsyncImage(

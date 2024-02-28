@@ -1,9 +1,12 @@
 package ru.nn.tripnn.di
 
-import dagger.Binds
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
 import ru.nn.tripnn.data.local.token.TokenRepositoryImpl
 import ru.nn.tripnn.data.remote.FakeAuthenticationServiceImpl
 import ru.nn.tripnn.domain.repository.AuthenticationService
@@ -12,17 +15,17 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class AuthenticationModule {
-    @Binds
-    @Fake
-    @Singleton
-    abstract fun authenticationService(
-        authenticationServiceImpl: FakeAuthenticationServiceImpl
-    ): AuthenticationService
+object AuthenticationModule {
 
-    @Binds
+    @Fake
+    @Provides
     @Singleton
-    abstract fun tokenRepository(
-        tokenRepositoryImpl: TokenRepositoryImpl
-    ): TokenRepository
+    fun authenticationService(): AuthenticationService = FakeAuthenticationServiceImpl()
+
+    @Provides
+    @Singleton
+    fun tokenRepository(
+        dataStore: DataStore<Preferences>,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): TokenRepository = TokenRepositoryImpl(dataStore, ioDispatcher)
 }

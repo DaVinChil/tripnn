@@ -354,13 +354,15 @@ fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
         state = pagerState,
         pagerSnapDistance = PagerSnapDistance.atMost(10)
     )
+
     HorizontalPager(
         modifier = Modifier.requiredWidth(screenWidth),
         state = pagerState,
         pageSpacing = 0.dp,
         pageSize = PageSize.Fixed(CARD_WIDTH),
         contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
-        flingBehavior = fling
+        flingBehavior = fling,
+        key = { routes[it % routes.size].id }
     ) {
         RouteCard(
             route = routes[it % routes.size],
@@ -374,7 +376,7 @@ fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
                         (pagerState.currentPage < it && pagerState.currentPageOffsetFraction > 0
                                 || pagerState.currentPage > it && pagerState.currentPageOffsetFraction < 0)
                     ) {
-                        0.750f + pagerState.currentPageOffsetFraction.absoluteValue / 4
+                        0.75f + pagerState.currentPageOffsetFraction.absoluteValue / 4
                     } else {
                         0.75f
                     }

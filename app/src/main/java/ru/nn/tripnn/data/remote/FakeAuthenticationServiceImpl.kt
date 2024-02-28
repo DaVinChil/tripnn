@@ -7,9 +7,7 @@ import ru.nn.tripnn.domain.repository.AuthenticationService
 import ru.nn.tripnn.domain.util.Resource
 import javax.inject.Inject
 
-class FakeAuthenticationServiceImpl @Inject constructor(
-
-) : AuthenticationService {
+class FakeAuthenticationServiceImpl : AuthenticationService {
     override suspend fun login(credentials: LogInData): Resource<String> {
         delay(2000)
         return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")

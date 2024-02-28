@@ -2,7 +2,6 @@ package ru.nn.tripnn.di
 
 import android.content.Context
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,14 +25,11 @@ object PreferencesModule {
 
     @Provides
     @Singleton
-    fun uiPreferencesDao(uiPreferencesDatabase: UiPreferencesDatabase) = uiPreferencesDatabase.uiPreferencesDao()
-}
+    fun uiPreferencesDao(uiPreferencesDatabase: UiPreferencesDatabase) =
+        uiPreferencesDatabase.uiPreferencesDao()
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class PreferencesRepositoryModule {
-
-    @Binds
+    @Provides
     @Singleton
-    abstract fun uiPreferencesRepository(uiPreferencesRepositoryImpl: UiPreferencesRepositoryImpl): UiPreferencesRepository
+    fun uiPreferencesRepository(uiPreferencesDao: UiPreferencesDao): UiPreferencesRepository =
+        UiPreferencesRepositoryImpl(uiPreferencesDao)
 }

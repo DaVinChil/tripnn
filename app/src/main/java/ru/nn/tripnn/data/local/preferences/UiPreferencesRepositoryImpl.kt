@@ -6,7 +6,7 @@ import ru.nn.tripnn.domain.repository.UiPreferencesRepository
 import ru.nn.tripnn.domain.util.Resource
 import javax.inject.Inject
 
-class UiPreferencesRepositoryImpl @Inject constructor(
+class UiPreferencesRepositoryImpl(
     private val uiPreferencesDao: UiPreferencesDao
 ) : UiPreferencesRepository {
 
