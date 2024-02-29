@@ -23,9 +23,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
@@ -39,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -158,26 +158,27 @@ fun HomeContent(
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
 ) {
-    Column(
+    Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-    ) {
+            .fillMaxSize(),
+        topBar = {
+            TopAppBar(onMenuClick = onMenuClick)
+        }
+    ) { paddings ->
         var showSearch by remember { mutableStateOf(false) }
         var showRouteInfo by remember { mutableStateOf(false) }
         var pickedRoute by remember { mutableStateOf(ROUTE_1) }
 
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.onSurface)
-                .statusBarsPadding()
-                .padding(16.dp)
+                .padding(paddings)
         ) {
-            Column {
-                TopAppBar(onMenuClick = onMenuClick)
-
-                Spacer(modifier = Modifier.height(30.dp))
-
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.onSurface)
+                    .padding(16.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -214,28 +215,27 @@ fun HomeContent(
 
                 Spacer(modifier = Modifier.height(30.dp))
             }
-        }
 
-        Column(
-            modifier = Modifier
-                .navigationBarsPadding()
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                NewRouteButton(
-                    modifier = Modifier.align(Alignment.Center),
-                    onClick = onNewRouteClick
-                )
-            }
-            if (onCurRouteClick != null && curRoutePercent != null) {
-                CurrentRouteBar(
-                    percent = curRoutePercent,
-                    onClick = onCurRouteClick
-                )
-            } else if (isLoading) {
-                LoadingCurrentRouteBar()
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    NewRouteButton(
+                        modifier = Modifier.align(Alignment.Center),
+                        onClick = onNewRouteClick
+                    )
+                }
+                if (onCurRouteClick != null && curRoutePercent != null) {
+                    CurrentRouteBar(
+                        percent = curRoutePercent,
+                        onClick = onCurRouteClick
+                    )
+                } else if (isLoading) {
+                    LoadingCurrentRouteBar()
+                }
             }
         }
 
@@ -269,7 +269,11 @@ fun TopAppBar(onMenuClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.onSurface)
+            .statusBarsPadding()
+            .padding(16.dp)
     ) {
         Box(modifier = Modifier.weight(1f)) {
             Icon(

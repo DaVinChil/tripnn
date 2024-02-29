@@ -53,7 +53,7 @@ class UiPreferencesViewModel @Inject constructor(
         UiPreferences(
             theme = Theme.SYSTEM.id,
             currency = Currency.RUB.id,
-            language = Language.RUSSIAN.id
+            language = Language.ENGLISH.id
         )
     )
         private set
