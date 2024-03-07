@@ -75,6 +75,7 @@ import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.entity.Place
+import ru.nn.tripnn.domain.entity.SearchFilters
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DraggableCard
@@ -85,6 +86,8 @@ import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import java.time.Instant
+import java.time.LocalTime
 
 val LEISURE_TYPES = listOf(
     R.string.zoos,
@@ -175,12 +178,12 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Unit) {
+fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> Unit) {
     val scrollState = rememberScrollState()
     var chosenCategory by remember { mutableIntStateOf(CULTURE) }
     var currentCategoryTypes by remember { mutableStateOf(CULTURE_TYPES) }
     var searchInput by remember { mutableStateOf("") }
-    var sliderPosition by remember { mutableStateOf(0f..100f) }
+    var priceSlider by remember { mutableStateOf(0f..100f) }
     val catalogs = listOf(
         stringResource(id = R.string.culture),
         stringResource(id = R.string.leisure),
@@ -234,8 +237,8 @@ fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Uni
             Spacer(modifier = Modifier.height(13.dp))
             RangeSliderWithPointers(
                 range = 0f..100f,
-                sliderPosition = sliderPosition,
-                onValueChange = { sliderPosition = it },
+                sliderPosition = priceSlider,
+                onValueChange = { priceSlider = it },
                 steps = 10
             )
 
@@ -288,13 +291,20 @@ fun SearchPlaceScreen(onSearch: (SearchState) -> Unit, toResultScreen: () -> Uni
                 paddingValues = PaddingValues(horizontal = 58.dp, vertical = 15.dp),
                 onClick = {
                     onSearch(
-                        SearchState(
-                            input = searchInput,
+                        SearchFilters(
+                            word = searchInput,
                             catalog = catalogs[chosenCategory],
                             types = mutableListOf<Int>().apply {
                                 picked.forEachIndexed { index, b -> if (b) add(currentCategoryTypes[index]) }
                             },
-                            priceRange = sliderPosition
+                            minPrice = priceSlider.start.toInt(),
+                            maxPrice = priceSlider.endInclusive.toInt(),
+                            prevPlaceId = "".also { TODO() },
+                            maxDistance = 0,
+                            minDistance = 0,
+                            userLocation = "",
+                            workEndTime = LocalTime.now(),
+                            workStartTime = LocalTime.now()
                         )
                     )
                     toResultScreen()

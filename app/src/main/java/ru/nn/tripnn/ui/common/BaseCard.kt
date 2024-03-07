@@ -14,6 +14,7 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -24,6 +25,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,8 +45,10 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -258,29 +264,24 @@ fun RouteCard(
     modifier: Modifier = Modifier,
     route: Route,
     onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF),
-    isLoading: Boolean = false
+    shadowColor: Color = Color(0x00FFFFFF)
 ) {
-    if (!isLoading) {
-        BaseCard(
-            modifier = modifier,
-            imageUrl = route.imageUrl,
-            name = route.name,
-            type = "Маршрут",
-            onCardClick = onCardClick,
-            shadowColor = shadowColor
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                if (route.cost != null) {
-                    CostInfo(cost = route.cost)
-                }
-                if (route.rating != null) {
-                    RatingInfo(rating = route.rating)
-                }
+    BaseCard(
+        modifier = modifier,
+        imageUrl = route.imageUrl,
+        name = route.name,
+        type = stringResource(id = R.string.route),
+        onCardClick = onCardClick,
+        shadowColor = shadowColor
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            if (route.cost != null) {
+                CostInfo(cost = route.cost)
+            }
+            if (route.rating != null) {
+                RatingInfo(rating = route.rating)
             }
         }
-    } else {
-        LoadingCard(modifier, shadowColor)
     }
 }
 
@@ -506,6 +507,36 @@ fun LoadingCardPreview() {
                 .padding(10.dp)
         ) {
             LoadingCard(shadowColor = Color.Black)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Preview
+@Composable
+fun Prev() {
+    TripNNTheme {
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .background(Color.White)
+                .padding(30.dp), contentAlignment = Alignment.Center
+        ) {
+            val pagerState = rememberPagerState { 10 }
+
+            HorizontalPager(
+                state = pagerState, pageSpacing = 10.dp,
+                pageSize = PageSize.Fixed(50.dp),
+                contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .background(Color.Black)
+                )
+            }
         }
     }
 }

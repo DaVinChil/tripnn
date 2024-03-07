@@ -19,5 +19,6 @@ val PLACE_1 = Place(
     workTime = "Ежедневно с 10:00 до 21:00",
     phone = "+7-963-231-96-17",
     reviews = 199,
-    doubleGisLink = "https://go.2gis.com/wrht0"
+    doubleGisLink = "https://go.2gis.com/wrht0",
+    lonLatLocation = ""
 )

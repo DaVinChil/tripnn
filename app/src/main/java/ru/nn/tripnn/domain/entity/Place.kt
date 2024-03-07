@@ -12,5 +12,6 @@ data class Place(
     val rating: Double,
     val reviews: Int,
     val doubleGisLink: String,
-    val favourite: Boolean
+    val favourite: Boolean,
+    val lonLatLocation: String
 )

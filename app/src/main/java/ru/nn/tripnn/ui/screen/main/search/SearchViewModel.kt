@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Place
+import ru.nn.tripnn.domain.entity.SearchFilters
 import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.util.Resource
 import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
@@ -24,10 +25,10 @@ class AllPlacesViewModel @Inject constructor(
         private set
     private var savedSearchResult: List<Place> by mutableStateOf(immutableListOf())
 
-    fun search(searchState: SearchState) {
+    fun search(searchFilters: SearchFilters) {
         viewModelScope.launch {
             searchResult = searchResult.copy(isLoading = true)
-            when (val resource = placeRepository.find(searchState)) {
+            when (val resource = placeRepository.find(searchFilters)) {
                 is Resource.Success -> {
                     searchResult = searchResult.copy(list = resource.data ?: listOf())
                     savedSearchResult = searchResult.list
@@ -36,6 +37,8 @@ class AllPlacesViewModel @Inject constructor(
                 is Resource.Error -> {
 
                 }
+
+                else -> {}
             }
             searchResult = searchResult.copy(isLoading = true)
         }
@@ -74,13 +77,6 @@ class AllPlacesViewModel @Inject constructor(
         }
     }
 }
-
-data class SearchState(
-    val input: String,
-    val types: List<Int>,
-    val catalog: String,
-    val priceRange: ClosedFloatingPointRange<Float>
-)
 
 data class SortState(
     val byPrice: Boolean = false,

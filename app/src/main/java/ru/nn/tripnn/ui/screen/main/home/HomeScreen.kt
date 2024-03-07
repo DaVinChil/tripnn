@@ -1,12 +1,14 @@
 package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +19,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerSnapDistance
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
@@ -44,7 +46,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.ShimmerBounds
@@ -351,42 +353,78 @@ fun MenuOption(text: String, onClick: () -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
-    val pagerState =
-        rememberPagerState(pageCount = { Int.MAX_VALUE }, initialPage = 500)
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val fling = PagerDefaults.flingBehavior(
-        state = pagerState,
-        pagerSnapDistance = PagerSnapDistance.atMost(10)
-    )
 
-    HorizontalPager(
+    InfiniteCarousel(
         modifier = Modifier.requiredWidth(screenWidth),
-        state = pagerState,
-        pageSpacing = 0.dp,
+        pageSpacing = 11.dp,
         pageSize = PageSize.Fixed(CARD_WIDTH),
         contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
-        flingBehavior = fling,
-        key = { routes[it % routes.size].id }
+        key = { routes[it].id },
+        count = routes.size
     ) {
         RouteCard(
-            route = routes[it % routes.size],
-            onCardClick = { onRouteClick(it % routes.size) },
+            route = routes[it],
+            onCardClick = { onRouteClick(it) },
             shadowColor = Color.Black.copy(alpha = 0.2f),
             modifier = Modifier
-                .scale(
-                    if (pagerState.currentPage == it) {
-                        1 - pagerState.currentPageOffsetFraction.absoluteValue / 4
-                    } else if ((pagerState.currentPage - it).absoluteValue == 1 &&
-                        (pagerState.currentPage < it && pagerState.currentPageOffsetFraction > 0
-                                || pagerState.currentPage > it && pagerState.currentPageOffsetFraction < 0)
-                    ) {
-                        0.75f + pagerState.currentPageOffsetFraction.absoluteValue / 4
-                    } else {
-                        0.75f
-                    }
-                )
                 .width(CARD_WIDTH)
         )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun InfiniteCarousel(
+    modifier: Modifier = Modifier,
+    count: Int,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    pageSize: PageSize = PageSize.Fill,
+    pageSpacing: Dp = 0.dp,
+    key: (index: Int) -> Any,
+    pageContent: @Composable PagerScope.(page: Int) -> Unit
+) {
+    val state = rememberPagerState(pageCount = { Int.MAX_VALUE }, initialPage = 500)
+    val flingBehavior = PagerDefaults.flingBehavior(
+        state = state,
+        pagerSnapDistance = PagerSnapDistance.atMost(10),
+    )
+    val scaleFactor = 3f
+
+    HorizontalPager(
+        modifier = modifier,
+        state = state,
+        pageSpacing = pageSpacing,
+        pageSize = pageSize,
+        contentPadding = contentPadding,
+        flingBehavior = flingBehavior,
+        key = { key(it % count) }
+    ) { index ->
+        val scale = if (state.currentPage == index) {
+            1 - state.currentPageOffsetFraction.absoluteValue / scaleFactor
+        } else if ((state.currentPage - index).absoluteValue == 1 &&
+                   (state.currentPage < index && state.currentPageOffsetFraction > 0 ||
+                    state.currentPage > index && state.currentPageOffsetFraction < 0)
+        ) {
+            (scaleFactor - 1) / scaleFactor + state.currentPageOffsetFraction.absoluteValue / scaleFactor
+        } else {
+            (scaleFactor - 1) / scaleFactor
+        }
+
+        val offset = (CARD_WIDTH - CARD_WIDTH * scale) / 2
+
+        Box(
+            modifier = Modifier
+                .offset(
+                    x = offset *  if (state.currentPage < index) -1
+                            else if (state.currentPage > index) 1
+                            else if (state.currentPageOffsetFraction <= 0) -1
+                            else 1
+                )
+                .scale(scale = scale)
+        ) {
+            pageContent(index % count)
+        }
     }
 }
 
@@ -440,8 +478,9 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 
 @Composable
 fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    var pressed by remember { mutableStateOf(false) }
 
+    val buttonInteractionSource = remember { MutableInteractionSource() }
+    val pressed by buttonInteractionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(targetValue = if (pressed) 0.85f else 1f, label = "")
 
     val height = 140.dp
@@ -458,14 +497,8 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
             .clickable(
                 onClick = onClick,
                 indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-                    .also { interactionSource ->
-                        LaunchedEffect(interactionSource) {
-                            interactionSource.interactions.collect {
-                                pressed = it is PressInteraction.Press
-                            }
-                        }
-                    }),
+                interactionSource = buttonInteractionSource
+            ),
         contentAlignment = Alignment.Center
     ) {
         Box(

@@ -133,4 +133,5 @@
     <string name="circuses">Цирки</string>
     <string name="quests">Квесты</string>
     <string name="cinemas">Кинотеатры</string>
+    <string name="route">Маршрут</string>
 </resources>
