@@ -21,7 +21,8 @@ fun MontsText(
     color: Color = MaterialTheme.colorScheme.tertiary,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Visible
+    overflow: TextOverflow = TextOverflow.Visible,
+    lineHeight: TextUnit? = null
 ) {
     Text(
         modifier = modifier,
@@ -30,7 +31,7 @@ fun MontsText(
         fontFamily = montserratFamily,
         fontWeight = fontWeight,
         color = color,
-        lineHeight = fontSize.times(4f/3f),
+        lineHeight = lineHeight ?: fontSize,
         textAlign = textAlign,
         maxLines = maxLines,
         overflow = overflow

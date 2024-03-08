@@ -1,12 +1,10 @@
 package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +28,6 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerSnapDistance
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
@@ -76,7 +73,7 @@ import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.domain.screen.HomeScreenData
 import ru.nn.tripnn.ui.common.CARD_WIDTH
-import ru.nn.tripnn.ui.common.DragHandler
+import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.LoadingCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
@@ -249,7 +246,7 @@ fun HomeContent(
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { showRouteInfo = false },
-                dragHandle = { DragHandler() },
+                dragHandle = { DragHandle() },
                 sheetState = sheetState,
                 containerColor = MaterialTheme.colorScheme.background
             ) {
@@ -433,11 +430,13 @@ fun InfiniteCarousel(
 fun LoadingRecommendedRoutes() {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     Box(modifier = Modifier.requiredWidth(screenWidth)) {
-        val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 1)
-        HorizontalPager(
-            state = pagerState,
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            pageSpacing = 20.dp
+        InfiniteCarousel(
+            modifier = Modifier.fillMaxWidth(),
+            pageSpacing = 11.dp,
+            pageSize = PageSize.Fixed(CARD_WIDTH),
+            contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
+            key = { it },
+            count = 3
         ) {
             LoadingCard()
         }

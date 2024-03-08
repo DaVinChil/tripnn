@@ -204,6 +204,7 @@ fun LoadingCard(
             ) {
                 Box(
                     modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
                         .height(17.dp)
                         .width(60.dp)
                         .shimmer(shimmerInstance)
@@ -217,6 +218,7 @@ fun LoadingCard(
                 Spacer(modifier = Modifier.height(30.dp))
                 Box(
                     modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
                         .height(22.dp)
                         .width(99.dp)
                         .shimmer(shimmerInstance)
@@ -507,36 +509,6 @@ fun LoadingCardPreview() {
                 .padding(10.dp)
         ) {
             LoadingCard(shadowColor = Color.Black)
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Preview
-@Composable
-fun Prev() {
-    TripNNTheme {
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(100.dp)
-                .background(Color.White)
-                .padding(30.dp), contentAlignment = Alignment.Center
-        ) {
-            val pagerState = rememberPagerState { 10 }
-
-            HorizontalPager(
-                state = pagerState, pageSpacing = 10.dp,
-                pageSize = PageSize.Fixed(50.dp),
-                contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .background(Color.Black)
-                )
-            }
         }
     }
 }

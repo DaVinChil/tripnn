@@ -1,7 +1,11 @@
 package ru.nn.tripnn.ui.screen.main.search
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -33,14 +37,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,9 +55,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -71,6 +80,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
@@ -78,18 +88,20 @@ import ru.nn.tripnn.domain.entity.Place
 import ru.nn.tripnn.domain.entity.SearchFilters
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
+import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlaceCard
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.Rating
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
 import ru.nn.tripnn.ui.theme.TripNNTheme
-import java.time.Instant
 import java.time.LocalTime
 
 val LEISURE_TYPES = listOf(
+    R.string.all_types,
     R.string.zoos,
     R.string.river_trips,
     R.string.anti_cafe,
@@ -103,6 +115,7 @@ val LEISURE_TYPES = listOf(
 )
 
 val CULTURE_TYPES = listOf(
+    R.string.all_types,
     R.string.museums,
     R.string.exhibitions,
     R.string.parks,
@@ -143,7 +156,8 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         containerColor = MaterialTheme.colorScheme.background,
-        sheetState = sheetState
+        sheetState = sheetState,
+        dragHandle = { DragHandle() }
     ) {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = SEARCH_ROUTE) {
@@ -487,169 +501,260 @@ fun SearchResultScreen(
         }
 
         if (showCardInfo) {
-            val cor = rememberCoroutineScope()
-            ModalBottomSheet(
+            PlaceInfoBottomSheet(
                 onDismissRequest = { showCardInfo = false },
-                dragHandle = null,
                 sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.background
-            ) {
-                PlaceInfoBottomSheet(
-                    place = pickedPlace,
-                    onClose = {
-                        cor.launch {
-                            sheetState.hide()
-                        }.invokeOnCompletion { showCardInfo = false }
-                    },
-                    removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
-                    addToFavourite = { addToFavourite(pickedPlace.id) }
-                )
+                place = pickedPlace,
+                removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
+                addToFavourite = { addToFavourite(pickedPlace.id) }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlaceInfoBottomSheet(
+    onDismissRequest: () -> Unit,
+    sheetState: SheetState,
+    place: Place,
+    removeFromFavourite: () -> Unit,
+    addToFavourite: () -> Unit
+) {
+    var showSnackBar by remember { mutableStateOf(false) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        dragHandle = { DragHandle() },
+        containerColor = /*MaterialTheme.colorScheme.background*/ Color.Transparent
+    ) {
+        Box {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(15.dp)
+                ) {
+                    items(items = place.photos, key = { it }) {
+                        AsyncImage(
+                            model = it,
+                            contentDescription = stringResource(id = R.string.image),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.onSecondary)
+                                .width(220.dp)
+                                .height(160.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = 15.dp, topEnd = 15.dp,
+                                bottomEnd = 0.dp, bottomStart = 0.dp
+                            )
+                        )
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(top = 10.dp)
+                ) {
+                    var favourite by remember { mutableStateOf(place.favourite) }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.padding(horizontal = 10.dp)
+                    ) {
+                        MontsText(
+                            text = place.name,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 24.sp
+                        )
+                        Icon(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick = {
+                                        favourite = if (favourite) {
+                                            removeFromFavourite()
+                                            false
+                                        } else {
+                                            addToFavourite()
+                                            true
+                                        }
+                                    }
+                                ),
+                            painter = painterResource(
+                                id = if (favourite) R.drawable.gold_bookmark
+                                else R.drawable.gray_bookmark
+                            ),
+                            contentDescription = stringResource(id = R.string.is_favourtie),
+                            tint = Color.Unspecified
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                            .padding(horizontal = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.fillMaxHeight()) {
+                            MontsText(text = place.type, fontSize = 13.sp)
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            TwoGisButton(doubleGisLink = place.doubleGisLink)
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            Row {
+                                Rating(rating = place.rating)
+
+                                Spacer(modifier = Modifier.width(5.dp))
+
+                                MontsText(
+                                    text = place.reviews.toString() + " " +
+                                            stringResource(id = R.string.reviews), fontSize = 12.sp
+                                )
+                            }
+                        }
+
+                        Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                MontsText(text = place.address, fontSize = 11.sp)
+                                CopyIcon(data = place.address, onClick = { showSnackBar = true })
+                            }
+
+                            MontsText(text = place.workTime, fontSize = 11.sp)
+
+                            MontsText(text = place.phone, fontSize = 11.sp)
+
+                            MontsText(
+                                text = stringResource(id = R.string.avg_receipt) + " " + place.cost + "₽",
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+            }
+
+            if (showSnackBar) {
+                CopiedToClipBoardSnackBar(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    onHide = { showSnackBar = false })
             }
         }
     }
 }
 
 @Composable
-fun PlaceInfoBottomSheet(
-    place: Place,
-    onClose: () -> Unit,
-    removeFromFavourite: () -> Unit,
-    addToFavourite: () -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.weight(1f))
-
-            val uriHandler = LocalUriHandler.current
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { uriHandler.openUri(place.doubleGisLink) }
-            ) {
-                MontsText(
-                    text = "2GIS",
-                    fontSize = 13.sp
-                )
-                Icon(
-                    painter = painterResource(id = R.drawable.reversed_link_icon),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
+fun CopyIcon(data: String, onClick: () -> Unit) {
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    Icon(
+        painter = painterResource(id = R.drawable.copy_icon),
+        contentDescription = stringResource(id = R.string.copy),
+        tint = MaterialTheme.colorScheme.onSecondary,
+        modifier = Modifier.clickable(
+            indication = rememberRipple(radius = 1.dp, color = Color.White),
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = {
+                clipboardManager.setText(buildAnnotatedString { append(data) })
+                onClick()
             }
+        )
+    )
+}
 
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                IconButton(onClick = onClose) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.cross_gray),
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.onSecondary
-                    )
-                }
-            }
-        }
+@Composable
+fun CopiedToClipBoardSnackBar(modifier: Modifier = Modifier, onHide: () -> Unit) {
+    val startOffset = 80f
+    val offset = remember { Animatable(startOffset) }
+    val alpha = remember { Animatable(0f) }
+    val localOnHide by rememberUpdatedState(newValue = onHide)
+    val time = 2000L
 
-        LazyRow(
-            contentPadding = PaddingValues(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            items(items = place.photos, key = { it }) {
-                AsyncImage(
-                    model = it,
-                    contentDescription = "image",
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.onSecondary)
-                        .width(220.dp)
-                        .height(160.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
+    Row(
+        modifier = Modifier
+            .offset(y = offset.value.dp - 10.dp)
+            .padding(horizontal = 10.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .alpha(alpha.value)
+            .then(modifier)
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.info),
+            contentDescription = stringResource(id = R.string.info),
+            tint = Color.White
+        )
+        MontsText(
+            text = stringResource(id = R.string.address_copied),
+            fontSize = 12.sp,
+            color = Color.White
+        )
+    }
 
-        Spacer(modifier = Modifier.height(10.dp))
+    LaunchedEffect(Unit) {
+        launch { alpha.animateTo(1f, tween(500)) }
+        offset.animateTo(
+            0f,
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        )
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Min)
-                .padding(horizontal = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            var favourite by remember { mutableStateOf(place.favourite) }
-            Column(modifier = Modifier.fillMaxHeight()) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    MontsText(
-                        text = place.name,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 24.sp
-                    )
-                    Icon(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                                onClick = {
-                                    favourite = if (favourite) {
-                                        removeFromFavourite()
-                                        false
-                                    } else {
-                                        addToFavourite()
-                                        true
-                                    }
-                                }
-                            ),
-                        painter = painterResource(id = if (favourite) R.drawable.gold_bookmark else R.drawable.gray_bookmark),
-                        contentDescription = "is favourite",
-                        tint = Color.Unspecified
-                    )
+        delay(time)
 
-                }
+        launch { alpha.animateTo(0f, tween(300)) }
+        offset.animateTo(
+            startOffset,
+            tween(500)
+        )
 
-                MontsText(text = place.type, fontSize = 13.sp)
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Row {
-                    MontsText(
-                        text = place.rating.toString(),
-                        fontSize = 12.sp,
-                        color = Color(0xFF1DAB4D),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    MontsText(text = place.reviews.toString() + " оценок", fontSize = 12.sp)
-                }
-            }
-            Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                val clipboardManager: ClipboardManager = LocalClipboardManager.current
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    MontsText(text = place.address, fontSize = 11.sp)
-                    Icon(
-                        painter = painterResource(id = R.drawable.copy_icon),
-                        contentDescription = "copy",
-                        tint = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier.clickable {
-                            clipboardManager.setText(
-                                buildAnnotatedString { append(place.address) })
-                        })
-                }
-                MontsText(text = place.workTime, fontSize = 11.sp)
-                MontsText(text = place.phone, fontSize = 11.sp)
-                MontsText(text = "Средний чек " + place.cost + "₽", fontSize = 11.sp)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
+        localOnHide()
     }
 }
 
+@Composable
+fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
+    val uriHandler = LocalUriHandler.current
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.clickable { uriHandler.openUri(doubleGisLink) }
+    ) {
+        MontsText(
+            text = "2GIS",
+            fontSize = 13.sp
+        )
+        Icon(
+            painter = painterResource(id = R.drawable.reversed_link_icon),
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.tertiary
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun CardInfoBottomSheetPreview() {
@@ -657,9 +762,10 @@ fun CardInfoBottomSheetPreview() {
         Box(modifier = Modifier.background(Color.White)) {
             PlaceInfoBottomSheet(
                 place = PLACE_1,
-                onClose = { },
                 removeFromFavourite = { },
-                addToFavourite = {}
+                addToFavourite = {},
+                sheetState = rememberModalBottomSheetState(),
+                onDismissRequest = {}
             )
         }
     }

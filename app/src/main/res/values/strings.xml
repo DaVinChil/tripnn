@@ -131,4 +131,11 @@
     <string name="quests">Quests</string>
     <string name="cinemas">cinemas</string>
     <string name="route">Route</string>
+
+    <string name="reviews">reviews</string>
+    <string name="is_favourtie">is favourite</string>
+    <string name="copy">copy</string>
+    <string name="image">image</string>
+
+    <string name="address_copied">Address copied</string>
 </resources>

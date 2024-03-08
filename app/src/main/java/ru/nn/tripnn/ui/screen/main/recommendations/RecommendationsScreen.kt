@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.entity.Route
+import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
@@ -121,6 +122,7 @@ fun RecommendationsScreen(
             ModalBottomSheet(
                 onDismissRequest = { showRouteInfo = false },
                 sheetState = sheetState,
+                dragHandle = { DragHandle() },
                 containerColor = MaterialTheme.colorScheme.background
             ) {
                 RouteInfoBottomSheetContent(

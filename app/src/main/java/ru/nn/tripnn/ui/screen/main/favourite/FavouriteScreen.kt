@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.data.stub_data.ROUTES
@@ -55,10 +53,13 @@ import ru.nn.tripnn.domain.entity.Place
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
+import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlaceCard
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.Rating
+import ru.nn.tripnn.ui.common.RatingInfo
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
@@ -214,24 +215,13 @@ fun FavouritePlacesContent(
     }
 
     if (showCardInfo) {
-        val cor = rememberCoroutineScope()
-        ModalBottomSheet(
+        PlaceInfoBottomSheet(
+            place = pickedPlace,
             onDismissRequest = { showCardInfo = false },
-            dragHandle = null,
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.background
-        ) {
-            PlaceInfoBottomSheet(
-                place = pickedPlace,
-                onClose = {
-                    cor.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion { showCardInfo = false }
-                },
-                removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
-                addToFavourite = { addToFavourite(pickedPlace.id) }
-            )
-        }
+            removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
+            addToFavourite = { addToFavourite(pickedPlace.id) }
+        )
     }
 }
 
@@ -279,7 +269,8 @@ fun RoutesContent(
         ModalBottomSheet(
             onDismissRequest = { showRouteInfo = false },
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.background
+            containerColor = MaterialTheme.colorScheme.background,
+            dragHandle = { DragHandle() }
         ) {
             RouteInfoBottomSheetContent(
                 route = pickedRoute,
@@ -314,15 +305,15 @@ fun RouteInfoBottomSheetContent(
             .fillMaxHeight(5f / 6f)
             .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
     ) {
-        Column(
-            modifier = Modifier
-        ) {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
                 MontsText(
-                    text = route.name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+                    text = route.name,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.fillMaxWidth(4f / 6f)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
@@ -335,12 +326,7 @@ fun RouteInfoBottomSheetContent(
                             tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(5.dp))
-                        MontsText(
-                            text = route.rating.toString(),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1DAB4D),
-                        )
+                        Rating(route.rating, fontSize = 20.sp)
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
@@ -371,13 +357,14 @@ fun RouteInfoBottomSheetContent(
             }
 
             if (route.desc != null) {
+                Spacer(modifier = Modifier.height(10.dp))
                 MontsText(
                     text = route.desc,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(15.dp))
 
             LazyColumn(
@@ -415,24 +402,13 @@ fun RouteInfoBottomSheetContent(
     }
 
     if (showCardInfo) {
-        val cor = rememberCoroutineScope()
-        ModalBottomSheet(
-            onDismissRequest = { showCardInfo = false },
-            dragHandle = null,
+        PlaceInfoBottomSheet(
+            place = pickedPlace,
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.background
-        ) {
-            PlaceInfoBottomSheet(
-                place = pickedPlace,
-                onClose = {
-                    cor.launch {
-                        sheetState.hide()
-                    }.invokeOnCompletion { showCardInfo = false }
-                },
-                removeFromFavourite = { removePlaceFromFavourite(pickedPlace.id) },
-                addToFavourite = { addPlaceToFavourite(pickedPlace.id) }
-            )
-        }
+            onDismissRequest = { showCardInfo = false },
+            removeFromFavourite = { removePlaceFromFavourite(pickedPlace.id) },
+            addToFavourite = { addPlaceToFavourite(pickedPlace.id) }
+        )
     }
 }
 

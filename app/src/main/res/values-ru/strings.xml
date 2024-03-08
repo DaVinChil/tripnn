@@ -134,4 +134,11 @@
     <string name="quests">Квесты</string>
     <string name="cinemas">Кинотеатры</string>
     <string name="route">Маршрут</string>
+
+    <string name="reviews">оценок</string>
+    <string name="is_favourtie">избранное</string>
+    <string name="copy">копировать</string>
+    <string name="image">картинка</string>
+
+    <string name="address_copied">Адрес скопирован</string>
 </resources>
