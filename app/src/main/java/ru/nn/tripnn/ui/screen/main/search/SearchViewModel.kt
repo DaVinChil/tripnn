@@ -12,8 +12,8 @@ import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Place
 import ru.nn.tripnn.domain.entity.SearchFilters
 import ru.nn.tripnn.domain.repository.PlaceRepository
-import ru.nn.tripnn.domain.util.Resource
-import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
+import ru.nn.tripnn.domain.util.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,7 +21,7 @@ class AllPlacesViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository
 ) : ViewModel() {
 
-    var searchResult by mutableStateOf(ResourceListState<Place>())
+    var searchResult by mutableStateOf(ResourceState<List<Place>>())
         private set
     private var savedSearchResult: List<Place> by mutableStateOf(immutableListOf())
 
@@ -29,40 +29,47 @@ class AllPlacesViewModel @Inject constructor(
         viewModelScope.launch {
             searchResult = searchResult.copy(isLoading = true)
             when (val resource = placeRepository.find(searchFilters)) {
-                is Resource.Success -> {
-                    searchResult = searchResult.copy(list = resource.data ?: listOf())
-                    savedSearchResult = searchResult.list
+                is RemoteResource.Success -> {
+                    searchResult = searchResult.copy(value = resource.data)
+                    savedSearchResult = resource.data ?: listOf()
                 }
 
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
+                    searchResult = searchResult.copy(
+                        value = null,
+                        error = resource.message,
+                        isError = true,
+                    )
 
+                    savedSearchResult = listOf()
                 }
-
-                else -> {}
             }
-            searchResult = searchResult.copy(isLoading = true)
+            searchResult = searchResult.copy(isLoading = false)
         }
     }
 
     fun sort(sortState: SortState) {
-        val sorted = mutableListOf<Place>()
-        savedSearchResult.forEach {
-            if (sortState.word.isNullOrBlank() ||
-                it.name.contains(
-                    sortState.word,
-                    ignoreCase = true
-                )
-            ) sorted.add(it)
-        }
-        sorted.sortWith { a, b ->
-            if (sortState.byRating && (a.rating != b.rating)) {
-                (a.rating - b.rating).toInt()
-            } else if (sortState.byPrice && (a.cost != b.cost)) {
-                a.cost.toInt() - b.cost.toInt()
+        viewModelScope.launch {
+            val sorted = mutableListOf<Place>()
+            savedSearchResult.forEach {
+                if (sortState.word.isNullOrBlank() ||
+                    it.name.contains(
+                        sortState.word,
+                        ignoreCase = true
+                    )
+                ) sorted.add(it)
             }
-            0
+            sorted.sortWith { a, b ->
+                if (sortState.byRating && (a.rating != b.rating)) {
+                    (a.rating - b.rating).toInt()
+                } else if (sortState.byPrice && (a.cost != b.cost)) {
+                    a.cost.toInt() - b.cost.toInt()
+                }
+                0
+            }
+            searchResult = searchResult.copy(value = sorted)
         }
-        searchResult = searchResult.copy(list = sorted)
+
     }
 
     fun removeFromFavourite(id: String) {

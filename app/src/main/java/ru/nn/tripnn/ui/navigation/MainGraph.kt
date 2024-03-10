@@ -3,6 +3,7 @@ package ru.nn.tripnn.ui.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,6 +70,10 @@ fun NavGraphBuilder.addAppGraph(
                 remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
             val homeViewModel = hiltViewModel<HomeViewModel>(graphBack)
 
+            LaunchedEffect(false) {
+                homeViewModel.init()
+            }
+
             HomeScreen(
                 homeScreenState = homeViewModel.homeScreenState,
                 onAccountClick = { navigateTo(AppRoutes.ACCOUNT.route) },
@@ -134,9 +139,14 @@ fun NavGraphBuilder.addAppGraph(
             val graphBack =
                 remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
             val accountViewModel = hiltViewModel<AccountViewModel>(graphBack)
+
+            LaunchedEffect(false) {
+                accountViewModel.init()
+            }
+
             AccountScreen(
                 onBackClick = onBack,
-                userState = accountViewModel.userState,
+                userInfo = accountViewModel.userInfo,
                 onUserNameChange = accountViewModel::changeUserName,
                 onClearHistory = accountViewModel::clearHistory,
                 onDeleteAccount = accountViewModel::deleteAccount,
@@ -163,10 +173,14 @@ fun NavGraphBuilder.addAppGraph(
             val graphBack =
                 remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
             val favouriteViewModel = hiltViewModel<FavouriteViewModel>(graphBack)
+
+            LaunchedEffect(true) {
+                favouriteViewModel.init()
+            }
+
             FavouriteScreen(
                 filterPlaces = favouriteViewModel::filterPlaces,
                 filterRoutes = favouriteViewModel::filterRoutes,
-                isLoading = favouriteViewModel.isLoading,
                 favouritePlaces = favouriteViewModel.favouritePlaces,
                 favouriteRoutes = favouriteViewModel.favouriteRoutes,
                 removePlaceFromFavourite = favouriteViewModel::removePlaceFromFavourite,
@@ -195,16 +209,21 @@ fun NavGraphBuilder.addAppGraph(
         ) { backStackEntry ->
             val graphBack =
                 remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
-            val homeViewModel = hiltViewModel<RecommendationsViewModel>(graphBack)
+            val recViewModel = hiltViewModel<RecommendationsViewModel>(graphBack)
+
+            LaunchedEffect(true) {
+                recViewModel.init()
+            }
 
             RecommendationsScreen(
                 onBack = onBack,
-                filterRoutes = homeViewModel::filterRoutes,
-                routes = homeViewModel.recommendedRoutes,
-                removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,
-                addRouteToFavourite = homeViewModel::addRouteToFavourite,
-                removePlaceFromFavourite = homeViewModel::removePlaceFromFavourite,
-                addPlaceToFavourite = homeViewModel::addPlaceToFavourite
+                filterRoutes = recViewModel::filterRoutes,
+                routes = recViewModel.recommendedRoutes,
+                removeRouteFromFavourite = recViewModel::removeRouteFromFavourite,
+                addRouteToFavourite = recViewModel::addRouteToFavourite,
+                removePlaceFromFavourite = recViewModel::removePlaceFromFavourite,
+                addPlaceToFavourite = recViewModel::addPlaceToFavourite,
+                isEmpty = recViewModel.isEmpty
             )
         }
 
@@ -227,10 +246,13 @@ fun NavGraphBuilder.addAppGraph(
                 remember(backStackEntry) { navController.getBackStackEntry(MAIN_GRAPH_ROUTE) }
             val homeViewModel = hiltViewModel<HistoryViewModel>(graphBack)
 
+            LaunchedEffect(true) {
+                homeViewModel.init()
+            }
+
             HistoryScreen(
                 filterPlaces = homeViewModel::filterPlaces,
                 filterRoutes = homeViewModel::filterRoutes,
-                isLoading = homeViewModel.isLoading,
                 places = homeViewModel.visitedPlaces,
                 routes = homeViewModel.takenRoutes,
                 removePlaceFromFavourite = homeViewModel::removePlaceFromFavourite,

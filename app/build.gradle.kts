@@ -100,6 +100,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    implementation("net.engawapg.lib:zoomable:1.5.1")
 }
 
 kapt {

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,7 +55,6 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.event.Dismiss
-import ru.nn.tripnn.ui.screen.RemoteResource
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -74,7 +72,7 @@ fun RegistrationScreen(
     ) -> Unit,
     onSignInClick: () -> Unit,
     dismissError: (Dismiss) -> Unit,
-    authenticated: RemoteResource<Boolean>,
+    authenticated: ResourceState<Boolean>,
     emailState: ResourceState<*>,
     userNameState: ResourceState<*>,
     passwordState: ResourceState<*>
@@ -394,7 +392,7 @@ fun RegistrationScreenPreview() {
                 { _, _, _, _, _ -> },
                 {},
                 {},
-                RemoteResource(),
+                ResourceState(value = false),
                 ResourceState<Unit>(),
                 ResourceState<Unit>(),
                 ResourceState<Unit>()

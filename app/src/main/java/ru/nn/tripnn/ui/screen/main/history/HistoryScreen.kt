@@ -1,6 +1,8 @@
 package ru.nn.tripnn.ui.screen.main.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,10 +20,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
@@ -33,21 +37,20 @@ import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.Search
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.DESTINATION
-import ru.nn.tripnn.ui.screen.main.favourite.FavouritePlacesContent
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
+import ru.nn.tripnn.ui.screen.main.favourite.PlacesColumn
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
-import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
-import ru.nn.tripnn.ui.screen.main.favourite.RoutesContent
+import ru.nn.tripnn.ui.screen.main.favourite.RoutesColumn
 
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
     filterPlaces: (String) -> Unit,
     filterRoutes: (String) -> Unit,
-    isLoading: Boolean,
-    places: ResourceListState<Place>,
-    routes: ResourceListState<Route>,
+    places: ResourceState<List<Place>>,
+    routes: ResourceState<List<Route>>,
     removePlaceFromFavourite: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
@@ -75,12 +78,19 @@ fun HistoryScreen(
             )
         }
 
-        MontsText(text = stringResource(id = R.string.history), fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+        MontsText(
+            text = stringResource(id = R.string.history),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
         CatalogNavigation(
-            catalogs = listOf(stringResource(id = R.string.places), stringResource(id = R.string.routes)),
+            catalogs = listOf(
+                stringResource(id = R.string.places),
+                stringResource(id = R.string.routes)
+            ),
             onCatalogChange = {
                 if (it == 0) {
                     filterPlaces(word)
@@ -117,24 +127,51 @@ fun HistoryScreen(
 
         NavHost(navController = navController, startDestination = DESTINATION[PLACES_INDEX]) {
             composable(route = DESTINATION[PLACES_INDEX]) {
-                chosen = PLACES_INDEX
-                FavouritePlacesContent(
-                    places = places.list,
+                PlacesColumn(
+                    places = places,
                     removeFromFavourite = removePlaceFromFavourite,
-                    addToFavourite = addPlaceToFavourite
+                    addToFavourite = addPlaceToFavourite,
+                    onEmpty = { HistoryEmptyResult() }
                 )
             }
             composable(route = DESTINATION[ROUTES_INDEX]) {
-                chosen = ROUTES_INDEX
-                RoutesContent(
-                    routes = routes.list,
+                RoutesColumn(
+                    routes = routes,
                     removeRouteFromFavourite = removeRouteFromFavourite,
                     addRouteToFavourite = addRouteToFavourite,
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    onTakeTheRoute = onTakeTheRoute
+                    onTakeTheRoute = onTakeTheRoute,
+                    onEmpty = { HistoryEmptyResult() }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun HistoryEmptyResult() {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(1/3f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            MontsText(
+                text = stringResource(id = R.string.empty),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(35.dp))
+            MontsText(text = "☹\uFE0F", fontSize = 50.sp)
+            Spacer(modifier = Modifier.height(35.dp))
+            MontsText(
+                text = stringResource(id = R.string.empty_history_comment),
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

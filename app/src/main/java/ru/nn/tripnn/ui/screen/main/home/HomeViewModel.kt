@@ -12,8 +12,8 @@ import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.repository.RouteRepository
 import ru.nn.tripnn.domain.repository.ScreenDataRepository
 import ru.nn.tripnn.domain.screen.HomeScreenData
-import ru.nn.tripnn.domain.util.Resource
-import ru.nn.tripnn.ui.screen.RemoteResource
+import ru.nn.tripnn.domain.util.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,33 +22,34 @@ class HomeViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
-    var homeScreenState by mutableStateOf(RemoteResource<HomeScreenData>())
+    var homeScreenState by mutableStateOf(ResourceState<HomeScreenData>())
 
-    init {
+    fun init() {
         loadHomeScreenState()
     }
 
-    fun loadHomeScreenState() {
+    private fun loadHomeScreenState() {
         viewModelScope.launch {
             homeScreenState = homeScreenState.copy(
                 isLoading = true,
                 isError = false,
-                message = null
+                error = null
             )
 
             when(val result = screenDataRepository.getHomeScreenData()) {
-                is Resource.Success -> {
+                is RemoteResource.Success -> {
                     homeScreenState = homeScreenState.copy(
                         isLoading = false,
                         isError = false,
-                        value = result.data
+                        value = result.data,
+                        error = null
                     )
                 }
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
                     homeScreenState = homeScreenState.copy(
                         isLoading = false,
                         isError = true,
-                        message = result.message,
+                        error = result.message,
                         value = null
                     )
                 }

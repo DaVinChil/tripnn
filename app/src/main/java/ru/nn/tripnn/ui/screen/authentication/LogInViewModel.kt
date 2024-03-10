@@ -11,9 +11,8 @@ import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.LogInData
 import ru.nn.tripnn.domain.repository.AuthenticationService
 import ru.nn.tripnn.domain.repository.TokenRepository
-import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.domain.util.RemoteResource
 import ru.nn.tripnn.ui.event.Dismiss
-import ru.nn.tripnn.ui.screen.RemoteResource
 import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
@@ -23,7 +22,7 @@ class LogInViewModel @Inject constructor(
     private val tokenRepository: TokenRepository
 ) : ViewModel() {
 
-    var authenticated by mutableStateOf(RemoteResource(value = false))
+    var authenticated by mutableStateOf(ResourceState(value = false))
         private set
     var emailState by mutableStateOf(ResourceState<Unit>())
         private set
@@ -40,10 +39,10 @@ class LogInViewModel @Inject constructor(
 
             if (!validateEmail(email) or !validatePassword(password)) {
                 authenticated = authenticated.copy(
+                    value = false,
                     isError = true,
                     isLoading = false,
-                    message = null,
-                    value = false
+                    error = "failed validate password or email"
                 )
 
                 return@launch
@@ -56,21 +55,21 @@ class LogInViewModel @Inject constructor(
                 )
             )
             ) {
-                is Resource.Success -> {
+                is RemoteResource.Success -> {
                     tokenRepository.saveToken(result.data!!)
                     authenticated = authenticated.copy(
                         isError = false,
                         isLoading = false,
-                        message = null,
+                        error = null,
                         value = true
                     )
                 }
 
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
                     authenticated = authenticated.copy(
                         isError = true,
                         isLoading = false,
-                        message = result.message,
+                        error = result.message,
                         value = false
                     )
                 }
@@ -80,22 +79,22 @@ class LogInViewModel @Inject constructor(
 
     private fun validateEmail(email: String): Boolean {
         if (email.isBlank()) {
-            emailState = emailState.copy(isError = true, message = "Email can not be empty")
+            emailState = emailState.copy(isError = true, error = "Email can not be empty")
             return false
         }
 
-        emailState = emailState.copy(isError = false, message = null)
+        emailState = emailState.copy(isError = false, error = null)
 
         return true
     }
 
     private fun validatePassword(password: String): Boolean {
         if (password.isBlank()) {
-            passwordState = passwordState.copy(isError = true, message = "Password can not be empty")
+            passwordState = passwordState.copy(isError = true, error = "Password can not be empty")
             return false
         }
 
-        passwordState = passwordState.copy(isError = false, message = null)
+        passwordState = passwordState.copy(isError = false, error = null)
 
         return true
     }
@@ -111,10 +110,10 @@ class LogInViewModel @Inject constructor(
     }
 
     private fun dismissPasswordError() {
-        passwordState = passwordState.copy(isError = false, message = null)
+        passwordState = passwordState.copy(isError = false, error = null)
     }
 
     private fun dismissEmailError() {
-        emailState = emailState.copy(isError = false, message = null)
+        emailState = emailState.copy(isError = false, error = null)
     }
 }

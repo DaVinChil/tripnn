@@ -1,9 +1,6 @@
 package ru.nn.tripnn.ui.screen.main.account
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -23,18 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,7 +45,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,12 +55,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.entity.UserInfo
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.darkShimmer
+import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
@@ -73,9 +73,11 @@ enum class DialogType {
     CHANGE_EMAIL, CHANGE_PASSWORD, CLEAR_HISTORY, DELETE_ACCOUNT, EXIT_DIALOG
 }
 
+val AVATAR_SIZE = 170.dp
+
 @Composable
 fun AccountScreen(
-    userState: UserState,
+    userInfo: ResourceState<UserInfo>,
     onBackClick: () -> Unit,
     onUserNameChange: (String) -> Unit,
     onClearHistory: () -> Unit,
@@ -83,186 +85,252 @@ fun AccountScreen(
     onLeaveAccount: () -> Unit,
     onAvatarChange: (Uri) -> Unit
 ) {
-    if (!userState.isLoading && userState.userInfo != null) {
-        Box(
+    if (userInfo.isError || (!userInfo.isLoading && userInfo.value == null)) {
+        InternetProblem()
+        return
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+    ) {
+        var dialogType by remember { mutableStateOf(DialogType.CHANGE_EMAIL) }
+        var showDialog by remember { mutableStateOf(false) }
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .statusBarsPadding()
+                .padding(16.dp)
         ) {
-            val userInfo = userState.userInfo
-
-            var dialogType by remember { mutableStateOf(DialogType.CHANGE_EMAIL) }
-            var showDialog by remember { mutableStateOf(false) }
-
-            val launcher =
-                rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
-                    it?.let { onAvatarChange(it) }
-                }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.offset(x = (-16).dp, y = (-16).dp)
             ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.offset(x = (-16).dp, y = (-16).dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.back_arrow),
-                        contentDescription = stringResource(R.string.back_txt)
-                    )
-                }
-
-                MontsText(text = "Аккаунт", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .clip(RoundedCornerShape(100))
-                        .clickable {
-                            launcher.launch("image/*")
-                        }
-                ) {
-                    if (userInfo.avatar == null) {
-                        Image(
-                            painter = painterResource(id = R.drawable.account_avatar_placeholder),
-                            contentDescription = stringResource(R.string.avatar)
-                        )
-                    } else {
-                        Image(
-                            bitmap = userInfo.avatar.asImageBitmap(),
-                            contentDescription = stringResource(R.string.avatar)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    var name by remember {
-                        mutableStateOf(userInfo.name)
-                    }
-                    val focusRequester = remember { FocusRequester() }
-
-                    val focusManager = LocalFocusManager.current
-
-                    BasicTextField(
-                        value = name,
-                        modifier = Modifier.focusRequester(focusRequester),
-                        onValueChange = {
-                            if (it.length <= 20) {
-                                name = it
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                this.defaultKeyboardAction(ImeAction.Done)
-                                focusManager.clearFocus()
-                                onUserNameChange(name)
-                            }
-                        ),
-                        singleLine = true,
-                        textStyle = TextStyle(
-                            color = MaterialTheme.colorScheme.tertiary,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = montserratFamily,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-
-                    Icon(
-                        painter = painterResource(id = R.drawable.edit_icon),
-                        contentDescription = stringResource(id = R.string.edit_name_txt),
-                        modifier = Modifier.clickable { focusRequester.requestFocus() }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                MontsText(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    text = userInfo.email,
-                    fontSize = 14.sp
+                Icon(
+                    painter = painterResource(id = R.drawable.back_arrow),
+                    contentDescription = stringResource(R.string.back_txt)
                 )
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-
-                Column(verticalArrangement = Arrangement.spacedBy(30.dp)) {
-                    MontsText(
-                        text = stringResource(id = R.string.change_email),
-                        fontSize = 16.sp,
-                        modifier = Modifier.clickable {
-                            showDialog = true
-                            dialogType = DialogType.CHANGE_EMAIL
-                        }
-                    )
-                    MontsText(
-                        text = stringResource(id = R.string.change_password),
-                        fontSize = 16.sp,
-                        modifier = Modifier.clickable {
-                            showDialog = true
-                            dialogType = DialogType.CHANGE_PASSWORD
-                        }
-                    )
-                    MontsText(
-                        text = stringResource(id = R.string.clear_history),
-                        fontSize = 16.sp,
-                        modifier = Modifier.clickable {
-                            showDialog = true
-                            dialogType = DialogType.CLEAR_HISTORY
-                        }
-                    )
-                    MontsText(
-                        text = stringResource(id = R.string.delete_account),
-                        fontSize = 16.sp,
-                        modifier = Modifier.clickable {
-                            showDialog = true
-                            dialogType = DialogType.DELETE_ACCOUNT
-                        }
-                    )
-                    MontsText(
-                        text = stringResource(id = R.string.exit),
-                        fontSize = 16.sp,
-                        color = Color.Red,
-                        modifier = Modifier.clickable {
-                            showDialog = true
-                            dialogType = DialogType.EXIT_DIALOG
-                        }
-                    )
-                }
             }
 
-            if (showDialog) {
-                when (dialogType) {
-                    DialogType.CHANGE_PASSWORD ->
-                        ChangePasswordDialog(onSubmit = {}, onClose = { showDialog = false })
+            MontsText(
+                text = stringResource(R.string.account_txt),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold
+            )
 
-                    DialogType.DELETE_ACCOUNT ->
-                        DeleteAccountDialog(onSubmit = onDeleteAccount, onClose = { showDialog = false })
+            Spacer(modifier = Modifier.height(40.dp))
 
-                    DialogType.CLEAR_HISTORY ->
-                        ClearHistoryDialog(onSubmit = onClearHistory, onClose = { showDialog = false })
+            if (userInfo.isLoading) {
+                LoadingUserInfoBlock()
+            } else {
+                UserInfoBlock(
+                    userInfo = userInfo.value ?: UserInfo(name = "", email = "", avatar = null),
+                    onAvatarChange = onAvatarChange,
+                    onUserNameChange = onUserNameChange
+                )
+            }
 
-                    DialogType.EXIT_DIALOG ->
-                        LeaveAccountDialog(onSubmit = onLeaveAccount, onClose = { showDialog = false })
+            Spacer(modifier = Modifier.height(40.dp))
 
-                    DialogType.CHANGE_EMAIL ->
-                        ChangeEmailDialog(onSubmit = {}, onClose = { showDialog = false })
-                }
 
+            Column(verticalArrangement = Arrangement.spacedBy(30.dp)) {
+                MontsText(
+                    text = stringResource(id = R.string.change_email),
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable {
+                        showDialog = true
+                        dialogType = DialogType.CHANGE_EMAIL
+                    }
+                )
+                MontsText(
+                    text = stringResource(id = R.string.change_password),
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable {
+                        showDialog = true
+                        dialogType = DialogType.CHANGE_PASSWORD
+                    }
+                )
+                MontsText(
+                    text = stringResource(id = R.string.clear_history),
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable {
+                        showDialog = true
+                        dialogType = DialogType.CLEAR_HISTORY
+                    }
+                )
+                MontsText(
+                    text = stringResource(id = R.string.delete_account),
+                    fontSize = 16.sp,
+                    modifier = Modifier.clickable {
+                        showDialog = true
+                        dialogType = DialogType.DELETE_ACCOUNT
+                    }
+                )
+                MontsText(
+                    text = stringResource(id = R.string.exit),
+                    fontSize = 16.sp,
+                    color = Color.Red,
+                    modifier = Modifier.clickable {
+                        showDialog = true
+                        dialogType = DialogType.EXIT_DIALOG
+                    }
+                )
             }
         }
+
+        if (showDialog) {
+            when (dialogType) {
+                DialogType.CHANGE_PASSWORD ->
+                    ChangePasswordDialog(onSubmit = {}, onClose = { showDialog = false })
+
+                DialogType.DELETE_ACCOUNT ->
+                    DeleteAccountDialog(
+                        onSubmit = onDeleteAccount,
+                        onClose = { showDialog = false })
+
+                DialogType.CLEAR_HISTORY ->
+                    ClearHistoryDialog(onSubmit = onClearHistory, onClose = { showDialog = false })
+
+                DialogType.EXIT_DIALOG ->
+                    LeaveAccountDialog(onSubmit = onLeaveAccount, onClose = { showDialog = false })
+
+                DialogType.CHANGE_EMAIL ->
+                    ChangeEmailDialog(onSubmit = {}, onClose = { showDialog = false })
+            }
+
+        }
+    }
+}
+
+@Composable
+fun LoadingUserInfoBlock() {
+    val shimmerInstance =
+        rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = darkShimmer)
+
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .clip(CircleShape)
+                .size(AVATAR_SIZE)
+                .background(MaterialTheme.colorScheme.secondary)
+                .shimmer(shimmerInstance)
+        )
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .width(60.dp)
+                .height(20.dp)
+                .background(MaterialTheme.colorScheme.secondary)
+                .shimmer(shimmerInstance)
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .width(150.dp)
+                .height(20.dp)
+                .background(MaterialTheme.colorScheme.secondary)
+                .shimmer(shimmerInstance)
+        )
+    }
+}
+
+@Composable
+fun UserInfoBlock(
+    userInfo: UserInfo,
+    onAvatarChange: (Uri) -> Unit,
+    onUserNameChange: (String) -> Unit
+) {
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
+            it?.let { onAvatarChange(it) }
+        }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .clip(RoundedCornerShape(100))
+                .size(AVATAR_SIZE)
+                .clickable {
+                    launcher.launch("image/*")
+                }
+        ) {
+            if (userInfo.avatar == null) {
+                Image(
+                    painter = painterResource(id = R.drawable.account_avatar_placeholder),
+                    contentDescription = stringResource(R.string.avatar)
+                )
+            } else {
+                Image(
+                    bitmap = userInfo.avatar.asImageBitmap(),
+                    contentDescription = stringResource(R.string.avatar)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            var name by remember {
+                mutableStateOf(userInfo.name)
+            }
+            val focusRequester = remember { FocusRequester() }
+
+            val focusManager = LocalFocusManager.current
+
+            BasicTextField(
+                value = name,
+                modifier = Modifier.focusRequester(focusRequester),
+                onValueChange = {
+                    if (it.length <= 20) {
+                        name = it
+                    }
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        this.defaultKeyboardAction(ImeAction.Done)
+                        focusManager.clearFocus()
+                        onUserNameChange(name)
+                    }
+                ),
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = montserratFamily,
+                    textAlign = TextAlign.Center
+                )
+            )
+
+            Icon(
+                painter = painterResource(id = R.drawable.edit_icon),
+                contentDescription = stringResource(id = R.string.edit_name_txt),
+                modifier = Modifier.clickable { focusRequester.requestFocus() }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        MontsText(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = userInfo.email,
+            fontSize = 14.sp
+        )
     }
 }
 
@@ -417,6 +485,7 @@ fun BottomSheetDialog(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutine = rememberCoroutineScope()
+
     ModalBottomSheet(
         onDismissRequest = onClose,
         sheetState = sheetState,
@@ -469,8 +538,8 @@ fun AccountScreenPreview() {
         Surface {
             AccountScreen(
                 onBackClick = {},
-                userState = UserState(
-                    userInfo = UserInfo(
+                userInfo = ResourceState(
+                    value = UserInfo(
                         name = "Sasha",
                         email = "hz.com@gmail.com",
                         avatar = null
@@ -482,6 +551,16 @@ fun AccountScreenPreview() {
                 onLeaveAccount = {},
                 onAvatarChange = {}
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun LoadingUserInfo() {
+    TripNNTheme (false) {
+        Box(modifier = Modifier.background(Color.White)) {
+            LoadingUserInfoBlock()
         }
     }
 }

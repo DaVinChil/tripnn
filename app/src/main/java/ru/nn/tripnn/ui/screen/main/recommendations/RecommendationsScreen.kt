@@ -2,6 +2,7 @@ package ru.nn.tripnn.ui.screen.main.recommendations
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -25,13 +26,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.DraggableCard
@@ -39,26 +44,40 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
+import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
+import ru.nn.tripnn.ui.screen.main.home.InternetProblem
+import ru.nn.tripnn.ui.screen.main.home.LoadingRecommendedRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecommendationsScreen(
     onBack: () -> Unit,
+    isEmpty: Boolean,
     filterRoutes: (String) -> Unit,
-    routes: ResourceListState<Route>,
+    routes: ResourceState<List<Route>>,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit
 ) {
+    if (routes.isError) {
+        InternetProblem()
+        return
+    }
+
+    if (isEmpty && !routes.isLoading) {
+        NoRecommendedRoutes(onBack)
+        return
+    }
+
     var word by remember { mutableStateOf("") }
 
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showRouteInfo by remember { mutableStateOf(false) }
-    var pickedRoute by remember { mutableStateOf(routes.list[0]) }
+    var pickedRoute by remember { mutableStateOf(ROUTE_1) }
 
     Column(
         modifier = Modifier
@@ -70,18 +89,23 @@ fun RecommendationsScreen(
         IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
-                contentDescription = "back",
+                contentDescription = stringResource(id = R.string.back_txt),
                 tint = MaterialTheme.colorScheme.tertiary
             )
         }
 
         MontsText(
-            text = "Рекомендованные маршруты",
+            text = stringResource(id = R.string.recommended_routes),
             fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold
         )
 
         Spacer(modifier = Modifier.height(10.dp))
+
+        if (routes.isLoading) {
+            LoadingCircleScreen()
+            return
+        }
 
         Search(
             onSearch = {
@@ -93,27 +117,31 @@ fun RecommendationsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        LazyColumn(
-            state = lazyState,
-            contentPadding = PaddingValues(vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            items(items = routes.list, key = Route::id) { route ->
-                val option: @Composable () -> Unit =
-                    @Composable {
-                        RemoveFromFavouriteRedCardOption(
-                            onClick = { removeRouteFromFavourite(route.id) })
+        if (routes.value.isNullOrEmpty()) {
+            NothingFoundByRequest()
+        } else {
+            LazyColumn(
+                state = lazyState,
+                contentPadding = PaddingValues(vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                items(items = routes.value, key = Route::id) { route ->
+                    val option: @Composable () -> Unit =
+                        @Composable {
+                            RemoveFromFavouriteRedCardOption(
+                                onClick = { removeRouteFromFavourite(route.id) })
+                        }
+                    DraggableCard(option1 = option) {
+                        RouteCard(
+                            route = route,
+                            onCardClick = {
+                                pickedRoute = route
+                                showRouteInfo = true
+                            },
+                            shadowColor = Color.Black.copy(alpha = 0.2f),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
-                DraggableCard(option1 = option) {
-                    RouteCard(
-                        route = route,
-                        onCardClick = {
-                            pickedRoute = route
-                            showRouteInfo = true
-                        },
-                        shadowColor = Color.Black.copy(alpha = 0.2f),
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
             }
         }
@@ -133,6 +161,70 @@ fun RecommendationsScreen(
                     route = pickedRoute,
                     onTakeTheRoute = { TODO() }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun NothingFoundByRequest() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(2 / 3f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            MontsText(text = "☹\uFE0F", fontSize = 50.sp)
+            Spacer(modifier = Modifier.height(35.dp))
+            MontsText(
+                text = stringResource(id = R.string.nothing_found_header),
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun NoRecommendedRoutes(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(10.dp)
+            .systemBarsPadding()
+    ) {
+        IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
+            Icon(
+                painter = painterResource(id = R.drawable.back_arrow),
+                contentDescription = stringResource(id = R.string.back_txt),
+                tint = MaterialTheme.colorScheme.tertiary
+            )
+        }
+
+        MontsText(
+            text = stringResource(id = R.string.recommended_routes),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(1 / 3f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                MontsText(
+                    text = stringResource(id = R.string.empty),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(35.dp))
+                MontsText(text = "☹\uFE0F", fontSize = 50.sp)
             }
         }
     }

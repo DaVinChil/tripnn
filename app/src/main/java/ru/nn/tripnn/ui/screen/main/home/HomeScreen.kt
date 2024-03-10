@@ -79,7 +79,7 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.lightShimmer
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -88,7 +88,7 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun HomeScreen(
-    homeScreenState: RemoteResource<HomeScreenData>,
+    homeScreenState: ResourceState<HomeScreenData>,
     onAccountClick: () -> Unit,
     onHistoryClick: () -> Unit,
     onFavouriteClick: () -> Unit,
@@ -103,42 +103,39 @@ fun HomeScreen(
 ) {
     val screenData = homeScreenState.value
 
-    if (homeScreenState.isError) {
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    } else {
-        val scope = rememberCoroutineScope()
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-
-        ModalNavigationDrawer(
-            drawerContent = {
-                Menu(
-                    onAccountClick = onAccountClick,
-                    onHistoryClick = onHistoryClick,
-                    onFavouriteClick = onFavouriteClick,
-                    onSettingsClick = onSettingsClick,
-                    onClose = { scope.launch { drawerState.close() } }
-                )
-            },
-            drawerState = drawerState
-        ) {
-            HomeContent(
-                curRoutePercent = screenData?.curRoutePercent,
-                recRoutes = screenData?.recommendedRoutes ?: listOf(),
-                onCurRouteClick = onCurRouteClick,
-                onAllRoutesClick = onAllRoutesClick,
-                onNewRouteClick = onNewRouteClick,
-                onMenuClick = {
-                    scope.launch {
-                        drawerState.open()
-                    }
-                },
-                removeRouteFromFavourite = removeRouteFromFavourite,
-                addRouteToFavourite = addRouteToFavourite,
-                removePlaceFromFavourite = removePlaceFromFavourite,
-                addPlaceToFavourite = addPlaceToFavourite,
-                isLoading = homeScreenState.isLoading
+    ModalNavigationDrawer(
+        drawerContent = {
+            Menu(
+                onAccountClick = onAccountClick,
+                onHistoryClick = onHistoryClick,
+                onFavouriteClick = onFavouriteClick,
+                onSettingsClick = onSettingsClick,
+                onClose = { scope.launch { drawerState.close() } }
             )
-        }
+        },
+        drawerState = drawerState
+    ) {
+        HomeContent(
+            curRoutePercent = screenData?.curRoutePercent,
+            recRoutes = screenData?.recommendedRoutes ?: listOf(),
+            onCurRouteClick = onCurRouteClick,
+            onAllRoutesClick = onAllRoutesClick,
+            onNewRouteClick = onNewRouteClick,
+            onMenuClick = {
+                scope.launch {
+                    drawerState.open()
+                }
+            },
+            removeRouteFromFavourite = removeRouteFromFavourite,
+            addRouteToFavourite = addRouteToFavourite,
+            removePlaceFromFavourite = removePlaceFromFavourite,
+            addPlaceToFavourite = addPlaceToFavourite,
+            isLoading = homeScreenState.isLoading,
+            isError = homeScreenState.isError
+        )
     }
 }
 
@@ -146,6 +143,7 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     isLoading: Boolean,
+    isError: Boolean,
     recRoutes: List<Route>,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
@@ -167,6 +165,11 @@ fun HomeContent(
         var showSearch by remember { mutableStateOf(false) }
         var showRouteInfo by remember { mutableStateOf(false) }
         var pickedRoute by remember { mutableStateOf(ROUTE_1) }
+
+        if (isError) {
+            InternetProblem()
+            return@Scaffold
+        }
 
         Column(
             modifier = Modifier
@@ -260,6 +263,13 @@ fun HomeContent(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun InternetProblem() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        MontsText(text = "Internet problems", fontSize = 20.sp)
     }
 }
 
@@ -381,6 +391,8 @@ fun InfiniteCarousel(
     key: (index: Int) -> Any,
     pageContent: @Composable PagerScope.(page: Int) -> Unit
 ) {
+    if (count == 0) return
+
     val state = rememberPagerState(pageCount = { Int.MAX_VALUE }, initialPage = 500)
     val flingBehavior = PagerDefaults.flingBehavior(
         state = state,
@@ -400,7 +412,7 @@ fun InfiniteCarousel(
         val scale = if (state.currentPage == index) {
             1 - state.currentPageOffsetFraction.absoluteValue / scaleFactor
         } else if ((state.currentPage - index).absoluteValue == 1 &&
-                   (state.currentPage < index && state.currentPageOffsetFraction > 0 ||
+            (state.currentPage < index && state.currentPageOffsetFraction > 0 ||
                     state.currentPage > index && state.currentPageOffsetFraction < 0)
         ) {
             (scaleFactor - 1) / scaleFactor + state.currentPageOffsetFraction.absoluteValue / scaleFactor
@@ -413,10 +425,10 @@ fun InfiniteCarousel(
         Box(
             modifier = Modifier
                 .offset(
-                    x = offset *  if (state.currentPage < index) -1
-                            else if (state.currentPage > index) 1
-                            else if (state.currentPageOffsetFraction <= 0) -1
-                            else 1
+                    x = offset * if (state.currentPage < index) -1
+                    else if (state.currentPage > index) 1
+                    else if (state.currentPageOffsetFraction <= 0) -1
+                    else 1
                 )
                 .scale(scale = scale)
         ) {
@@ -643,7 +655,7 @@ fun HomeScreenPreview() {
         ) {
             Box {
                 HomeScreen(
-                    homeScreenState = RemoteResource(
+                    homeScreenState = ResourceState(
                         value = HomeScreenData(
                             recommendedRoutes = ROUTES,
                             curRoutePercent = 33

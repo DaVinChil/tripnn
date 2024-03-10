@@ -34,7 +34,6 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.event.Dismiss
-import ru.nn.tripnn.ui.screen.RemoteResource
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
@@ -43,7 +42,7 @@ fun LogInScreen(
     onForgotClick: () -> Unit,
     onRegisterClick: () -> Unit,
     authenticate: (rememberMe: Boolean, email: String, password: String) -> Unit,
-    authenticated: RemoteResource<Boolean>,
+    authenticated: ResourceState<Boolean>,
     emailState: ResourceState<*>,
     passwordState: ResourceState<*>,
     dismissError: (Dismiss) -> Unit
@@ -182,7 +181,7 @@ fun LogInScreenPreview() {
             LogInScreen(
                 onForgotClick = { },
                 authenticate = {_, _, _ -> },
-                authenticated = RemoteResource(),
+                authenticated = ResourceState(value = false),
                 onRegisterClick = {},
                 dismissError = {},
                 emailState = ResourceState<Unit>(),

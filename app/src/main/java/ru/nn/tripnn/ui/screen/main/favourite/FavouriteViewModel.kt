@@ -8,14 +8,13 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Place
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.repository.RouteRepository
-import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.domain.util.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,17 +22,14 @@ class FavouriteViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
-    val isLoading
-        get() = favouritePlaces.isLoading || favouriteRoutes.isLoading
 
-    var favouritePlaces by mutableStateOf(ResourceListState<Place>())
+    var favouritePlaces by mutableStateOf(ResourceState<List<Place>>())
     private var savedFavouritePlaces = immutableListOf<Place>()
 
-
-    var favouriteRoutes by mutableStateOf(ResourceListState<Route>())
+    var favouriteRoutes by mutableStateOf(ResourceState<List<Route>>())
     private var savedFavouriteRoutes = immutableListOf<Route>()
 
-    init {
+    fun init() {
         loadFavouritePlaces()
         loadFavouriteRoutes()
     }
@@ -41,16 +37,26 @@ class FavouriteViewModel @Inject constructor(
     private fun loadFavouritePlaces() {
         viewModelScope.launch {
             favouritePlaces = favouritePlaces.copy(isLoading = true)
+
             when (val result = placeRepository.getFavourite()) {
-                is Resource.Success -> {
-                    favouritePlaces = favouritePlaces.copy(list = result.data ?: listOf())
-                    savedFavouritePlaces = favouritePlaces.list ?: listOf()
+                is RemoteResource.Success -> {
+                    favouritePlaces = favouritePlaces.copy(
+                        value = result.data,
+                        error = null,
+                        isError = false
+                    )
+                    savedFavouritePlaces = result.data ?: listOf()
                 }
 
-                is Resource.Error -> {
-
+                is RemoteResource.Error -> {
+                    favouritePlaces = favouritePlaces.copy(
+                        value = null,
+                        error = result.message,
+                        isError = true
+                    )
                 }
             }
+
             favouritePlaces = favouritePlaces.copy(isLoading = false)
         }
     }
@@ -59,16 +65,27 @@ class FavouriteViewModel @Inject constructor(
         viewModelScope.launch {
             favouriteRoutes = favouriteRoutes.copy(isLoading = true)
             when (val result = routeRepository.getFavourite()) {
-                is Resource.Success -> {
-                    favouriteRoutes = favouriteRoutes.copy(list = result.data ?: listOf())
-                    savedFavouriteRoutes = favouriteRoutes.list
+                is RemoteResource.Success -> {
+                    favouriteRoutes = favouriteRoutes.copy(
+                        value = result.data,
+                        error = null,
+                        isError = false
+                    )
+                    savedFavouriteRoutes = result.data ?: listOf()
                 }
 
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
+                    favouriteRoutes = favouriteRoutes.copy(
+                        value = null,
+                        error = result.message,
+                        isError = true
+                    )
 
+                    savedFavouriteRoutes = listOf()
                 }
             }
-            favouritePlaces = favouritePlaces.copy(isLoading = false)
+
+            favouriteRoutes = favouriteRoutes.copy(isLoading = false)
         }
     }
 
@@ -99,26 +116,20 @@ class FavouriteViewModel @Inject constructor(
     fun filterRoutes(word: String) {
         val filtered = mutableListOf<Route>()
         savedFavouriteRoutes.forEach {
-            if (word.isNullOrBlank() || it.name.contains(word, ignoreCase = true)) {
+            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
                 filtered.add(it)
             }
         }
-        favouriteRoutes = favouriteRoutes.copy(list = filtered)
+        favouriteRoutes = favouriteRoutes.copy(value = filtered)
     }
 
     fun filterPlaces(word: String) {
         val filtered = mutableListOf<Place>()
         savedFavouritePlaces.forEach {
-            if (word.isNullOrBlank() || it.name.contains(word, ignoreCase = true)) {
+            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
                 filtered.add(it)
             }
         }
-        favouritePlaces = favouritePlaces.copy(list = filtered)
+        favouritePlaces = favouritePlaces.copy(value = filtered)
     }
 }
-
-data class ResourceListState<T>(
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val list: List<T> = listOf()
-)

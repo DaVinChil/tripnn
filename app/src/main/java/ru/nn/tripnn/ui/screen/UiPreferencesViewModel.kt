@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.local.preferences.UiPreferences
 import ru.nn.tripnn.domain.repository.UiPreferencesRepository
-import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.domain.util.RemoteResource
 import javax.inject.Inject
 
 enum class Theme(@StringRes val resId: Int, val id: Int) {
@@ -62,11 +62,11 @@ class UiPreferencesViewModel @Inject constructor(
         viewModelScope.launch {
             isLoading = true
             when (val result = uiPreferencesRepository.getUiPreferences()) {
-                is Resource.Success -> {
+                is RemoteResource.Success -> {
                     uiPreferencesState = result.data ?: uiPreferencesState
                 }
 
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
                     message = result.message
                 }
             }

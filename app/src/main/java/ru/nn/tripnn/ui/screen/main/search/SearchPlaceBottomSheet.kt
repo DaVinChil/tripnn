@@ -8,6 +8,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,12 +29,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,7 +60,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +71,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -80,8 +86,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.zoomable
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.entity.Place
@@ -96,7 +105,9 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.Rating
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
+import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
+import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import java.time.LocalTime
 
@@ -313,7 +324,7 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
                             },
                             minPrice = priceSlider.start.toInt(),
                             maxPrice = priceSlider.endInclusive.toInt(),
-                            prevPlaceId = "".also { TODO() },
+                            prevPlaceId = "",
                             maxDistance = 0,
                             minDistance = 0,
                             userLocation = "",
@@ -412,16 +423,33 @@ fun SliderPointer(sliderWidth: Float, valueOnSlider: Float, max: Float, infoPref
 @Composable
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
-    result: ResourceListState<Place>,
+    result: ResourceState<List<Place>>,
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit,
     popBack: () -> Unit
 ) {
+    if (result.isError) {
+        InternetProblem()
+        return
+    }
+
+    if (result.isLoading) {
+        Box(modifier = Modifier.fillMaxHeight(5f / 6f)) {
+            LoadingCircleScreen()
+        }
+        return
+    }
+
+    if (result.value.isNullOrEmpty()) {
+        SearchEmptyResult(popBack)
+        return
+    }
+
     var sortState by remember { mutableStateOf(SortState()) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
-    var pickedPlace by remember { mutableStateOf(result.list[0]) }
+    var pickedPlace by remember { mutableStateOf(PLACE_1) }
 
     Box {
         Column(
@@ -476,7 +504,7 @@ fun SearchResultScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
-                items(items = result.list, key = Place::id) { place ->
+                items(items = result.value, key = Place::id) { place ->
                     val option: @Composable () -> Unit = if (place.favourite) {
                         @Composable {
                             RemoveFromFavouriteGoldCardOption(
@@ -508,6 +536,39 @@ fun SearchResultScreen(
                 removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
                 addToFavourite = { addToFavourite(pickedPlace.id) }
             )
+        }
+    }
+}
+
+@Composable
+fun SearchEmptyResult(popBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(5f / 6f)
+            .padding(horizontal = 10.dp)
+    ) {
+        IconButton(onClick = popBack, modifier = Modifier.offset(x = (-16).dp)) {
+            Icon(
+                painter = painterResource(id = R.drawable.back_arrow),
+                contentDescription = stringResource(id = R.string.back_txt),
+                tint = MaterialTheme.colorScheme.onSecondary
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(3 / 5f)
+                .align(Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            MontsText(text = stringResource(id = R.string.nothing_found_header), fontSize = 18.sp)
+            Spacer(modifier = Modifier.height(50.dp))
+            MontsText(text = "☹\uFE0F", fontSize = 18.sp)
+            Spacer(modifier = Modifier.height(50.dp))
+            MontsText(text = stringResource(id = R.string.nothing_found_comment), fontSize = 18.sp)
         }
     }
 }
@@ -751,6 +812,44 @@ fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
             contentDescription = "",
             tint = MaterialTheme.colorScheme.tertiary
         )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FullScreenPhotoPager(images: List<String>) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+    Box(
+        modifier = Modifier
+            .requiredWidth(screenWidth)
+            .requiredHeight(screenHeight)
+            .background(Color.Black)
+    ) {
+        val pagerState = rememberPagerState { images.size }
+        val zoomState = rememberZoomState(maxScale = 5f)
+
+        LaunchedEffect(pagerState.currentPage) {
+            zoomState.reset()
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { index ->
+            val url = images[index]
+
+            // Image from URL. We can also use painterResource to load images from resources
+            val imagePainter = rememberAsyncImagePainter(url) // From coil-compose
+
+            Image(
+                painter = imagePainter,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.zoomable(zoomState)
+            )
+        }
     }
 }
 

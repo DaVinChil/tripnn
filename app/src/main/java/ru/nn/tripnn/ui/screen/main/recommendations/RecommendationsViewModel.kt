@@ -12,8 +12,8 @@ import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.Route
 import ru.nn.tripnn.domain.repository.PlaceRepository
 import ru.nn.tripnn.domain.repository.RouteRepository
-import ru.nn.tripnn.domain.util.Resource
-import ru.nn.tripnn.ui.screen.main.favourite.ResourceListState
+import ru.nn.tripnn.domain.util.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,11 +21,14 @@ class RecommendationsViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository
 ) : ViewModel() {
-    var recommendedRoutes by mutableStateOf(ResourceListState<Route>())
+    var recommendedRoutes by mutableStateOf(ResourceState<List<Route>>())
         private set
+    val isEmpty
+        get() = savedRoutes.isEmpty()
     private var savedRoutes = immutableListOf<Route>()
 
-    init {
+
+    fun init() {
         loadRecommended()
     }
 
@@ -33,15 +36,26 @@ class RecommendationsViewModel @Inject constructor(
         viewModelScope.launch {
             recommendedRoutes = recommendedRoutes.copy(isLoading = true)
             when(val resource = routeRepository.getRecommendations()) {
-                is Resource.Success -> {
-                    recommendedRoutes = recommendedRoutes.copy(list = resource.data ?: listOf())
+                is RemoteResource.Success -> {
+                    recommendedRoutes = recommendedRoutes.copy(
+                        value = resource.data,
+                        error = null,
+                        isError = false
+                    )
+                    savedRoutes = resource.data ?: listOf()
                 }
 
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
+                    recommendedRoutes = recommendedRoutes.copy(
+                        value = null,
+                        error = resource.message,
+                        isError = true,
+                    )
 
+                    savedRoutes = listOf()
                 }
             }
-            recommendedRoutes = recommendedRoutes.copy(isLoading = true)
+            recommendedRoutes = recommendedRoutes.copy(isLoading = false)
         }
     }
 
@@ -72,10 +86,10 @@ class RecommendationsViewModel @Inject constructor(
     fun filterRoutes(word: String) {
         val filtered = mutableListOf<Route>()
         savedRoutes.forEach {
-            if (word.isNullOrBlank() || it.name.contains(word, ignoreCase = true)) {
+            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
                 filtered.add(it)
             }
         }
-        recommendedRoutes = recommendedRoutes.copy(list = filtered)
+        recommendedRoutes = recommendedRoutes.copy(value = filtered)
     }
 }

@@ -138,4 +138,12 @@
     <string name="image">image</string>
 
     <string name="address_copied">Address copied</string>
+    <string name="empty">Empty!</string>
+    <string name="empty_history_comment">It\'s time to visit something interesting!</string>
+    <string name="empty_favourite_comment_1">Use</string>
+    <string name="empty_favourite_comment_2">in order to add</string>
+    <string name="empty_favourite_comment_3">to favourite</string>
+
+    <string name="nothing_found_header">Nothing was found for your search!</string>
+    <string name="nothing_found_comment">Try changing the preference filters, the range of the average check, or the location category</string>
 </resources>

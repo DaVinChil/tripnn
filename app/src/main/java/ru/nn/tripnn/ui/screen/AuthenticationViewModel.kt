@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.repository.AuthenticationService
 import ru.nn.tripnn.domain.repository.TokenRepository
-import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.domain.util.RemoteResource
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,11 +43,11 @@ class AuthenticationViewModel @Inject constructor(
             }
 
             when (val result = authenticationService.authenticate(token)) {
-                is Resource.Success -> {
+                is RemoteResource.Success -> {
                     isAuthenticated = true
                 }
 
-                is Resource.Error -> {
+                is RemoteResource.Error -> {
                     message = result.message
                     isAuthenticated = false
                 }
@@ -68,16 +68,9 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 }
-
-data class RemoteResource<T> (
-    val value: T? = null,
-    val message: String? = null,
-    val isLoading: Boolean = false,
-    val isError: Boolean = false
-)
-
 data class ResourceState<T>(
     val value: T? = null,
-    val message: String? = null,
-    val isError: Boolean = false
+    val isError: Boolean = false,
+    val error: String? = null,
+    val isLoading: Boolean = false
 )

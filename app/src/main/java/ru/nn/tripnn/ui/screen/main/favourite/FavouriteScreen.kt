@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,11 +62,12 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlaceCard
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.Rating
-import ru.nn.tripnn.ui.common.RatingInfo
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
+import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
@@ -76,9 +80,8 @@ fun FavouriteScreen(
     onBack: () -> Unit,
     filterPlaces: (String) -> Unit,
     filterRoutes: (String) -> Unit,
-    isLoading: Boolean,
-    favouritePlaces: ResourceListState<Place>,
-    favouriteRoutes: ResourceListState<Route>,
+    favouritePlaces: ResourceState<List<Place>>,
+    favouriteRoutes: ResourceState<List<Route>>,
     removePlaceFromFavourite: (String) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
@@ -155,22 +158,22 @@ fun FavouriteScreen(
 
         NavHost(navController = navController, startDestination = DESTINATION[PLACES_INDEX]) {
             composable(route = DESTINATION[PLACES_INDEX]) {
-                chosen = PLACES_INDEX
-                FavouritePlacesContent(
-                    places = favouritePlaces.list,
+                PlacesColumn(
+                    places = favouritePlaces,
                     removeFromFavourite = removePlaceFromFavourite,
-                    addToFavourite = addPlaceToFavourite
+                    addToFavourite = addPlaceToFavourite,
+                    onEmpty = { FavouriteEmptyResult() }
                 )
             }
             composable(route = DESTINATION[ROUTES_INDEX]) {
-                chosen = ROUTES_INDEX
-                RoutesContent(
-                    routes = favouriteRoutes.list,
+                RoutesColumn(
+                    routes = favouriteRoutes,
                     removeRouteFromFavourite = removeRouteFromFavourite,
                     addRouteToFavourite = addRouteToFavourite,
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    onTakeTheRoute = onTakeTheRoute
+                    onTakeTheRoute = onTakeTheRoute,
+                    onEmpty = { FavouriteEmptyResult() }
                 )
             }
         }
@@ -179,22 +182,38 @@ fun FavouriteScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavouritePlacesContent(
-    places: List<Place>,
+fun PlacesColumn(
+    onEmpty: @Composable () -> Unit,
+    places: ResourceState<List<Place>>,
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit
 ) {
+    if (places.isError) {
+        InternetProblem()
+        return
+    }
+
+    if (places.isLoading) {
+        LoadingCircleScreen()
+        return
+    }
+
+    if (places.value.isNullOrEmpty()) {
+        onEmpty()
+        return
+    }
+
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
-    var pickedPlace by remember { mutableStateOf(places[0]) }
+    var pickedPlace by remember { mutableStateOf(PLACE_1) }
 
     LazyColumn(
         state = lazyState,
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = places, key = Place::id) { place ->
+        items(items = places.value, key = Place::id) { place ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteRedCardOption(
@@ -225,27 +244,50 @@ fun FavouritePlacesContent(
     }
 }
 
+@Composable
+fun LoadingCircleScreen() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutesContent(
-    routes: List<Route>,
+fun RoutesColumn(
+    routes: ResourceState<List<Route>>,
+    onEmpty: @Composable () -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     onTakeTheRoute: (String) -> Unit
 ) {
+    if (routes.isError) {
+        InternetProblem()
+        return
+    }
+
+    if (routes.isLoading) {
+        LoadingCircleScreen()
+        return
+    }
+
+    if (routes.value.isNullOrEmpty()) {
+        onEmpty()
+        return
+    }
+
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showRouteInfo by remember { mutableStateOf(false) }
-    var pickedRoute by remember { mutableStateOf(routes[0]) }
+    var pickedRoute by remember { mutableStateOf(ROUTE_1) }
 
     LazyColumn(
         state = lazyState,
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = routes, key = Route::id) { route ->
+        items(items = routes.value, key = Route::id) { route ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteRedCardOption(
@@ -279,6 +321,56 @@ fun RoutesContent(
                 removePlaceFromFavourite = removePlaceFromFavourite,
                 addPlaceToFavourite = addPlaceToFavourite,
                 onTakeTheRoute = onTakeTheRoute
+            )
+        }
+    }
+}
+
+@Composable
+fun FavouriteEmptyResult() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        MontsText(
+            text = stringResource(id = R.string.empty), fontSize = 18.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(35.dp))
+        MontsText(text = "☹\uFE0F", fontSize = 50.sp)
+        Spacer(modifier = Modifier.height(35.dp))
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                MontsText(
+                    text = stringResource(id = R.string.empty_favourite_comment_1),
+                    fontSize = 16.sp
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.unselected_bookmark),
+                    contentDescription = stringResource(
+                        id = R.string.favourite
+                    )
+                )
+            }
+
+            MontsText(
+                text = stringResource(id = R.string.empty_favourite_comment_2),
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
+            )
+
+            MontsText(
+                text = stringResource(id = R.string.empty_favourite_comment_3),
+                fontSize = 16.sp,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -420,9 +512,8 @@ fun FavouriteScreenPreview() {
             onBack = { /*TODO*/ },
             filterPlaces = { /*TODO*/ },
             filterRoutes = { /*TODO*/ },
-            isLoading = false,
-            favouritePlaces = ResourceListState(list = listOf(PLACE_1)),
-            favouriteRoutes = ResourceListState(list = ROUTES),
+            favouritePlaces = ResourceState(value = listOf(PLACE_1)),
+            favouriteRoutes = ResourceState(value = ROUTES),
             removePlaceFromFavourite = { /*TODO*/ },
             removeRouteFromFavourite = { /*TODO*/ },
             addPlaceToFavourite = { /*TODO*/ },

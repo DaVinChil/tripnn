@@ -4,23 +4,22 @@ import kotlinx.coroutines.delay
 import ru.nn.tripnn.domain.entity.LogInData
 import ru.nn.tripnn.domain.entity.RegistrationData
 import ru.nn.tripnn.domain.repository.AuthenticationService
-import ru.nn.tripnn.domain.util.Resource
-import javax.inject.Inject
+import ru.nn.tripnn.domain.util.RemoteResource
 
 class FakeAuthenticationServiceImpl : AuthenticationService {
-    override suspend fun login(credentials: LogInData): Resource<String> {
+    override suspend fun login(credentials: LogInData): RemoteResource<String> {
         delay(2000)
-        return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")
+        return RemoteResource.Success("Kd2Ssdjf832-kLsDs^k92$2")
     }
 
-    override suspend fun authenticate(token: String): Resource<String> {
+    override suspend fun authenticate(token: String): RemoteResource<String> {
         delay(2000)
-        return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")
+        return RemoteResource.Success("Kd2Ssdjf832-kLsDs^k92$2")
     }
 
-    override suspend fun register(credentials: RegistrationData): Resource<String> {
+    override suspend fun register(credentials: RegistrationData): RemoteResource<String> {
         delay(2000)
-        return Resource.Success("Kd2Ssdjf832-kLsDs^k92$2")
+        return RemoteResource.Success("Kd2Ssdjf832-kLsDs^k92$2")
     }
 
     override suspend fun logout(token: String) {

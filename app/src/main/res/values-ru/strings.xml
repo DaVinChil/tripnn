@@ -141,4 +141,12 @@
     <string name="image">картинка</string>
 
     <string name="address_copied">Адрес скопирован</string>
+    <string name="empty">Пусто!</string>
+    <string name="empty_history_comment">Самое время посетить что-нибудь интересное!</string>
+    <string name="empty_favourite_comment_1">Используйте </string>
+    <string name="empty_favourite_comment_2">для добавления в</string>
+    <string name="empty_favourite_comment_3">избранные</string>
+
+    <string name="nothing_found_header">По вашему запросу ничего не найдено!</string>
+    <string name="nothing_found_comment">Попробуйте изменить фильтры предпочтений, диапазон среднего чека или категорию места</string>
 </resources>

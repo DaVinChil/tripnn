@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.entity.UserInfo
 import ru.nn.tripnn.domain.repository.UserRepository
-import ru.nn.tripnn.domain.util.Resource
+import ru.nn.tripnn.domain.util.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
 
@@ -19,33 +20,33 @@ import javax.inject.Inject
 class AccountViewModel @Inject constructor(
     @Fake private val userRepository: UserRepository
 ) : ViewModel() {
-    var userState by mutableStateOf(UserState())
+    var userInfo by mutableStateOf(ResourceState<UserInfo>())
         private set
 
-    init {
+    fun init() {
         loadUserState()
     }
 
     private fun loadUserState() {
         viewModelScope.launch {
-            userState = userState.copy(
+            userInfo = userInfo.copy(
                 isLoading = true,
                 error = null
             )
 
             when(val result = userRepository.getUserInfo()) {
-                is Resource.Success -> {
-                    userState = userState.copy(
+                is RemoteResource.Success -> {
+                    userInfo = userInfo.copy(
                         isLoading = false,
                         error = null,
-                        userInfo = result.data
+                        value = result.data
                     )
                 }
-                is Resource.Error -> {
-                    userState = userState.copy(
+                is RemoteResource.Error -> {
+                    userInfo = userInfo.copy(
                         isLoading = false,
                         error = result.message,
-                        userInfo = null
+                        value = null
                     )
                 }
             }
@@ -68,9 +69,3 @@ class AccountViewModel @Inject constructor(
 
     }
 }
-
-data class UserState(
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val userInfo: UserInfo? = null
-)
