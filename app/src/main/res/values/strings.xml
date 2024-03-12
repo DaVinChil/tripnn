@@ -146,4 +146,7 @@
 
     <string name="nothing_found_header">Nothing was found for your search!</string>
     <string name="nothing_found_comment">Try changing the preference filters, the range of the average check, or the location category</string>
+
+    <string name="close">Close</string>
+    <string name="of">of</string>
 </resources>

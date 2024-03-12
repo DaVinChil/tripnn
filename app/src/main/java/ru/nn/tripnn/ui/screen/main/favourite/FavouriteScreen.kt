@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -312,7 +314,8 @@ fun RoutesColumn(
             onDismissRequest = { showRouteInfo = false },
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.background,
-            dragHandle = { DragHandle() }
+            dragHandle = { DragHandle() },
+            windowInsets = WindowInsets(0)
         ) {
             RouteInfoBottomSheetContent(
                 route = pickedRoute,
@@ -395,6 +398,7 @@ fun RouteInfoBottomSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(5f / 6f)
+            .navigationBarsPadding()
             .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
     ) {
         Column {

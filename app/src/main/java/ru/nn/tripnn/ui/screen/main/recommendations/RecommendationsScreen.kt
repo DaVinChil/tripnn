@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,7 +49,6 @@ import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
-import ru.nn.tripnn.ui.screen.main.home.LoadingRecommendedRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -151,7 +151,8 @@ fun RecommendationsScreen(
                 onDismissRequest = { showRouteInfo = false },
                 sheetState = sheetState,
                 dragHandle = { DragHandle() },
-                containerColor = MaterialTheme.colorScheme.background
+                containerColor = MaterialTheme.colorScheme.background,
+                windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
                     removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },

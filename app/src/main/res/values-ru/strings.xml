@@ -149,4 +149,7 @@
 
     <string name="nothing_found_header">По вашему запросу ничего не найдено!</string>
     <string name="nothing_found_comment">Попробуйте изменить фильтры предпочтений, диапазон среднего чека или категорию места</string>
+
+    <string name="close">Закрыть</string>
+    <string name="of">из</string>
 </resources>
