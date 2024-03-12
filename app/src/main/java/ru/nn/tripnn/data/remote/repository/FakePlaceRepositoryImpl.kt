@@ -28,4 +28,9 @@ class FakePlaceRepositoryImpl @Inject constructor(
     override suspend fun addToFavourite(id: String) {
 
     }
+
+    override suspend fun findById(id: String): RemoteResource<Place> {
+        delay(2000)
+        return RemoteResource.Success(PLACE_1)
+    }
 }

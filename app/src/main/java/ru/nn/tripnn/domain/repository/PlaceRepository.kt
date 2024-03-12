@@ -9,4 +9,5 @@ interface PlaceRepository {
     suspend fun getFavourite(): RemoteResource<List<Place>>
     suspend fun removeFromFavourite(id: String)
     suspend fun addToFavourite(id: String)
+    suspend fun findById(id: String): RemoteResource<Place>
 }
