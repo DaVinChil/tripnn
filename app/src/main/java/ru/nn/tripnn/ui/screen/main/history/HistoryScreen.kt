@@ -32,12 +32,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
-import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.Route
+import ru.nn.tripnn.domain.model.Place
+import ru.nn.tripnn.domain.model.Route
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.DESTINATION
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.PlacesColumn
@@ -55,7 +55,8 @@ fun HistoryScreen(
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit
+    onTakeTheRoute: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -131,7 +132,8 @@ fun HistoryScreen(
                     places = places,
                     removeFromFavourite = removePlaceFromFavourite,
                     addToFavourite = addPlaceToFavourite,
-                    onEmpty = { HistoryEmptyResult() }
+                    onEmpty = { HistoryEmptyResult() },
+                    toPhotos = toPhotos
                 )
             }
             composable(route = DESTINATION[ROUTES_INDEX]) {
@@ -142,7 +144,8 @@ fun HistoryScreen(
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
                     onTakeTheRoute = onTakeTheRoute,
-                    onEmpty = { HistoryEmptyResult() }
+                    onEmpty = { HistoryEmptyResult() },
+                    toPhotos = toPhotos
                 )
             }
         }

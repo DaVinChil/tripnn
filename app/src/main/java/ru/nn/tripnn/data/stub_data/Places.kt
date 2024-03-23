@@ -1,6 +1,6 @@
 package ru.nn.tripnn.data.stub_data
 
-import ru.nn.tripnn.domain.entity.Place
+import ru.nn.tripnn.domain.model.Place
 
 val PLACE_1 = Place(
     photos = listOf(

@@ -25,7 +25,7 @@ fun rememberTripNnNavController(
 class TripNnNavController(
     val navController: NavHostController
 ) {
-    val currentRoute: String?
+    private val currentRoute: String?
         get() = navController.currentDestination?.route
 
     fun upPress() {

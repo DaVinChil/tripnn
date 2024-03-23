@@ -6,16 +6,18 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.repository.HistoryRepository
-import ru.nn.tripnn.domain.repository.PlaceRepository
-import ru.nn.tripnn.domain.repository.RouteRepository
-import ru.nn.tripnn.domain.util.RemoteResource
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.model.Place
+import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.data.remote.history.HistoryRepository
+import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.remote.route.RouteRepository
+import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,10 +28,10 @@ class HistoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     var visitedPlaces by mutableStateOf(ResourceState<List<Place>>())
-    private var savedPlaces = immutableListOf<Place>()
+    private var savedVisitedPlaces = immutableListOf<Place>()
 
     var takenRoutes by mutableStateOf(ResourceState<List<Route>>())
-    private var savedRoutes = immutableListOf<Route>()
+    private var savedTakenRoutes = immutableListOf<Route>()
 
     fun init() {
         loadVisitedPlaces()
@@ -38,44 +40,29 @@ class HistoryViewModel @Inject constructor(
 
     private fun loadVisitedPlaces() {
         viewModelScope.launch {
-            visitedPlaces = visitedPlaces.copy(isLoading = true)
-            when (val result = historyRepository.getPlaces()) {
-                is RemoteResource.Success -> {
-                    visitedPlaces = visitedPlaces.copy(value = result.data)
-                    savedPlaces = result.data ?: listOf()
-                }
-
-                is RemoteResource.Error -> {
-                    visitedPlaces = visitedPlaces.copy(
-                        value = null,
-                        error = result.message,
-                        isError = true
-                    )
-                }
+            if (savedVisitedPlaces.isNotEmpty()) {
+                visitedPlaces = visitedPlaces.copy(value = savedVisitedPlaces)
+                return@launch
             }
-            visitedPlaces = visitedPlaces.copy(isLoading = false)
+
+            resourceStateFromRequest(historyRepository::getPlaces).collectLatest {
+                visitedPlaces = it
+                savedVisitedPlaces = it.value ?: listOf()
+            }
         }
     }
 
     private fun loadTakenRoutes() {
         viewModelScope.launch {
-            takenRoutes = takenRoutes.copy(isLoading = true)
-            when (val result = historyRepository.getRoutes()) {
-                is RemoteResource.Success -> {
-                    takenRoutes = takenRoutes.copy(value = result.data)
-                    savedRoutes = result.data ?: listOf()
-                }
-
-                is RemoteResource.Error -> {
-                    takenRoutes = takenRoutes.copy(
-                        value = null,
-                        error = result.message,
-                        isError = true
-                    )
-                    savedRoutes = listOf()
-                }
+            if (savedTakenRoutes.isNotEmpty()) {
+                takenRoutes = takenRoutes.copy(value = savedTakenRoutes)
+                return@launch
             }
-            takenRoutes = takenRoutes.copy(isLoading = false)
+
+            resourceStateFromRequest(historyRepository::getRoutes).collectLatest {
+                takenRoutes = it
+                savedTakenRoutes = it.value ?: listOf()
+            }
         }
     }
 
@@ -104,22 +91,22 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun filterRoutes(word: String) {
-        val filtered = mutableListOf<Route>()
-        savedRoutes.forEach {
-            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
-                filtered.add(it)
-            }
-        }
+        val filtered = filterByWord(word, savedTakenRoutes, Route::name)
         takenRoutes = takenRoutes.copy(value = filtered)
     }
 
     fun filterPlaces(word: String) {
-        val filtered = mutableListOf<Place>()
-        savedPlaces.forEach {
-            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
+        val filtered = filterByWord(word, savedVisitedPlaces, Place::name)
+        visitedPlaces = visitedPlaces.copy(value = filtered)
+    }
+
+    private fun <T> filterByWord(word: String, list: List<T>, getName: T.() -> String): List<T> {
+        val filtered = mutableListOf<T>()
+        list.forEach {
+            if (word.isBlank() || it.getName().contains(word, ignoreCase = true)) {
                 filtered.add(it)
             }
         }
-        visitedPlaces = visitedPlaces.copy(value = filtered)
+        return filtered
     }
 }

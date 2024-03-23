@@ -36,10 +36,6 @@ import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.Currency
-import ru.nn.tripnn.ui.screen.Language
-import ru.nn.tripnn.ui.screen.Theme
-import ru.nn.tripnn.ui.screen.getEntryById
 import ru.nn.tripnn.ui.screen.main.account.BottomSheetDialog
 import ru.nn.tripnn.ui.theme.TripNNTheme
 

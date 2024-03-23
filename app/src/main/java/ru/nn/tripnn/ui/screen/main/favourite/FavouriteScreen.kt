@@ -6,7 +6,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +55,8 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.data.stub_data.ROUTES
 import ru.nn.tripnn.data.stub_data.ROUTE_1
-import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.Route
+import ru.nn.tripnn.domain.model.Place
+import ru.nn.tripnn.domain.model.Route
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DragHandle
@@ -68,7 +69,7 @@ import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -88,7 +89,8 @@ fun FavouriteScreen(
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit
+    onTakeTheRoute: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -164,7 +166,8 @@ fun FavouriteScreen(
                     places = favouritePlaces,
                     removeFromFavourite = removePlaceFromFavourite,
                     addToFavourite = addPlaceToFavourite,
-                    onEmpty = { FavouriteEmptyResult() }
+                    onEmpty = { FavouriteEmptyResult() },
+                    toPhotos = toPhotos
                 )
             }
             composable(route = DESTINATION[ROUTES_INDEX]) {
@@ -175,7 +178,8 @@ fun FavouriteScreen(
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
                     onTakeTheRoute = onTakeTheRoute,
-                    onEmpty = { FavouriteEmptyResult() }
+                    onEmpty = { FavouriteEmptyResult() },
+                    toPhotos = toPhotos
                 )
             }
         }
@@ -188,7 +192,8 @@ fun PlacesColumn(
     onEmpty: @Composable () -> Unit,
     places: ResourceState<List<Place>>,
     removeFromFavourite: (String) -> Unit,
-    addToFavourite: (String) -> Unit
+    addToFavourite: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     if (places.isError) {
         InternetProblem()
@@ -241,7 +246,8 @@ fun PlacesColumn(
             onDismissRequest = { showCardInfo = false },
             sheetState = sheetState,
             removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
-            addToFavourite = { addToFavourite(pickedPlace.id) }
+            addToFavourite = { addToFavourite(pickedPlace.id) },
+            toPhotos = toPhotos
         )
     }
 }
@@ -262,7 +268,8 @@ fun RoutesColumn(
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit
+    onTakeTheRoute: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     if (routes.isError) {
         InternetProblem()
@@ -323,7 +330,8 @@ fun RoutesColumn(
                 addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
                 removePlaceFromFavourite = removePlaceFromFavourite,
                 addPlaceToFavourite = addPlaceToFavourite,
-                onTakeTheRoute = onTakeTheRoute
+                onTakeTheRoute = onTakeTheRoute,
+                toPhotos = toPhotos
             )
         }
     }
@@ -387,13 +395,15 @@ fun RouteInfoBottomSheetContent(
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit
+    onTakeTheRoute: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
-    var favourite by remember { mutableStateOf(route.favourite) }
+    var favourite by rememberSaveable { mutableStateOf(route.favourite) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showCardInfo by remember { mutableStateOf(false) }
-    var pickedPlace by remember { mutableStateOf(route.places[0]) }
+    var showCardInfo by rememberSaveable { mutableStateOf(false) }
+    var pickedPlace by rememberSaveable { mutableIntStateOf(0) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -469,7 +479,7 @@ fun RouteInfoBottomSheetContent(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(items = route.places, key = Place::id) { place ->
+                itemsIndexed(items = route.places, key = { index, place -> place.id }) { index, place ->
                     val option: @Composable () -> Unit = if (place.favourite) {
                         @Composable {
                             RemoveFromFavouriteGoldCardOption(
@@ -481,7 +491,7 @@ fun RouteInfoBottomSheetContent(
                     DraggableCard(option1 = option) {
                         PlaceCard(
                             place = place,
-                            onCardClick = { showCardInfo = true; pickedPlace = place },
+                            onCardClick = { showCardInfo = true; pickedPlace = index },
                             shadowColor = Color.Black.copy(alpha = 0.2f),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -499,11 +509,12 @@ fun RouteInfoBottomSheetContent(
 
     if (showCardInfo) {
         PlaceInfoBottomSheet(
-            place = pickedPlace,
+            place = route.places[pickedPlace],
             sheetState = sheetState,
             onDismissRequest = { showCardInfo = false },
-            removeFromFavourite = { removePlaceFromFavourite(pickedPlace.id) },
-            addToFavourite = { addPlaceToFavourite(pickedPlace.id) }
+            removeFromFavourite = { removePlaceFromFavourite(route.places[pickedPlace].id) },
+            addToFavourite = { addPlaceToFavourite(route.places[pickedPlace].id) },
+            toPhotos = toPhotos
         )
     }
 }
@@ -522,7 +533,8 @@ fun FavouriteScreenPreview() {
             removeRouteFromFavourite = { /*TODO*/ },
             addPlaceToFavourite = { /*TODO*/ },
             addRouteToFavourite = { /*TODO*/ },
-            onTakeTheRoute = {}
+            onTakeTheRoute = {},
+            toPhotos = {_,_->}
         )
     }
 }
@@ -542,7 +554,8 @@ fun RouteInfoPreview() {
                 addRouteToFavourite = { },
                 removePlaceFromFavourite = {},
                 addPlaceToFavourite = {},
-                onTakeTheRoute = {}
+                onTakeTheRoute = {},
+                toPhotos = {_, _ -> }
             )
         }
     }

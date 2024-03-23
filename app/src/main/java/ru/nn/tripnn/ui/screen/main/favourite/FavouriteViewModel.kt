@@ -6,15 +6,17 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.repository.PlaceRepository
-import ru.nn.tripnn.domain.repository.RouteRepository
-import ru.nn.tripnn.domain.util.RemoteResource
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.model.Place
+import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.remote.route.RouteRepository
+import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,56 +38,27 @@ class FavouriteViewModel @Inject constructor(
 
     private fun loadFavouritePlaces() {
         viewModelScope.launch {
-            favouritePlaces = favouritePlaces.copy(isLoading = true)
-
-            when (val result = placeRepository.getFavourite()) {
-                is RemoteResource.Success -> {
-                    favouritePlaces = favouritePlaces.copy(
-                        value = result.data,
-                        error = null,
-                        isError = false
-                    )
-                    savedFavouritePlaces = result.data ?: listOf()
-                }
-
-                is RemoteResource.Error -> {
-                    favouritePlaces = favouritePlaces.copy(
-                        value = null,
-                        error = result.message,
-                        isError = true
-                    )
-                }
+            if (savedFavouritePlaces.isNotEmpty()) {
+                favouritePlaces = favouritePlaces.copy(value = savedFavouritePlaces)
             }
 
-            favouritePlaces = favouritePlaces.copy(isLoading = false)
+            resourceStateFromRequest(placeRepository::getFavourite).collectLatest {
+                favouritePlaces = it
+                savedFavouritePlaces = it.value ?: listOf()
+            }
         }
     }
 
     private fun loadFavouriteRoutes() {
         viewModelScope.launch {
-            favouriteRoutes = favouriteRoutes.copy(isLoading = true)
-            when (val result = routeRepository.getFavourite()) {
-                is RemoteResource.Success -> {
-                    favouriteRoutes = favouriteRoutes.copy(
-                        value = result.data,
-                        error = null,
-                        isError = false
-                    )
-                    savedFavouriteRoutes = result.data ?: listOf()
-                }
-
-                is RemoteResource.Error -> {
-                    favouriteRoutes = favouriteRoutes.copy(
-                        value = null,
-                        error = result.message,
-                        isError = true
-                    )
-
-                    savedFavouriteRoutes = listOf()
-                }
+            if (savedFavouriteRoutes.isNotEmpty()) {
+                favouriteRoutes = favouriteRoutes.copy(value = savedFavouriteRoutes)
             }
 
-            favouriteRoutes = favouriteRoutes.copy(isLoading = false)
+            resourceStateFromRequest(routeRepository::getFavourite).collectLatest {
+                favouriteRoutes = it
+                savedFavouriteRoutes = it.value ?: listOf()
+            }
         }
     }
 
@@ -114,22 +87,23 @@ class FavouriteViewModel @Inject constructor(
     }
 
     fun filterRoutes(word: String) {
-        val filtered = mutableListOf<Route>()
-        savedFavouriteRoutes.forEach {
-            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
-                filtered.add(it)
-            }
-        }
+        val filtered = filterByWord(word, savedFavouriteRoutes, Route::name)
         favouriteRoutes = favouriteRoutes.copy(value = filtered)
     }
 
     fun filterPlaces(word: String) {
-        val filtered = mutableListOf<Place>()
-        savedFavouritePlaces.forEach {
-            if (word.isBlank() || it.name.contains(word, ignoreCase = true)) {
+        val filtered = filterByWord(word, savedFavouritePlaces, Place::name)
+        favouritePlaces = favouritePlaces.copy(value = filtered)
+    }
+
+    private fun <T> filterByWord(word: String, list: List<T>, getName: T.() -> String): List<T> {
+        val filtered = mutableListOf<T>()
+        list.forEach {
+            if (word.isBlank() || it.getName().contains(word, ignoreCase = true)) {
                 filtered.add(it)
             }
         }
-        favouritePlaces = favouritePlaces.copy(value = filtered)
+
+        return filtered
     }
 }

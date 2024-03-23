@@ -9,16 +9,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.entity.UserInfo
-import ru.nn.tripnn.domain.repository.UserRepository
-import ru.nn.tripnn.domain.util.RemoteResource
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.model.UserInfo
+import ru.nn.tripnn.data.remote.userinfo.UserInfoRepository
+import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import javax.inject.Inject
 
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(
-    @Fake private val userRepository: UserRepository
+    @Fake private val userInfoRepository: UserInfoRepository
 ) : ViewModel() {
     var userInfo by mutableStateOf(ResourceState<UserInfo>())
         private set
@@ -34,7 +34,7 @@ class AccountViewModel @Inject constructor(
                 error = null
             )
 
-            when(val result = userRepository.getUserInfo()) {
+            when(val result = userInfoRepository.getUserInfo()) {
                 is RemoteResource.Success -> {
                     userInfo = userInfo.copy(
                         isLoading = false,

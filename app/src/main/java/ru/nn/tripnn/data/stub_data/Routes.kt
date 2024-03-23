@@ -1,6 +1,6 @@
 package ru.nn.tripnn.data.stub_data
 
-import ru.nn.tripnn.domain.entity.Route
+import ru.nn.tripnn.domain.model.Route
 import java.util.Date
 
 val ROUTE_1 = Route(

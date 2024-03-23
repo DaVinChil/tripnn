@@ -8,9 +8,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import ru.nn.tripnn.data.local.token.TokenRepositoryImpl
-import ru.nn.tripnn.data.remote.FakeAuthenticationServiceImpl
-import ru.nn.tripnn.domain.repository.AuthenticationService
-import ru.nn.tripnn.domain.repository.TokenRepository
+import ru.nn.tripnn.data.remote.auth.FakeAuthenticationServiceImpl
+import ru.nn.tripnn.data.remote.auth.AuthenticationService
+import ru.nn.tripnn.data.local.token.TokenRepository
 import javax.inject.Singleton
 
 @Module

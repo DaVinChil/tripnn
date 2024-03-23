@@ -60,11 +60,11 @@ import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.domain.entity.UserInfo
+import ru.nn.tripnn.domain.model.UserInfo
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.darkShimmer
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily

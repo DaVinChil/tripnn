@@ -8,12 +8,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.entity.RegistrationData
-import ru.nn.tripnn.domain.repository.AuthenticationService
-import ru.nn.tripnn.domain.repository.TokenRepository
-import ru.nn.tripnn.domain.util.RemoteResource
-import ru.nn.tripnn.ui.event.Dismiss
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.model.RegistrationData
+import ru.nn.tripnn.data.remote.auth.AuthenticationService
+import ru.nn.tripnn.data.local.token.TokenRepository
+import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.screen.authentication.event.Dismiss
 import javax.inject.Inject
 
 @HiltViewModel

@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,9 +46,11 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,8 +74,8 @@ import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTES
 import ru.nn.tripnn.data.stub_data.ROUTE_1
-import ru.nn.tripnn.domain.entity.Route
-import ru.nn.tripnn.domain.screen.HomeScreenData
+import ru.nn.tripnn.domain.model.CurrentRoute
+import ru.nn.tripnn.domain.model.Route
 import ru.nn.tripnn.ui.common.CARD_WIDTH
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.LoadingCard
@@ -80,7 +83,7 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.lightShimmer
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -89,21 +92,21 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun HomeScreen(
-    homeScreenState: ResourceState<HomeScreenData>,
+    recommendedRoutes: ResourceState<List<Route>>,
+    currentRoute: ResourceState<CurrentRoute>,
     onAccountClick: () -> Unit,
     onHistoryClick: () -> Unit,
     onFavouriteClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
-    onCurRouteClick: (() -> Unit)? = null,
+    onCurrentRouteClick: () -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
-    val screenData = homeScreenState.value
-
     val scope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
@@ -120,9 +123,9 @@ fun HomeScreen(
         drawerState = drawerState
     ) {
         HomeContent(
-            curRoutePercent = screenData?.curRoutePercent,
-            recRoutes = screenData?.recommendedRoutes ?: listOf(),
-            onCurRouteClick = onCurRouteClick,
+            currentRoute = currentRoute.value,
+            recommendedRoutes = recommendedRoutes.value ?: listOf(),
+            onCurrentRouteClick = onCurrentRouteClick,
             onAllRoutesClick = onAllRoutesClick,
             onNewRouteClick = onNewRouteClick,
             onMenuClick = {
@@ -134,8 +137,9 @@ fun HomeScreen(
             addRouteToFavourite = addRouteToFavourite,
             removePlaceFromFavourite = removePlaceFromFavourite,
             addPlaceToFavourite = addPlaceToFavourite,
-            isLoading = homeScreenState.isLoading,
-            isError = homeScreenState.isError
+            isLoading = currentRoute.isLoading || recommendedRoutes.isLoading,
+            isError = currentRoute.isError || recommendedRoutes.isError,
+            toPhotos = toPhotos
         )
     }
 }
@@ -145,27 +149,27 @@ fun HomeScreen(
 fun HomeContent(
     isLoading: Boolean,
     isError: Boolean,
-    recRoutes: List<Route>,
+    recommendedRoutes: List<Route>,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
-    curRoutePercent: Int?,
-    onCurRouteClick: (() -> Unit)? = null,
+    currentRoute: CurrentRoute?,
+    onCurrentRouteClick: () -> Unit,
     onMenuClick: () -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(onMenuClick = onMenuClick)
         }
     ) { paddings ->
-        var showSearch by remember { mutableStateOf(false) }
-        var showRouteInfo by remember { mutableStateOf(false) }
-        var pickedRoute by remember { mutableStateOf(ROUTE_1) }
+        var showSearch by rememberSaveable { mutableStateOf(false) }
+        var showRouteInfo by rememberSaveable { mutableStateOf(false) }
+        var pickedRoute by rememberSaveable { mutableIntStateOf(0) }
 
         if (isError) {
             InternetProblem()
@@ -204,9 +208,9 @@ fun HomeContent(
                     LoadingRecommendedRoutes()
                 } else {
                     RecommendedRoutes(
-                        routes = recRoutes,
+                        routes = recommendedRoutes,
                         onRouteClick = {
-                            pickedRoute = recRoutes[it]
+                            pickedRoute = it
                             showRouteInfo = true
                         }
                     )
@@ -231,10 +235,10 @@ fun HomeContent(
                         onClick = onNewRouteClick
                     )
                 }
-                if (onCurRouteClick != null && curRoutePercent != null) {
+                if (currentRoute != null) {
                     CurrentRouteBar(
-                        percent = curRoutePercent,
-                        onClick = onCurRouteClick
+                        percent = currentRoute.currentPlaceIndex * 100 / currentRoute.route.places.size,
+                        onClick = onCurrentRouteClick
                     )
                 } else if (isLoading) {
                     LoadingCurrentRouteBar()
@@ -243,7 +247,7 @@ fun HomeContent(
         }
 
         if (showSearch) {
-            SearchPlaceBottomSheet(onDismissRequest = { showSearch = false })
+            SearchPlaceBottomSheet(onDismissRequest = { showSearch = false }, toPhotos = toPhotos)
         }
 
         if (showRouteInfo) {
@@ -256,12 +260,13 @@ fun HomeContent(
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
-                    removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
-                    addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes[pickedRoute].id) },
+                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes[pickedRoute].id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    route = pickedRoute,
-                    onTakeTheRoute = { TODO() }
+                    route = recommendedRoutes[pickedRoute],
+                    onTakeTheRoute = { TODO() },
+                    toPhotos = toPhotos
                 )
             }
         }
@@ -395,7 +400,7 @@ fun InfiniteCarousel(
 ) {
     if (count == 0) return
 
-    val state = rememberPagerState(pageCount = { Int.MAX_VALUE }, initialPage = 500)
+    val state = rememberPagerState(pageCount = { 10000 }, initialPage = 5000)
     val flingBehavior = PagerDefaults.flingBehavior(
         state = state,
         pagerSnapDistance = PagerSnapDistance.atMost(10),
@@ -530,6 +535,7 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.weight(1f))
+
             Text(
                 text = stringResource(id = R.string.new_route),
                 fontFamily = montserratFamily,
@@ -538,8 +544,10 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.tertiary,
                 textAlign = TextAlign.Center,
                 lineHeight = lineHeight,
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-0.5).sp,
+                modifier = Modifier.width(IntrinsicSize.Min)
             )
+
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
                 MontsText(
                     text = stringResource(id = R.string.create),
@@ -657,14 +665,10 @@ fun HomeScreenPreview() {
         ) {
             Box {
                 HomeScreen(
-                    homeScreenState = ResourceState(
-                        value = HomeScreenData(
-                            recommendedRoutes = ROUTES,
-                            curRoutePercent = 33
-                        )
-                    ),
+                    currentRoute = ResourceState(CurrentRoute(route = ROUTE_1, currentPlaceIndex = 2)),
+                    recommendedRoutes = ResourceState(ROUTES),
                     onAllRoutesClick = {},
-                    onCurRouteClick = {},
+                    onCurrentRouteClick = {},
                     onNewRouteClick = {},
                     onAccountClick = {},
                     onFavouriteClick = {},
@@ -673,7 +677,8 @@ fun HomeScreenPreview() {
                     addPlaceToFavourite = {},
                     addRouteToFavourite = {},
                     removePlaceFromFavourite = {},
-                    removeRouteFromFavourite = {}
+                    removeRouteFromFavourite = {},
+                    toPhotos = { _, _ -> }
                 )
             }
         }

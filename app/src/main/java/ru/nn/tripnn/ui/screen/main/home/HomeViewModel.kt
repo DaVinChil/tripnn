@@ -6,53 +6,49 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import ru.nn.tripnn.data.remote.currentroute.CurrentRouteRepository
+import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.remote.route.RouteRepository
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.repository.PlaceRepository
-import ru.nn.tripnn.domain.repository.RouteRepository
-import ru.nn.tripnn.domain.repository.ScreenDataRepository
-import ru.nn.tripnn.domain.screen.HomeScreenData
-import ru.nn.tripnn.domain.util.RemoteResource
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.model.CurrentRoute
+import ru.nn.tripnn.domain.model.HomeScreenData
+import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    @Fake private val screenDataRepository: ScreenDataRepository,
     @Fake private val placeRepository: PlaceRepository,
-    @Fake private val routeRepository: RouteRepository
+    @Fake private val routeRepository: RouteRepository,
+    @Fake private val currentRouteRepository: CurrentRouteRepository
 ) : ViewModel() {
     var homeScreenState by mutableStateOf(ResourceState<HomeScreenData>())
+        private set
+    var currentRoute by mutableStateOf(ResourceState<CurrentRoute>())
+        private set
+    var recommendedRoutes by mutableStateOf(ResourceState<List<Route>>())
+        private set
 
-    fun init() {
-        loadHomeScreenState()
+    init {
+        loadCurrentRoute()
+        loadRecommendedRoutes()
     }
 
-    private fun loadHomeScreenState() {
+    private fun loadCurrentRoute() {
         viewModelScope.launch {
-            homeScreenState = homeScreenState.copy(
-                isLoading = true,
-                isError = false,
-                error = null
-            )
+            resourceStateFromRequest { currentRouteRepository.getCurrentRoute() }.collectLatest {
+                currentRoute = it
+            }
+        }
+    }
 
-            when(val result = screenDataRepository.getHomeScreenData()) {
-                is RemoteResource.Success -> {
-                    homeScreenState = homeScreenState.copy(
-                        isLoading = false,
-                        isError = false,
-                        value = result.data,
-                        error = null
-                    )
-                }
-                is RemoteResource.Error -> {
-                    homeScreenState = homeScreenState.copy(
-                        isLoading = false,
-                        isError = true,
-                        error = result.message,
-                        value = null
-                    )
-                }
+    private fun loadRecommendedRoutes() {
+        viewModelScope.launch {
+            resourceStateFromRequest { routeRepository.getRecommendations() }.collectLatest {
+                recommendedRoutes = it
             }
         }
     }

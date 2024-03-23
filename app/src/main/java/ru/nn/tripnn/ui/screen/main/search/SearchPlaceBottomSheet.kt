@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -51,16 +53,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,8 +96,8 @@ import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.SearchFilters
+import ru.nn.tripnn.domain.model.Place
+import ru.nn.tripnn.domain.model.SearchFilters
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DragHandle
@@ -105,7 +108,7 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.Rating
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -160,7 +163,10 @@ const val SEARCH_RESULT_ROUTE = "search_result"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
+fun SearchPlaceBottomSheet(
+    onDismissRequest: () -> Unit,
+    toPhotos: (String, Int) -> Unit
+) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val placesViewModel = hiltViewModel<AllPlacesViewModel>()
 
@@ -183,6 +189,7 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
                     }
                 })
             }
+
             composable(
                 route = SEARCH_RESULT_ROUTE,
                 popExitTransition = { slideOutHorizontally { it } },
@@ -194,6 +201,7 @@ fun SearchPlaceBottomSheet(onDismissRequest: () -> Unit) {
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
                     popBack = navController::popBackStack,
+                    toPhotos = toPhotos
                 )
             }
         }
@@ -263,8 +271,7 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
             RangeSliderWithPointers(
                 range = 0f..100f,
                 sliderPosition = priceSlider,
-                onValueChange = { priceSlider = it },
-                steps = 10
+                onValueChange = { priceSlider = it }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -284,7 +291,7 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
                 currentCategoryTypes.forEachIndexed { i, type ->
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
+                            .clip(RoundedCornerShape(8.dp))
                             .background(color = if (picked[i]) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
                             .clickable(
                                 indication = null,
@@ -339,45 +346,71 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RangeSliderWithPointers(
     range: ClosedFloatingPointRange<Float>,
     sliderPosition: ClosedFloatingPointRange<Float>,
     onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
-    steps: Int
+    steps: Int = 0
 ) {
-    var sliderWidth by remember { mutableFloatStateOf(0f) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .onGloballyPositioned {
-                sliderWidth = it.size.width.toFloat()
+    RangeSlider(
+        modifier = Modifier.fillMaxWidth(),
+        value = sliderPosition,
+        steps = steps,
+        onValueChange = onValueChange,
+        valueRange = range,
+        onValueChangeFinished = {},
+        startThumb = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SliderPointer(text = sliderPosition.start.toInt().toString() + "₽")
+                Spacer(modifier = Modifier.height(5.dp))
+                SliderDefaults.Thumb(interactionSource = remember { MutableInteractionSource() })
             }
-    ) {
+        },
+        endThumb = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SliderPointer(text = sliderPosition.endInclusive.toInt().toString() + "₽")
+                Spacer(modifier = Modifier.height(5.dp))
+                SliderDefaults.Thumb(interactionSource = remember { MutableInteractionSource() })
+            }
+        },
+        track = {
+            // Тут накастылил, хз как по другому. Нужно что бы трэк был на уровне кружочков слайдер поинтеров,
+            // а не по центру всего слайдер поинтера. Если не совсем понятно, то убери параметр track.
 
-        Box {
-            SliderPointer(
-                sliderWidth = sliderWidth,
-                valueOnSlider = sliderPosition.start,
-                max = range.endInclusive,
-                infoPrefix = "₽"
-            )
-            SliderPointer(
-                sliderWidth = sliderWidth,
-                valueOnSlider = sliderPosition.endInclusive,
-                max = range.endInclusive,
-                infoPrefix = "₽"
-            )
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.alpha(0f)
+                ) {
+                    SliderPointer(text = "")
+                    Spacer(modifier = Modifier.height(5.dp))
+                    SliderDefaults.Thumb(
+                        enabled = false,
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SliderDefaults.Thumb(
+                        enabled = false,
+                        interactionSource = remember { MutableInteractionSource() },
+                        modifier = Modifier.alpha(0f)
+                    )
+                    SliderDefaults.Track(sliderPositions = it)
+                }
+            }
         }
-        RangeSlider(
-            value = sliderPosition,
-            steps = steps,
-            onValueChange = onValueChange,
-            valueRange = range,
-            onValueChangeFinished = {}
-        )
-    }
+    )
 }
 
 @Composable
@@ -419,6 +452,33 @@ fun SliderPointer(sliderWidth: Float, valueOnSlider: Float, max: Float, infoPref
     }
 }
 
+@Composable
+fun SliderPointer(text: String) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.onSecondary)
+                .padding(vertical = 10.dp, horizontal = 15.dp)
+                .animateContentSize()
+        ) {
+            MontsText(
+                text = text,
+                fontSize = 12.sp,
+                color = Color.White
+            )
+        }
+        Icon(
+            modifier = Modifier.offset(y = (-0.18).dp),
+            painter = painterResource(id = R.drawable.slider_shard_pointer),
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.onSecondary
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchResultScreen(
@@ -426,7 +486,8 @@ fun SearchResultScreen(
     result: ResourceState<List<Place>>,
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit,
-    popBack: () -> Unit
+    popBack: () -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     if (result.isError) {
         InternetProblem()
@@ -513,6 +574,7 @@ fun SearchResultScreen(
                     } else {
                         @Composable { AddToFavouriteCardOption(onClick = { addToFavourite(place.id) }) }
                     }
+
                     DraggableCard(option1 = option) {
                         PlaceCard(
                             place = place,
@@ -534,7 +596,8 @@ fun SearchResultScreen(
                 sheetState = sheetState,
                 place = pickedPlace,
                 removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
-                addToFavourite = { addToFavourite(pickedPlace.id) }
+                addToFavourite = { addToFavourite(pickedPlace.id) },
+                toPhotos = toPhotos
             )
         }
     }
@@ -580,7 +643,8 @@ fun PlaceInfoBottomSheet(
     sheetState: SheetState,
     place: Place,
     removeFromFavourite: () -> Unit,
-    addToFavourite: () -> Unit
+    addToFavourite: () -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     var showSnackBar by remember { mutableStateOf(false) }
 
@@ -588,7 +652,8 @@ fun PlaceInfoBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         dragHandle = { DragHandle() },
-        containerColor = /*MaterialTheme.colorScheme.background*/ Color.Transparent
+        containerColor = Color.Transparent,
+        windowInsets = WindowInsets(0)
     ) {
         Box {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -596,15 +661,18 @@ fun PlaceInfoBottomSheet(
                     contentPadding = PaddingValues(horizontal = 10.dp),
                     horizontalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
-                    items(items = place.photos, key = { it }) {
+                    itemsIndexed(items = place.photos, key = { _, url -> url }) { index, url ->
                         AsyncImage(
-                            model = it,
+                            model = url,
                             contentDescription = stringResource(id = R.string.image),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(MaterialTheme.colorScheme.onSecondary)
                                 .width(220.dp)
-                                .height(160.dp),
+                                .height(160.dp)
+                                .clickable {
+                                    toPhotos(place.id, index)
+                                },
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -623,8 +691,9 @@ fun PlaceInfoBottomSheet(
                         )
                         .background(MaterialTheme.colorScheme.background)
                         .padding(top = 10.dp)
+                        .navigationBarsPadding()
                 ) {
-                    var favourite by remember { mutableStateOf(place.favourite) }
+                    var favourite by rememberSaveable { mutableStateOf(place.favourite) }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -864,7 +933,8 @@ fun CardInfoBottomSheetPreview() {
                 removeFromFavourite = { },
                 addToFavourite = {},
                 sheetState = rememberModalBottomSheetState(),
-                onDismissRequest = {}
+                onDismissRequest = {},
+                toPhotos = { _, _ -> }
             )
         }
     }

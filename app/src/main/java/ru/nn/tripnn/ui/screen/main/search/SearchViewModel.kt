@@ -9,11 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.entity.Place
-import ru.nn.tripnn.domain.entity.SearchFilters
-import ru.nn.tripnn.domain.repository.PlaceRepository
-import ru.nn.tripnn.domain.util.RemoteResource
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.model.Place
+import ru.nn.tripnn.domain.model.SearchFilters
+import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import javax.inject.Inject
 
 @HiltViewModel

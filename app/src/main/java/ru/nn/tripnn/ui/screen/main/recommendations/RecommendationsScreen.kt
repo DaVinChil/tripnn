@@ -38,14 +38,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTE_1
-import ru.nn.tripnn.domain.entity.Route
+import ru.nn.tripnn.domain.model.Route
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
@@ -60,7 +60,8 @@ fun RecommendationsScreen(
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit
+    addPlaceToFavourite: (String) -> Unit,
+    toPhotos: (String, Int) -> Unit
 ) {
     if (routes.isError) {
         InternetProblem()
@@ -160,7 +161,8 @@ fun RecommendationsScreen(
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
                     route = pickedRoute,
-                    onTakeTheRoute = { TODO() }
+                    onTakeTheRoute = { TODO() },
+                    toPhotos = toPhotos
                 )
             }
         }

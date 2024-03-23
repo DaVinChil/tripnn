@@ -54,8 +54,7 @@ import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.event.Dismiss
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.screen.authentication.event.Dismiss
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 

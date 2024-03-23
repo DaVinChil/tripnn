@@ -10,9 +10,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import ru.nn.tripnn.ui.screen.AuthenticationViewModel
-import ru.nn.tripnn.ui.screen.authentication.LogInScreen
-import ru.nn.tripnn.ui.screen.authentication.LogInViewModel
+import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
+import ru.nn.tripnn.ui.screen.authentication.LoginScreen
+import ru.nn.tripnn.ui.screen.authentication.LoginViewModel
 import ru.nn.tripnn.ui.screen.authentication.RegistrationScreen
 import ru.nn.tripnn.ui.screen.authentication.RegistrationViewModel
 
@@ -57,7 +57,7 @@ fun NavGraphBuilder.addAuthGraph(
         }
 
         composable(AuthRoutes.LOGIN.route) { backStackEntry ->
-            val logInViewModel = backStackEntry.getViewModel<LogInViewModel>(
+            val logInViewModel = backStackEntry.getViewModel<LoginViewModel>(
                 route = AUTH_GRAPH_ROUTE,
                 navController = navController.navController
             )
@@ -68,7 +68,7 @@ fun NavGraphBuilder.addAuthGraph(
                 }
             }
 
-            LogInScreen(
+            LoginScreen(
                 onForgotClick = { },
                 authenticate = logInViewModel::authenticate,
                 authenticated = logInViewModel.authenticated,

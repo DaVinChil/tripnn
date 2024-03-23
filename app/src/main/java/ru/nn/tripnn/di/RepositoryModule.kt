@@ -1,60 +1,50 @@
 package ru.nn.tripnn.di
 
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.nn.tripnn.data.remote.repository.FakeHistoryRepositoryImpl
-import ru.nn.tripnn.data.remote.repository.FakePlaceRepositoryImpl
-import ru.nn.tripnn.data.remote.repository.FakeRouteRepositoryImpl
-import ru.nn.tripnn.data.remote.repository.FakeScreenDataRepositoryImpl
-import ru.nn.tripnn.data.remote.repository.FakeUserRepositoryImpl
-import ru.nn.tripnn.domain.repository.HistoryRepository
-import ru.nn.tripnn.domain.repository.PlaceRepository
-import ru.nn.tripnn.domain.repository.RouteRepository
-import ru.nn.tripnn.domain.repository.ScreenDataRepository
-import ru.nn.tripnn.domain.repository.UserRepository
+import ru.nn.tripnn.data.remote.currentroute.CurrentRouteRepository
+import ru.nn.tripnn.data.remote.currentroute.CurrentRouteRepositoryImpl
+import ru.nn.tripnn.data.remote.history.FakeHistoryRepositoryImpl
+import ru.nn.tripnn.data.remote.history.HistoryRepository
+import ru.nn.tripnn.data.remote.place.FakePlaceRepositoryImpl
+import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.remote.route.FakeRouteRepositoryImpl
+import ru.nn.tripnn.data.remote.route.RouteRepository
+import ru.nn.tripnn.data.remote.userinfo.FakeUserInfoRepositoryImpl
+import ru.nn.tripnn.data.remote.userinfo.UserInfoRepository
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
+object RepositoryModule {
 
-    @Binds
+    @Provides
     @Singleton
     @Fake
-    abstract fun bindScreenDataRepository(
-        screenDataRepository: FakeScreenDataRepositoryImpl
-    ): ScreenDataRepository
+    fun userInfoRepository(): UserInfoRepository = FakeUserInfoRepositoryImpl()
 
-    @Binds
+    @Provides
     @Singleton
     @Fake
-    abstract fun bindUserRepository(
-        userRepository: FakeUserRepositoryImpl
-    ): UserRepository
+    fun currentRouteRepository(): CurrentRouteRepository = CurrentRouteRepositoryImpl()
 
-    @Binds
+    @Provides
     @Singleton
     @Fake
-    abstract fun bindPlaceRepository(
-        placeRepository: FakePlaceRepositoryImpl
-    ): PlaceRepository
+    fun placeRepository(): PlaceRepository = FakePlaceRepositoryImpl()
 
-    @Binds
+    @Provides
     @Singleton
     @Fake
-    abstract fun bindRouteRepository(
-        routeRepository: FakeRouteRepositoryImpl
-    ): RouteRepository
+    fun routeRepository(): RouteRepository = FakeRouteRepositoryImpl()
 
-    @Binds
+    @Provides
     @Singleton
     @Fake
-    abstract fun bindHistoryRepository(
-        historyRepository: FakeHistoryRepositoryImpl
-    ): HistoryRepository
+    fun historyRepository(): HistoryRepository = FakeHistoryRepositoryImpl()
 }
 
 @Qualifier

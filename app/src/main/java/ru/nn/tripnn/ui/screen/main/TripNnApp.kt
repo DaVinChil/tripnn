@@ -6,24 +6,25 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import ru.nn.tripnn.ui.navigation.AUTH_GRAPH_ROUTE
+import ru.nn.tripnn.ui.navigation.AppRoutes
 import ru.nn.tripnn.ui.navigation.MAIN_GRAPH_ROUTE
 import ru.nn.tripnn.ui.navigation.SPLASH_ROUTE
 import ru.nn.tripnn.ui.navigation.TripNnNavController
 import ru.nn.tripnn.ui.navigation.addAppGraph
 import ru.nn.tripnn.ui.navigation.addAuthGraph
 import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
-import ru.nn.tripnn.ui.screen.AuthenticationViewModel
-import ru.nn.tripnn.ui.screen.Theme
-import ru.nn.tripnn.ui.screen.UiPreferencesViewModel
+import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
+import ru.nn.tripnn.ui.screen.main.settings.Theme
+import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
 import ru.nn.tripnn.ui.screen.main.splash.HeartSplashScreen
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 @Composable
 fun TripNnApp(
-    uiPreferencesViewModel: UiPreferencesViewModel,
+    userSettingsViewModel: UserSettingsViewModel,
     authViewModel: AuthenticationViewModel
 ) {
-    val uiState = uiPreferencesViewModel.uiPreferencesState
+    val uiState = userSettingsViewModel.userSettingsState
 
     TripNNTheme(
         darkTheme = when (uiState.theme) {
@@ -40,7 +41,7 @@ fun TripNnApp(
         ) {
             tripNnNavGraph(
                 navController = tripNnNavController,
-                uiPreferencesViewModel = uiPreferencesViewModel,
+                userSettingsViewModel = userSettingsViewModel,
                 authViewModel = authViewModel
             )
 
@@ -53,7 +54,7 @@ fun TripNnApp(
                             tripNnNavController.navigateTo(AUTH_GRAPH_ROUTE)
                         }
                     },
-                    isLoading = authViewModel.isLoading || uiPreferencesViewModel.isLoading
+                    isLoading = authViewModel.isLoading || userSettingsViewModel.isLoading
                 )
             }
         }
@@ -62,7 +63,7 @@ fun TripNnApp(
 
 private fun NavGraphBuilder.tripNnNavGraph(
     navController: TripNnNavController,
-    uiPreferencesViewModel: UiPreferencesViewModel,
+    userSettingsViewModel: UserSettingsViewModel,
     authViewModel: AuthenticationViewModel
 ) {
     addAuthGraph(
@@ -75,10 +76,16 @@ private fun NavGraphBuilder.tripNnNavGraph(
         navController = navController.navController,
         navigateTo = navController::navigateTo,
         onBack = navController::upPress,
-        uiPreferencesViewModel = uiPreferencesViewModel,
+        userSettingsViewModel = userSettingsViewModel,
         onLeaveAccount = {
             navController.navigateTo(AUTH_GRAPH_ROUTE)
             authViewModel.logout()
+        },
+        navigateToPhotos = { placeId, initial ->
+            navController.navController.navigate(AppRoutes.PHOTOS_ROUTE.route + "/$placeId/$initial") {
+                launchSingleTop = true
+                restoreState = true
+            }
         }
     )
 }

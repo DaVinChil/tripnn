@@ -48,7 +48,7 @@ fun CatalogNavigation(
     )
     Box(
         Modifier
-            .clip(RoundedCornerShape(100))
+            .clip(RoundedCornerShape(8.dp))
             .height(IntrinsicSize.Max)
             .then(modifier)
             .background(MaterialTheme.colorScheme.secondary)
@@ -56,7 +56,7 @@ fun CatalogNavigation(
         Box(
             modifier = Modifier
                 .offset(x = selectorOffset)
-                .clip(RoundedCornerShape(100))
+                .clip(RoundedCornerShape(8.dp))
                 .fillMaxHeight()
                 .fillMaxWidth(1f / catalogs.size)
                 .background(MaterialTheme.colorScheme.primary)
