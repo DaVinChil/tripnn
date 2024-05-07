@@ -13,7 +13,7 @@ import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.SearchFilters
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 

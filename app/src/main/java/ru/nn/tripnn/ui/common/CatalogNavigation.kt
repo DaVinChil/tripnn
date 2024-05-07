@@ -41,7 +41,6 @@ fun CatalogNavigation(
 ) {
     var catalogSize by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current.density
-    val fontSize = 12.sp
     val selectorOffset by animateDpAsState(
         targetValue = (catalogSize / density * chosen).dp,
         label = ""
@@ -82,11 +81,9 @@ fun CatalogNavigation(
                         modifier = Modifier.fillMaxWidth(),
                         color = if (chosen == i) MaterialTheme.colorScheme.background
                         else MaterialTheme.colorScheme.onSecondary,
-                        fontSize = fontSize,
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
-
             }
         }
     }

@@ -54,7 +54,7 @@ fun PrimaryButton(
         ) {
             MontsText(
                 text = text,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.headlineSmall,
                 fontSize = fontSize,
                 color = textColor,
                 maxLines = 1

@@ -81,7 +81,7 @@ fun SettingsScreen(
 
             MontsText(
                 text = stringResource(id = R.string.settings),
-                fontSize = 24.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
@@ -191,8 +191,15 @@ fun Option(
             .clickable(onClick = onClick),
         verticalArrangement = Arrangement.Center
     ) {
-        MontsText(text = title, fontSize = 18.sp)
-        MontsText(text = current, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSecondary)
+        MontsText(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        MontsText(
+            text = current,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSecondary
+        )
     }
 }
 
@@ -209,7 +216,7 @@ fun <T> SettingsBottomSheetDialog(
     BottomSheetDialog(onClose = onClose) {
         MontsText(
             text = title,
-            fontSize = 18.sp,
+            style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
@@ -249,7 +256,7 @@ fun <T> SettingsBottomSheetDialog(
                 ) {
                     MontsText(
                         text = stringResource(id = options[i].getResId()),
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = textColor
                     )
                 }

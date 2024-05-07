@@ -103,8 +103,8 @@ fun BaseCard(
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                MontsText(text = type ?: "", fontSize = 10.sp)
-                MontsText(text = name, fontSize = 16.sp, maxLines = 2)
+                MontsText(text = type ?: "")
+                MontsText(text = name, style = MaterialTheme.typography.labelLarge, maxLines = 2)
                 if (info != null) {
                     Box(
                         contentAlignment = Alignment.BottomStart
@@ -258,8 +258,7 @@ fun CostInfo(cost: String) {
         )
         MontsText(
             text = "$cost ₽",
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.displaySmall
         )
     }
 }
@@ -277,8 +276,7 @@ fun RatingInfo(rating: Double) {
         )
         MontsText(
             text = rating.toString(),
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.displaySmall
         )
     }
 }
@@ -367,7 +365,7 @@ fun CardOption(
             contentDescription = "",
             tint = color
         )
-        MontsText(text = text, fontSize = 10.sp, textAlign = TextAlign.Center, color = color)
+        MontsText(text = text, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, color = color)
     }
 }
 

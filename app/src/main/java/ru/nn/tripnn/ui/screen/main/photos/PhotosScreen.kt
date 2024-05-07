@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,7 +36,7 @@ import coil.compose.AsyncImage
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.ui.common.MontsText
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import kotlin.math.abs
 
@@ -118,7 +119,7 @@ fun PhotosTopAppBar(
             Box(modifier = Modifier.weight(1f)) {
                 MontsText(
                     text = stringResource(id = R.string.close),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
@@ -130,8 +131,7 @@ fun PhotosTopAppBar(
 
             MontsText(
                 text = count.toString() + " " + stringResource(id = R.string.of) + " " + outOf.toString(),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.displayMedium,
                 color = Color.White
             )
 

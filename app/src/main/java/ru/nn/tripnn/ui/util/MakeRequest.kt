@@ -3,7 +3,7 @@ package ru.nn.tripnn.ui.util
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 
 fun <T> resourceStateFromRequest(request: suspend () -> RemoteResource<T>): Flow<ResourceState<T>> =
     flow {

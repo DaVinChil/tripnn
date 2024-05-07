@@ -12,6 +12,7 @@ import ru.nn.tripnn.domain.RegistrationData
 import ru.nn.tripnn.data.remote.auth.AuthenticationService
 import ru.nn.tripnn.data.local.token.TokenRepository
 import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import javax.inject.Inject
 

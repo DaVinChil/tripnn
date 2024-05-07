@@ -65,7 +65,7 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.UserInfoData
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -118,8 +118,7 @@ fun AccountScreen(
 
             MontsText(
                 text = stringResource(R.string.account_txt),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold
+                style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -148,7 +147,7 @@ fun AccountScreen(
                 )
                 MontsText(
                     text = stringResource(id = R.string.change_password),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.clickable {
                         showDialog = true
                         dialogType = DialogType.CHANGE_PASSWORD
@@ -156,7 +155,7 @@ fun AccountScreen(
                 )
                 MontsText(
                     text = stringResource(id = R.string.clear_history),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.clickable {
                         showDialog = true
                         dialogType = DialogType.CLEAR_HISTORY
@@ -164,7 +163,7 @@ fun AccountScreen(
                 )
                 MontsText(
                     text = stringResource(id = R.string.delete_account),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.clickable {
                         showDialog = true
                         dialogType = DialogType.DELETE_ACCOUNT
@@ -172,7 +171,7 @@ fun AccountScreen(
                 )
                 MontsText(
                     text = stringResource(id = R.string.exit),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     color = Color.Red,
                     modifier = Modifier.clickable {
                         showDialog = true
@@ -331,7 +330,7 @@ fun UserInfoBlock(
         MontsText(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = userInfoData.email,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
@@ -433,7 +432,7 @@ fun TwoButtonBottomSheetDialog(
                         )
                     }
                 }
-                MontsText(text = title, fontSize = 18.sp)
+                MontsText(text = title, style = MaterialTheme.typography.titleSmall)
                 Spacer(modifier = Modifier.weight(1f))
             }
 
@@ -441,7 +440,7 @@ fun TwoButtonBottomSheetDialog(
 
             MontsText(
                 text = text,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(0.8f),

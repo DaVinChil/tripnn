@@ -11,7 +11,6 @@ import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.data.remote.auth.AuthenticationService
 import ru.nn.tripnn.data.local.token.TokenRepository
 import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,9 +54,3 @@ class AuthenticationViewModel @Inject constructor(
         }
     }
 }
-data class ResourceState<T>(
-    val value: T? = null,
-    val isError: Boolean = false,
-    val error: String? = null,
-    val isLoading: Boolean = false
-)

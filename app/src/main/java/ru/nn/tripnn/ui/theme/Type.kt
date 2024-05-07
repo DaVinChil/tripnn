@@ -8,27 +8,83 @@ import androidx.compose.ui.unit.sp
 
 // Set of Material typography styles to start with
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
+    bodySmall = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 13.sp
     ),
+    bodyMedium = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp
+    ),
+
     labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    ),
+
+    displaySmall = TextStyle(
+        fontFamily = montserratFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+        fontSize = 9.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp
+    ),
+    displayLarge = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp
+    ),
+
+    headlineSmall = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
+    ),
+
+    titleSmall = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 19.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 25.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = montserratFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 40.sp
     )
-    */
 )

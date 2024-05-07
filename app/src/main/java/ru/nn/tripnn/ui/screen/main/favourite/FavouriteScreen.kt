@@ -69,7 +69,7 @@ import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
@@ -117,7 +117,7 @@ fun FavouriteScreen(
 
         MontsText(
             text = stringResource(id = R.string.favourites),
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -350,8 +350,8 @@ fun FavouriteEmptyResult() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         MontsText(
-            text = stringResource(id = R.string.empty), fontSize = 18.sp,
-            fontWeight = FontWeight.Medium
+            text = stringResource(id = R.string.empty),
+            style = MaterialTheme.typography.displayLarge
         )
         Spacer(modifier = Modifier.height(35.dp))
         MontsText(text = "☹\uFE0F", fontSize = 50.sp)
@@ -367,7 +367,7 @@ fun FavouriteEmptyResult() {
             ) {
                 MontsText(
                     text = stringResource(id = R.string.empty_favourite_comment_1),
-                    fontSize = 16.sp
+                    style = MaterialTheme.typography.labelLarge
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.unselected_bookmark),
@@ -379,13 +379,13 @@ fun FavouriteEmptyResult() {
 
             MontsText(
                 text = stringResource(id = R.string.empty_favourite_comment_2),
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center
             )
 
             MontsText(
                 text = stringResource(id = R.string.empty_favourite_comment_3),
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center
             )
         }
@@ -427,8 +427,7 @@ fun RouteInfoBottomSheetContent(
             ) {
                 MontsText(
                     text = route.name,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.fillMaxWidth(4f / 6f)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
@@ -441,7 +440,7 @@ fun RouteInfoBottomSheetContent(
                             tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(5.dp))
-                        Rating(route.rating, fontSize = 20.sp)
+                        Rating(route.rating, style = MaterialTheme.typography.headlineMedium)
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
@@ -475,7 +474,7 @@ fun RouteInfoBottomSheetContent(
                 Spacer(modifier = Modifier.height(10.dp))
                 MontsText(
                     text = route.desc,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondary
                 )
             }

@@ -83,7 +83,7 @@ import ru.nn.tripnn.ui.common.LoadingCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
@@ -194,13 +194,12 @@ fun HomeContent(
                 ) {
                     MontsText(
                         text = stringResource(id = R.string.recommended_routes),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
+                        style = MaterialTheme.typography.displayMedium
                     )
                     MontsText(
                         modifier = Modifier.clickable(onClick = onAllRoutesClick),
                         text = stringResource(id = R.string.all_txt),
-                        fontSize = 16.sp
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
 
@@ -302,7 +301,10 @@ fun HomeContent(
 @Composable
 fun InternetProblem() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        MontsText(text = "Internet problems", fontSize = 20.sp)
+        MontsText(
+            text = "Internet problems",
+            style = MaterialTheme.typography.headlineLarge
+        )
     }
 }
 
@@ -385,7 +387,7 @@ fun MenuOption(text: String, onClick: () -> Unit) {
         MontsText(
             modifier = Modifier,
             text = text,
-            fontSize = 18.sp,
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }
@@ -514,7 +516,7 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
             )
             MontsText(
                 text = stringResource(id = R.string.all_places_nn_txt),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
@@ -530,8 +532,6 @@ fun NewRouteButton(
     val scale by animateFloatAsState(targetValue = if (pressed) 0.85f else 1f, label = "")
 
     val height = 140.dp
-    val nrTextSize = 40.sp
-    val createTextSize = 12.sp
     val lineHeight = 30.sp
     val yOffset = (-9).dp
 
@@ -566,9 +566,7 @@ fun NewRouteButton(
 
             Text(
                 text = stringResource(id = R.string.new_route),
-                fontFamily = montserratFamily,
-                fontSize = nrTextSize,
-                fontWeight = FontWeight.Black,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.tertiary,
                 textAlign = TextAlign.Center,
                 lineHeight = lineHeight,
@@ -579,7 +577,7 @@ fun NewRouteButton(
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
                 MontsText(
                     text = stringResource(id = R.string.create),
-                    fontSize = createTextSize,
+                    style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.offset(y = yOffset)
                 )
             }
@@ -619,12 +617,15 @@ fun CurrentRouteBar(
         ) {
             MontsText(
                 text = stringResource(id = R.string.current_route),
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.background,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.displayMedium,
+                color = MaterialTheme.colorScheme.background
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MontsText(text = "$percent%", fontSize = 14.sp, color = Color.White)
+                MontsText(
+                    text = "$percent%",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White
+                )
                 Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     painter = painterResource(id = R.drawable.map_icon),

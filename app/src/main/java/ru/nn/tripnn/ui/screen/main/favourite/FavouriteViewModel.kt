@@ -15,7 +15,7 @@ import ru.nn.tripnn.data.remote.route.RouteRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject

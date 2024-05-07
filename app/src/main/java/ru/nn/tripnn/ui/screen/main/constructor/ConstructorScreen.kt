@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -61,7 +60,7 @@ import ru.nn.tripnn.ui.common.PlaceCard
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.RemoveFromRouteCardOption
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
@@ -97,8 +96,7 @@ fun ConstructorScreen(
 
             MontsText(
                 text = stringResource(id = R.string.build_route),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold
+                style = MaterialTheme.typography.titleMedium
             )
 
             Spacer(modifier = Modifier.height(15.dp))
@@ -200,7 +198,7 @@ fun RouteColumn(
                         MontsText(
                             text = (place.timeToGo ?: 0).toString()
                                     + " " + stringResource(id = R.string.minute_short),
-                            fontSize = 11.sp
+                            style = MaterialTheme.typography.labelSmall
                         )
 
                         Icon(
@@ -281,8 +279,7 @@ fun AddPlaceButton(
 
         MontsText(
             text = stringResource(id = R.string.add_place),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.displayMedium,
             color = MaterialTheme.colorScheme.background
         )
     }

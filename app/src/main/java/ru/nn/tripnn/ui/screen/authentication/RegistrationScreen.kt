@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
@@ -161,14 +162,13 @@ fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
     Row(modifier = modifier) {
         MontsText(
             text = stringResource(id = R.string.have_account),
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondary
         )
         Spacer(modifier = Modifier.width(5.dp))
         MontsText(
             text = stringResource(id = R.string.login),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.clickable(onClick = onSignInClick)
         )
     }
@@ -178,13 +178,12 @@ fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
 private fun Title() {
     MontsText(
         text = stringResource(id = R.string.welcome),
-        fontSize = 19.sp
+        style = MaterialTheme.typography.titleSmall
     )
     Spacer(modifier = Modifier.height(15.dp))
     MontsText(
         text = stringResource(id = R.string.register),
-        fontSize = 25.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = MaterialTheme.typography.titleMedium
     )
 }
 
@@ -212,7 +211,7 @@ fun InputBlock(
     Column {
         MontsText(
             text = title,
-            fontSize = 16.sp
+            style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(14.dp))
         AuthInputField(

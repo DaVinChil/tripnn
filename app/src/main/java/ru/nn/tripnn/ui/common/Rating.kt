@@ -1,18 +1,16 @@
 package ru.nn.tripnn.ui.common
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
 
 @Composable
-fun Rating(rating: Double, fontSize: TextUnit = 12.sp) {
+fun Rating(rating: Double, style: TextStyle = MaterialTheme.typography.headlineLarge) {
     MontsText(
         text = rating.toString(),
-        fontSize = fontSize,
         color = getColorFromRating(rating),
-        fontWeight = FontWeight.Bold
+        style = style
     )
 }
 

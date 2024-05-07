@@ -5,34 +5,35 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import ru.nn.tripnn.ui.theme.montserratFamily
 
 @Composable
 fun MontsText(
     modifier: Modifier = Modifier,
     text: String,
-    fontSize: TextUnit,
-    fontWeight: FontWeight = FontWeight.Normal,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontWeight: FontWeight? = null,
     color: Color = MaterialTheme.colorScheme.tertiary,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Visible,
-    lineHeight: TextUnit? = null
+    overflow: TextOverflow = TextOverflow.Clip,
+    lineHeight: TextUnit? = null,
+    style: TextStyle = MaterialTheme.typography.labelSmall
 ) {
     Text(
         modifier = modifier,
         text = text,
         fontSize = fontSize,
-        fontFamily = montserratFamily,
         fontWeight = fontWeight,
         color = color,
         lineHeight = lineHeight ?: fontSize,
         textAlign = textAlign,
         maxLines = maxLines,
-        overflow = overflow
+        overflow = overflow,
+        style = style
     )
 }

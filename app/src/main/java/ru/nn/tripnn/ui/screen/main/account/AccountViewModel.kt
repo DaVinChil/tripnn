@@ -12,7 +12,7 @@ import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.UserInfoData
 import ru.nn.tripnn.data.remote.userinfo.UserInfoRepository
 import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
 

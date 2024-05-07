@@ -45,7 +45,7 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
@@ -100,7 +100,7 @@ fun RecommendationsScreen(
         MontsText(
             text = stringResource(id = R.string.recommended_routes),
             fontSize = 24.sp,
-            fontWeight = FontWeight.SemiBold
+            style = MaterialTheme.typography.titleMedium
         )
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -187,7 +187,7 @@ fun NothingFoundByRequest() {
             Spacer(modifier = Modifier.height(35.dp))
             MontsText(
                 text = stringResource(id = R.string.nothing_found_header),
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.displayLarge,
                 textAlign = TextAlign.Center
             )
         }
@@ -213,7 +213,7 @@ fun NoRecommendedRoutes(onBack: () -> Unit) {
 
         MontsText(
             text = stringResource(id = R.string.recommended_routes),
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
         Box(
@@ -226,8 +226,7 @@ fun NoRecommendedRoutes(onBack: () -> Unit) {
             ) {
                 MontsText(
                     text = stringResource(id = R.string.empty),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.displayLarge
                 )
                 Spacer(modifier = Modifier.height(35.dp))
                 MontsText(text = "☹\uFE0F", fontSize = 50.sp)

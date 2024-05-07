@@ -37,7 +37,7 @@ import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.DESTINATION
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.PlacesColumn
@@ -82,7 +82,7 @@ fun HistoryScreen(
 
         MontsText(
             text = stringResource(id = R.string.history),
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -160,21 +160,21 @@ fun HistoryEmptyResult() {
         modifier = Modifier.fillMaxSize()
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(1/3f),
+            modifier = Modifier.fillMaxWidth(1 / 3f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             MontsText(
                 text = stringResource(id = R.string.empty),
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.displayLarge
             )
             Spacer(modifier = Modifier.height(35.dp))
             MontsText(text = "☹\uFE0F", fontSize = 50.sp)
             Spacer(modifier = Modifier.height(35.dp))
             MontsText(
                 text = stringResource(id = R.string.empty_history_comment),
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center
             )
         }

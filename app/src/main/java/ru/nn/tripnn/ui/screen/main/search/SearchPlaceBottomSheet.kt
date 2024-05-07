@@ -97,7 +97,7 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.Rating
 import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -397,8 +397,7 @@ fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
     Column {
         MontsText(
             text = stringResource(id = R.string.avg_receipt),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.displayMedium
         )
         Spacer(modifier = Modifier.height(13.dp))
         FlowRow(
@@ -422,8 +421,7 @@ fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
                 ) {
                     MontsText(
                         text = price,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelMedium,
                         color = if (picked[i]) Color.White else MaterialTheme.colorScheme.tertiary
                     )
                 }
@@ -438,8 +436,7 @@ fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
     Column {
         MontsText(
             text = stringResource(id = R.string.rating),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.displayMedium
         )
         Spacer(modifier = Modifier.height(13.dp))
         FlowRow(
@@ -469,8 +466,7 @@ fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
                     ) {
                         MontsText(
                             text = stringResource(id = R.string.from_lower) + " $minRating",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
+                            style = MaterialTheme.typography.labelMedium,
                             color = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary
                         )
 
@@ -498,8 +494,7 @@ fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
     Column {
         MontsText(
             text = stringResource(id = R.string.distance),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
+            style = MaterialTheme.typography.displayMedium
         )
         Spacer(modifier = Modifier.height(13.dp))
         FlowRow(
@@ -524,8 +519,7 @@ fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
                     MontsText(
                         text = stringResource(id = R.string.until) + " $distance " +
                                 stringResource(id = R.string.km),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelMedium,
                         color = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary
                     )
                 }
@@ -551,12 +545,12 @@ fun TypeChoice(
             MontsText(
                 text = stringResource(id = R.string.place_type),
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.displayMedium
             )
 
             MontsText(
                 text = stringResource(id = R.string.choose_all),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
@@ -588,8 +582,7 @@ fun TypeChoice(
                 ) {
                     MontsText(
                         text = stringResource(id = type),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.labelMedium,
                         color = if (pickedTypes[i]) Color.White else MaterialTheme.colorScheme.tertiary
                     )
                 }
@@ -703,7 +696,7 @@ fun SearchResultScreen(
 
                 MontsText(
                     text = stringResource(id = R.string.closer),
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     color = if (sortState.closer) MaterialTheme.colorScheme.primary else Color.Black,
                     modifier = Modifier.clickable {
                         sortState = sortState.copy(closer = true, byRating = false)
@@ -713,7 +706,7 @@ fun SearchResultScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 MontsText(
                     text = stringResource(id = R.string.by_rating),
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     color = if (sortState.byRating) MaterialTheme.colorScheme.primary else Color.Black,
                     modifier = Modifier.clickable {
                         sortState = sortState.copy(closer = false, byRating = true)
@@ -1047,11 +1040,17 @@ fun SearchEmptyResult(popBack: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MontsText(text = stringResource(id = R.string.nothing_found_header), fontSize = 18.sp)
+            MontsText(
+                text = stringResource(id = R.string.nothing_found_header),
+                style = MaterialTheme.typography.displayLarge
+            )
             Spacer(modifier = Modifier.height(50.dp))
             MontsText(text = "☹\uFE0F", fontSize = 18.sp)
             Spacer(modifier = Modifier.height(50.dp))
-            MontsText(text = stringResource(id = R.string.nothing_found_comment), fontSize = 18.sp)
+            MontsText(
+                text = stringResource(id = R.string.nothing_found_comment),
+                style = MaterialTheme.typography.displayLarge
+            )
         }
     }
 }
@@ -1122,8 +1121,7 @@ fun PlaceInfoBottomSheet(
                     ) {
                         MontsText(
                             text = place.name,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 24.sp
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Icon(
                             modifier = Modifier
@@ -1159,7 +1157,10 @@ fun PlaceInfoBottomSheet(
                     ) {
                         Column(modifier = Modifier.fillMaxHeight()) {
                             if (place.type != null) {
-                                MontsText(text = place.type, fontSize = 13.sp)
+                                MontsText(
+                                    text = place.type,
+                                    style = MaterialTheme.typography.labelMedium
+                                )
                             }
 
                             Spacer(modifier = Modifier.weight(1f))
@@ -1169,13 +1170,14 @@ fun PlaceInfoBottomSheet(
                             Spacer(modifier = Modifier.height(5.dp))
 
                             Row {
-                                Rating(rating = place.rating)
+                                Rating(rating = place.rating, style = MaterialTheme.typography.bodySmall)
 
                                 Spacer(modifier = Modifier.width(5.dp))
 
                                 MontsText(
                                     text = place.reviews.toString() + " " +
-                                            stringResource(id = R.string.reviews), fontSize = 12.sp
+                                            stringResource(id = R.string.reviews),
+                                    style = MaterialTheme.typography.labelMedium
                                 )
                             }
                         }
@@ -1187,24 +1189,34 @@ fun PlaceInfoBottomSheet(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    MontsText(text = place.address, fontSize = 11.sp)
+                                    MontsText(
+                                        text = place.address,
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                     CopyIcon(
                                         data = place.address,
-                                        onClick = { showSnackBar = true })
+                                        onClick = { showSnackBar = true }
+                                    )
                                 }
                             }
 
                             if (place.workTime != null) {
-                                MontsText(text = place.workTime, fontSize = 11.sp)
+                                MontsText(
+                                    text = place.workTime,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             }
 
                             if (place.phone != null) {
-                                MontsText(text = place.phone, fontSize = 11.sp)
+                                MontsText(
+                                    text = place.phone,
+                                    style = MaterialTheme.typography.labelSmall
+                                )
                             }
 
                             MontsText(
                                 text = stringResource(id = R.string.avg_receipt) + " " + place.cost + "₽",
-                                fontSize = 11.sp
+                                style = MaterialTheme.typography.labelSmall
                             )
                         }
                     }
@@ -1268,7 +1280,7 @@ fun CopiedToClipBoardSnackBar(modifier: Modifier = Modifier, onHide: () -> Unit)
         )
         MontsText(
             text = stringResource(id = R.string.address_copied),
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.labelMedium,
             color = Color.White
         )
     }
@@ -1305,7 +1317,7 @@ fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
     ) {
         MontsText(
             text = "2GIS",
-            fontSize = 13.sp
+            style = MaterialTheme.typography.labelMedium
         )
         Icon(
             painter = painterResource(id = R.drawable.reversed_link_icon),
