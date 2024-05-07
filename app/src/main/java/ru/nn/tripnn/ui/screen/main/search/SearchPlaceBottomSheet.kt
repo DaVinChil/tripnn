@@ -1,15 +1,15 @@
 package ru.nn.tripnn.ui.screen.main.search
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,17 +31,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,9 +47,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +56,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -71,11 +66,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -89,15 +81,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.engawapg.lib.zoomable.rememberZoomState
-import net.engawapg.lib.zoomable.zoomable
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.SearchFilters
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.SearchFilters
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DragHandle
@@ -115,7 +104,6 @@ import ru.nn.tripnn.ui.theme.TripNNTheme
 import java.time.LocalTime
 
 val LEISURE_TYPES = listOf(
-    R.string.all_types,
     R.string.zoos,
     R.string.river_trips,
     R.string.anti_cafe,
@@ -129,7 +117,6 @@ val LEISURE_TYPES = listOf(
 )
 
 val CULTURE_TYPES = listOf(
-    R.string.all_types,
     R.string.museums,
     R.string.exhibitions,
     R.string.parks,
@@ -137,7 +124,6 @@ val CULTURE_TYPES = listOf(
 )
 
 val EAT_TYPES = listOf(
-    R.string.all_types,
     R.string.home_cook,
     R.string.sushi_bars,
     R.string.pizzerias,
@@ -154,12 +140,80 @@ val EAT_TYPES = listOf(
     R.string.dumplings,
 )
 
+val MIN_RATINGS = listOf(3f, 3.5f, 4f, 4.5f)
+val PRICES = listOf("₽", "₽₽", "₽₽₽", "₽₽₽₽")
+val DISTANCES = listOf(1, 2, 5, 10)
+
 const val LEISURE = 1
 const val CULTURE = 0
 const val EAT = 2
 
 const val SEARCH_ROUTE = "search"
 const val SEARCH_RESULT_ROUTE = "search_result"
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ConstructorSearchBottomSheet(
+    onDismissRequest: () -> Unit,
+    toPhotos: (String, Int) -> Unit,
+    previousPlaceId: String?,
+    onChoose: (Place) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val placesViewModel = hiltViewModel<AllPlacesViewModel>()
+    val coroutine = rememberCoroutineScope()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        containerColor = MaterialTheme.colorScheme.background,
+        sheetState = sheetState,
+        dragHandle = { DragHandle() },
+        windowInsets = WindowInsets(0)
+    ) {
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = SEARCH_ROUTE) {
+            composable(
+                route = SEARCH_ROUTE,
+                exitTransition = { slideOutHorizontally { -it } },
+                popEnterTransition = { slideInHorizontally { -it } }
+            ) {
+                SearchPlaceScreen(
+                    onSearch = placesViewModel::search,
+                    toResultScreen = {
+                        navController.navigate(SEARCH_RESULT_ROUTE) {
+                            launchSingleTop = true
+                        }
+                    },
+                    previousPlaceId = previousPlaceId
+                )
+            }
+
+            composable(
+                route = SEARCH_RESULT_ROUTE,
+                popExitTransition = { slideOutHorizontally { it } },
+                enterTransition = { slideInHorizontally { it } }
+            ) {
+                ConstructorSearchResultScreen(
+                    sort = placesViewModel::sort,
+                    result = placesViewModel.searchResult,
+                    removeFromFavourite = placesViewModel::removeFromFavourite,
+                    addToFavourite = placesViewModel::addToFavourite,
+                    popBack = navController::popBackStack,
+                    toPhotos = toPhotos,
+                    onChoose = {
+                        coroutine.launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion { onDismissRequest() }
+                        onChoose(it)
+                    },
+                    filters = placesViewModel.searchFilters,
+                    previousPlaceId = previousPlaceId,
+                    onSearch = placesViewModel::search
+                )
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -174,7 +228,8 @@ fun SearchPlaceBottomSheet(
         onDismissRequest = onDismissRequest,
         containerColor = MaterialTheme.colorScheme.background,
         sheetState = sheetState,
-        dragHandle = { DragHandle() }
+        dragHandle = { DragHandle() },
+        windowInsets = WindowInsets(0)
     ) {
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = SEARCH_ROUTE) {
@@ -183,11 +238,14 @@ fun SearchPlaceBottomSheet(
                 exitTransition = { slideOutHorizontally { -it } },
                 popEnterTransition = { slideInHorizontally { -it } }
             ) {
-                SearchPlaceScreen(onSearch = placesViewModel::search, toResultScreen = {
-                    navController.navigate(SEARCH_RESULT_ROUTE) {
-                        launchSingleTop = true
+                SearchPlaceScreen(
+                    onSearch = placesViewModel::search,
+                    toResultScreen = {
+                        navController.navigate(SEARCH_RESULT_ROUTE) {
+                            launchSingleTop = true
+                        }
                     }
-                })
+                )
             }
 
             composable(
@@ -201,33 +259,49 @@ fun SearchPlaceBottomSheet(
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
                     popBack = navController::popBackStack,
-                    toPhotos = toPhotos
+                    toPhotos = toPhotos,
+                    filters = placesViewModel.searchFilters,
+                    onSearch = placesViewModel::search
                 )
             }
         }
-
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> Unit) {
+fun SearchPlaceScreen(
+    onSearch: (SearchFilters) -> Unit,
+    toResultScreen: () -> Unit,
+    previousPlaceId: String? = null
+) {
     val scrollState = rememberScrollState()
     var chosenCategory by remember { mutableIntStateOf(CULTURE) }
     var currentCategoryTypes by remember { mutableStateOf(CULTURE_TYPES) }
     var searchInput by remember { mutableStateOf("") }
-    var priceSlider by remember { mutableStateOf(0f..100f) }
     val catalogs = listOf(
         stringResource(id = R.string.culture),
         stringResource(id = R.string.leisure),
         stringResource(id = R.string.to_eat)
     )
-    val picked = remember(chosenCategory) {
+    val pickedTypes = remember(chosenCategory) {
         mutableStateListOf<Boolean>().apply {
             for (i in currentCategoryTypes.indices) {
                 add(false)
             }
         }
+    }
+    val pickedPrices = remember(chosenCategory) {
+        mutableStateListOf<Boolean>().apply {
+            repeat(4) {
+                add(false)
+            }
+        }
+    }
+    var pickedMinRating by remember(chosenCategory) {
+        mutableIntStateOf(-1)
+    }
+    var pickedDistance by remember(chosenCategory) {
+        mutableIntStateOf(-1)
     }
 
     Box(
@@ -240,7 +314,8 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
                 .fillMaxWidth()
                 .verticalScroll(scrollState)
                 .navigationBarsPadding()
-                .padding(start = 15.dp, end = 15.dp, bottom = 90.dp)
+                .padding(start = 15.dp, end = 15.dp, bottom = 90.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             CatalogNavigation(
                 catalogs = catalogs,
@@ -256,67 +331,31 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
                 chosen = chosenCategory
             )
 
-            Spacer(modifier = Modifier.height(13.dp))
-
             Search(modifier = Modifier.fillMaxWidth(), onSearch = { searchInput = it })
 
-            Spacer(modifier = Modifier.height(13.dp))
+            PriceChoice(picked = pickedPrices, onPick = { pickedPrices[it] = !pickedPrices[it] })
 
-            MontsText(
-                text = stringResource(id = R.string.avg_receipt),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(modifier = Modifier.height(13.dp))
-            RangeSliderWithPointers(
-                range = 0f..100f,
-                sliderPosition = priceSlider,
-                onValueChange = { priceSlider = it }
-            )
+            RatingChoice(picked = pickedMinRating, onPick = { pickedMinRating = it })
 
-            Spacer(modifier = Modifier.height(8.dp))
+            DistanceChoice(picked = pickedDistance, onPick = { pickedDistance = it })
 
-            MontsText(
-                text = stringResource(id = R.string.place_type),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(13.dp))
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
-                verticalArrangement = Arrangement.spacedBy(17.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                currentCategoryTypes.forEachIndexed { i, type ->
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(color = if (picked[i]) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember {
-                                    MutableInteractionSource()
-                                },
-                                onClick = { picked[i] = !picked[i] }
-                            )
-                            .padding(horizontal = 22.dp, vertical = 11.dp)
-                    ) {
-                        MontsText(
-                            text = stringResource(id = type),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = if (picked[i]) Color.White else MaterialTheme.colorScheme.tertiary
-                        )
+            TypeChoice(
+                types = currentCategoryTypes,
+                pickedTypes = pickedTypes,
+                onPick = { pickedTypes[it] = !pickedTypes[it] },
+                onPickAll = {
+                    for (i in pickedTypes.indices) {
+                        pickedTypes[i] = true
                     }
                 }
-            }
+            )
         }
 
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 20.dp)
+                .navigationBarsPadding()
         ) {
             PrimaryButton(
                 text = stringResource(id = R.string.next),
@@ -325,15 +364,21 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
                     onSearch(
                         SearchFilters(
                             word = searchInput,
-                            catalog = catalogs[chosenCategory],
+                            catalog = chosenCategory,
                             types = mutableListOf<Int>().apply {
-                                picked.forEachIndexed { index, b -> if (b) add(currentCategoryTypes[index]) }
+                                pickedTypes.forEachIndexed { index, isPicked ->
+                                    if (isPicked) add(currentCategoryTypes[index])
+                                }
                             },
-                            minPrice = priceSlider.start.toInt(),
-                            maxPrice = priceSlider.endInclusive.toInt(),
-                            prevPlaceId = "",
-                            maxDistance = 0,
-                            minDistance = 0,
+                            minPrice = pickedPrices.indexOf(true).let {
+                                if (it == -1) null else it
+                            },
+                            maxPrice = pickedPrices.lastIndexOf(true).let {
+                                if (it == -1) null else it
+                            },
+                            minRating = MIN_RATINGS.getOrNull(pickedMinRating),
+                            previousPlaceId = previousPlaceId,
+                            maxDistance = DISTANCES.getOrNull(pickedDistance),
                             userLocation = "",
                             workEndTime = LocalTime.now(),
                             workStartTime = LocalTime.now()
@@ -346,137 +391,265 @@ fun SearchPlaceScreen(onSearch: (SearchFilters) -> Unit, toResultScreen: () -> U
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RangeSliderWithPointers(
-    range: ClosedFloatingPointRange<Float>,
-    sliderPosition: ClosedFloatingPointRange<Float>,
-    onValueChange: (ClosedFloatingPointRange<Float>) -> Unit,
-    steps: Int = 0
-) {
-    RangeSlider(
-        modifier = Modifier.fillMaxWidth(),
-        value = sliderPosition,
-        steps = steps,
-        onValueChange = onValueChange,
-        valueRange = range,
-        onValueChangeFinished = {},
-        startThumb = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SliderPointer(text = sliderPosition.start.toInt().toString() + "₽")
-                Spacer(modifier = Modifier.height(5.dp))
-                SliderDefaults.Thumb(interactionSource = remember { MutableInteractionSource() })
-            }
-        },
-        endThumb = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SliderPointer(text = sliderPosition.endInclusive.toInt().toString() + "₽")
-                Spacer(modifier = Modifier.height(5.dp))
-                SliderDefaults.Thumb(interactionSource = remember { MutableInteractionSource() })
-            }
-        },
-        track = {
-            // Тут накастылил, хз как по другому. Нужно что бы трэк был на уровне кружочков слайдер поинтеров,
-            // а не по центру всего слайдер поинтера. Если не совсем понятно, то убери параметр track.
-
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.alpha(0f)
-                ) {
-                    SliderPointer(text = "")
-                    Spacer(modifier = Modifier.height(5.dp))
-                    SliderDefaults.Thumb(
-                        enabled = false,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
-                }
-
+fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
+    Column {
+        MontsText(
+            text = stringResource(id = R.string.avg_receipt),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(13.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalArrangement = Arrangement.spacedBy(17.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PRICES.forEachIndexed { i, price ->
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(color = if (picked[i]) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember {
+                                MutableInteractionSource()
+                            },
+                            onClick = { onPick(i) }
+                        )
+                        .padding(horizontal = 15.dp, vertical = 11.dp)
                 ) {
-                    SliderDefaults.Thumb(
-                        enabled = false,
-                        interactionSource = remember { MutableInteractionSource() },
-                        modifier = Modifier.alpha(0f)
+                    MontsText(
+                        text = price,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (picked[i]) Color.White else MaterialTheme.colorScheme.tertiary
                     )
-                    SliderDefaults.Track(sliderPositions = it)
                 }
             }
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SliderPointer(sliderWidth: Float, valueOnSlider: Float, max: Float, infoPrefix: String) {
-    var startSize by remember { mutableIntStateOf(0) }
-    val pointRadius = 9.5f
-    val density = LocalDensity.current.density
-    val maxWidth = sliderWidth - pointRadius * 2 * density
-    val startOffset by animateDpAsState(
-        targetValue = ((valueOnSlider / max * maxWidth - startSize / 2) / density).dp,
-        label = ""
-    )
+fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
+    Column {
+        MontsText(
+            text = stringResource(id = R.string.rating),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(13.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(11.dp),
+            verticalArrangement = Arrangement.spacedBy(17.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            MIN_RATINGS.forEachIndexed { i, minRating ->
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(color = if (picked == i) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember {
+                                MutableInteractionSource()
+                            },
+                            onClick = { onPick(i) }
+                        )
+                        .padding(horizontal = 11.dp, vertical = 11.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .height(IntrinsicSize.Min),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        MontsText(
+                            text = stringResource(id = R.string.from_lower) + " $minRating",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary
+                        )
 
-    Column(
-        modifier = Modifier
-            .offset(x = startOffset + pointRadius.dp)
-            .animateContentSize()
-            .onGloballyPositioned { startSize = it.size.width },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSecondary)
-                .padding(vertical = 10.dp, horizontal = 15.dp)
+                        Icon(
+                            painter = painterResource(id = R.drawable.outlined_gray_star),
+                            contentDescription = stringResource(
+                                id = R.string.rating_star
+                            ),
+                            tint = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .aspectRatio(1f)
+                        )
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
+    Column {
+        MontsText(
+            text = stringResource(id = R.string.distance),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(13.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(11.dp),
+            verticalArrangement = Arrangement.spacedBy(17.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            DISTANCES.forEachIndexed { i, distance ->
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(color = if (picked == i) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember {
+                                MutableInteractionSource()
+                            },
+                            onClick = { onPick(i) }
+                        )
+                        .padding(horizontal = 11.dp, vertical = 11.dp)
+                ) {
+                    MontsText(
+                        text = stringResource(id = R.string.until) + " $distance " +
+                                stringResource(id = R.string.km),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun TypeChoice(
+    types: List<Int>,
+    pickedTypes: List<Boolean>,
+    onPick: (Int) -> Unit,
+    onPickAll: () -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             MontsText(
-                text = valueOnSlider.toInt().toString() + infoPrefix,
+                text = stringResource(id = R.string.place_type),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            MontsText(
+                text = stringResource(id = R.string.choose_all),
                 fontSize = 12.sp,
-                color = Color.White
+                modifier = Modifier.clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onPickAll
+                )
             )
         }
-        Icon(
-            modifier = Modifier.offset(y = (-0.18).dp),
-            painter = painterResource(id = R.drawable.slider_shard_pointer),
-            contentDescription = "",
-            tint = MaterialTheme.colorScheme.onSecondary
-        )
+
+        Spacer(modifier = Modifier.height(13.dp))
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            types.forEachIndexed { i, type ->
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(color = if (pickedTypes[i]) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember {
+                                MutableInteractionSource()
+                            },
+                            onClick = { onPick(i) }
+                        )
+                        .padding(horizontal = 22.dp, vertical = 11.dp)
+                ) {
+                    MontsText(
+                        text = stringResource(id = type),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (pickedTypes[i]) Color.White else MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun SliderPointer(text: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onSecondary)
-                .padding(vertical = 10.dp, horizontal = 15.dp)
-                .animateContentSize()
-        ) {
-            MontsText(
-                text = text,
-                fontSize = 12.sp,
-                color = Color.White
-            )
-        }
-        Icon(
-            modifier = Modifier.offset(y = (-0.18).dp),
-            painter = painterResource(id = R.drawable.slider_shard_pointer),
-            contentDescription = "",
-            tint = MaterialTheme.colorScheme.onSecondary
-        )
-    }
+fun SearchResultScreen(
+    sort: (SortState) -> Unit,
+    result: ResourceState<List<Place>>,
+    removeFromFavourite: (String) -> Unit,
+    addToFavourite: (String) -> Unit,
+    popBack: () -> Unit,
+    toPhotos: (String, Int) -> Unit,
+    filters: SearchFilters,
+    onSearch: (SearchFilters) -> Unit
+) {
+    SearchResultScreen(
+        sort = sort,
+        result = result,
+        removeFromFavourite = removeFromFavourite,
+        addToFavourite = addToFavourite,
+        popBack = popBack,
+        toPhotos = toPhotos,
+        buttonText = null,
+        onChoose = null,
+        onSearch = onSearch,
+        filters = filters,
+        previousPlaceId = null
+    )
+}
+
+@Composable
+fun ConstructorSearchResultScreen(
+    sort: (SortState) -> Unit,
+    result: ResourceState<List<Place>>,
+    removeFromFavourite: (String) -> Unit,
+    addToFavourite: (String) -> Unit,
+    popBack: () -> Unit,
+    toPhotos: (String, Int) -> Unit,
+    onChoose: (Place) -> Unit,
+    filters: SearchFilters,
+    previousPlaceId: String?,
+    onSearch: (SearchFilters) -> Unit
+) {
+    SearchResultScreen(
+        sort = sort,
+        result = result,
+        removeFromFavourite = removeFromFavourite,
+        addToFavourite = addToFavourite,
+        popBack = popBack,
+        toPhotos = toPhotos,
+        filters = filters,
+        buttonText = stringResource(id = R.string.add_place),
+        onChoose = onChoose,
+        previousPlaceId = previousPlaceId,
+        onSearch = onSearch
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -487,30 +660,25 @@ fun SearchResultScreen(
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit,
     popBack: () -> Unit,
-    toPhotos: (String, Int) -> Unit
+    toPhotos: (String, Int) -> Unit,
+    onChoose: ((Place) -> Unit)?,
+    onSearch: (SearchFilters) -> Unit,
+    filters: SearchFilters,
+    buttonText: String?,
+    previousPlaceId: String?
 ) {
     if (result.isError) {
         InternetProblem()
         return
     }
 
-    if (result.isLoading) {
-        Box(modifier = Modifier.fillMaxHeight(5f / 6f)) {
-            LoadingCircleScreen()
-        }
-        return
-    }
-
-    if (result.value.isNullOrEmpty()) {
-        SearchEmptyResult(popBack)
-        return
-    }
-
-    var sortState by remember { mutableStateOf(SortState()) }
+    var sortState by remember { mutableStateOf(SortState(closer = false, byRating = true)) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by remember { mutableStateOf(false) }
     var pickedPlace by remember { mutableStateOf(PLACE_1) }
+    var chosenPlace by remember { mutableIntStateOf(-1) }
+    var showSearchFilters by remember { mutableStateOf(false) }
 
     Box {
         Column(
@@ -530,13 +698,15 @@ fun SearchResultScreen(
                         tint = MaterialTheme.colorScheme.onSecondary
                     )
                 }
+
                 Spacer(modifier = Modifier.weight(1f))
+
                 MontsText(
-                    text = stringResource(id = R.string.by_price),
+                    text = stringResource(id = R.string.closer),
                     fontSize = 12.sp,
-                    color = if (sortState.byPrice) MaterialTheme.colorScheme.primary else Color.Black,
+                    color = if (sortState.closer) MaterialTheme.colorScheme.primary else Color.Black,
                     modifier = Modifier.clickable {
-                        sortState = sortState.copy(byPrice = !sortState.byPrice)
+                        sortState = sortState.copy(closer = true, byRating = false)
                         sort(sortState)
                     }
                 )
@@ -546,15 +716,22 @@ fun SearchResultScreen(
                     fontSize = 12.sp,
                     color = if (sortState.byRating) MaterialTheme.colorScheme.primary else Color.Black,
                     modifier = Modifier.clickable {
-                        sortState = sortState.copy(byRating = !sortState.byRating)
+                        sortState = sortState.copy(closer = false, byRating = true)
                         sort(sortState)
                     }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 Icon(
-                    painter = painterResource(id = R.drawable.sort_icon),
+                    painter = painterResource(id = R.drawable.filter_settings),
                     contentDescription = "",
-                    tint = MaterialTheme.colorScheme.tertiary
+                    tint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+                            showSearchFilters = true
+                        }
+                    )
                 )
             }
 
@@ -564,30 +741,86 @@ fun SearchResultScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
-                items(items = result.value, key = Place::id) { place ->
-                    val option: @Composable () -> Unit = if (place.favourite) {
-                        @Composable {
-                            RemoveFromFavouriteGoldCardOption(
-                                onClick = { removeFromFavourite(place.id) })
+            if (result.isLoading) {
+                Box(modifier = Modifier.fillMaxHeight(5f / 6f)) {
+                    LoadingCircleScreen()
+                }
+            } else if (result.value.isNullOrEmpty()) {
+                SearchEmptyResult(popBack)
+            } else {
+                LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
+                    itemsIndexed(
+                        items = result.value,
+                        key = { _, place -> place.id }) { index, place ->
+                        val option: @Composable () -> Unit = if (place.favourite) {
+                            @Composable {
+                                RemoveFromFavouriteGoldCardOption(
+                                    onClick = { removeFromFavourite(place.id) }
+                                )
+                            }
+                        } else {
+                            @Composable {
+                                AddToFavouriteCardOption(onClick = { addToFavourite(place.id) })
+                            }
                         }
-                    } else {
-                        @Composable { AddToFavouriteCardOption(onClick = { addToFavourite(place.id) }) }
-                    }
 
-                    DraggableCard(option1 = option) {
-                        PlaceCard(
-                            place = place,
-                            onCardClick = {
-                                pickedPlace = place
-                                showCardInfo = true
-                            },
-                            shadowColor = Color.Black.copy(alpha = 0.2f),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        if (onChoose != null) {
+                            CardWithRadioButton(
+                                place = place,
+                                option = option,
+                                onCardClick = {
+                                    pickedPlace = place
+                                    showCardInfo = true
+                                },
+                                chosenPlace = chosenPlace,
+                                index = index,
+                                onChoose = {
+                                    chosenPlace = index
+                                }
+                            )
+                        } else {
+                            DraggableCard(option1 = option) {
+                                PlaceCard(
+                                    place = place,
+                                    onCardClick = {
+                                        pickedPlace = place
+                                        showCardInfo = true
+                                    },
+                                    shadowColor = Color.Black.copy(alpha = 0.2f),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        if (buttonText != null && onChoose != null) {
+            AnimatedVisibility(
+                visible = chosenPlace != -1,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 20.dp)
+                    .navigationBarsPadding(),
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutHorizontally { it } + fadeOut()
+            ) {
+                PrimaryButton(
+                    text = stringResource(id = R.string.add_place),
+                    paddingValues = PaddingValues(horizontal = 58.dp, vertical = 15.dp),
+                    onClick = { if (chosenPlace != -1 && result.value != null) onChoose(result.value[chosenPlace]) }
+                )
+            }
+        }
+
+        if (showSearchFilters) {
+            SearchFiltersScreen(
+                filters = filters,
+                onSearch = onSearch,
+                previousPlaceId = previousPlaceId,
+                onDismissRequest = { showSearchFilters = false }
+            )
         }
 
         if (showCardInfo) {
@@ -600,6 +833,193 @@ fun SearchResultScreen(
                 toPhotos = toPhotos
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchFiltersScreen(
+    filters: SearchFilters,
+    onSearch: (SearchFilters) -> Unit,
+    previousPlaceId: String?,
+    onDismissRequest: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutine = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    val chosenCategory = filters.catalog ?: 0
+    val currentCategoryTypes by remember {
+        mutableStateOf(
+            when (chosenCategory) {
+                CULTURE -> CULTURE_TYPES
+                LEISURE -> LEISURE_TYPES
+                EAT -> EAT_TYPES
+                else -> CULTURE_TYPES
+            }
+        )
+    }
+    val pickedTypes = remember {
+        mutableStateListOf<Boolean>().apply {
+            val types = filters.types?.toSet()
+            if (types != null) {
+                for (i in currentCategoryTypes.indices) {
+                    add(types.contains(currentCategoryTypes[i]))
+                }
+            } else {
+                for (i in currentCategoryTypes.indices) {
+                    add(false)
+                }
+            }
+        }
+    }
+    val pickedPrices = remember {
+        mutableStateListOf<Boolean>().apply {
+            val minPrice = filters.minPrice
+            val maxPrice = filters.maxPrice
+
+            repeat(4) {
+                add(minPrice == it || maxPrice == it)
+            }
+        }
+    }
+    var pickedMinRating by remember {
+        mutableIntStateOf(MIN_RATINGS.indexOf(filters.minRating))
+    }
+    var pickedDistance by remember {
+        mutableIntStateOf(DISTANCES.indexOf(filters.maxDistance))
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+        dragHandle = { DragHandle() },
+        windowInsets = WindowInsets(0)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight(5f / 6f)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState)
+                    .navigationBarsPadding()
+                    .padding(start = 15.dp, end = 15.dp, bottom = 90.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                PriceChoice(
+                    picked = pickedPrices,
+                    onPick = { pickedPrices[it] = !pickedPrices[it] })
+
+                RatingChoice(picked = pickedMinRating, onPick = { pickedMinRating = it })
+
+                DistanceChoice(picked = pickedDistance, onPick = { pickedDistance = it })
+
+                TypeChoice(
+                    types = currentCategoryTypes,
+                    pickedTypes = pickedTypes,
+                    onPick = { pickedTypes[it] = !pickedTypes[it] },
+                    onPickAll = {
+                        for (i in pickedTypes.indices) {
+                            pickedTypes[i] = true
+                        }
+                    }
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 20.dp)
+                    .navigationBarsPadding()
+            ) {
+                PrimaryButton(
+                    text = stringResource(id = R.string.apply),
+                    paddingValues = PaddingValues(horizontal = 58.dp, vertical = 15.dp),
+                    onClick = {
+                        onSearch(
+                            SearchFilters(
+                                catalog = chosenCategory,
+                                types = mutableListOf<Int>().apply {
+                                    pickedTypes.forEachIndexed { index, isPicked ->
+                                        if (isPicked) add(currentCategoryTypes[index])
+                                    }
+                                },
+                                minPrice = pickedPrices.indexOf(true).let {
+                                    if (it == -1) null else it
+                                },
+                                maxPrice = pickedPrices.lastIndexOf(true).let {
+                                    if (it == -1) null else it
+                                },
+                                minRating = MIN_RATINGS.getOrNull(pickedMinRating),
+                                previousPlaceId = previousPlaceId,
+                                maxDistance = DISTANCES.getOrNull(pickedDistance),
+                                userLocation = "",
+                                workEndTime = LocalTime.now(),
+                                workStartTime = LocalTime.now()
+                            )
+                        )
+
+                        coroutine.launch {
+                            sheetState.hide()
+                        }.invokeOnCompletion {
+                            onDismissRequest()
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CardWithRadioButton(
+    place: Place,
+    option: @Composable () -> Unit,
+    onCardClick: (Place) -> Unit,
+    chosenPlace: Int,
+    index: Int,
+    onChoose: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        DraggableCard(option1 = option, modifier = Modifier.weight(1f)) {
+            PlaceCard(
+                place = place,
+                onCardClick = { onCardClick(place) },
+                shadowColor = Color.Black.copy(alpha = 0.2f)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Icon(
+            painter = if (chosenPlace == index) {
+                painterResource(id = R.drawable.radio_button_selected)
+            } else {
+                painterResource(id = R.drawable.radio_button_not_selected)
+            },
+            contentDescription = if (chosenPlace == index) {
+                stringResource(id = androidx.compose.ui.R.string.selected)
+            } else {
+                stringResource(id = androidx.compose.ui.R.string.not_selected)
+            },
+            modifier = Modifier
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = { onChoose(index) }
+                ),
+            tint = if (chosenPlace == index) {
+                Color.Unspecified
+            } else {
+                MaterialTheme.colorScheme.onSecondary
+            }
+        )
     }
 }
 
@@ -738,7 +1158,9 @@ fun PlaceInfoBottomSheet(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column(modifier = Modifier.fillMaxHeight()) {
-                            MontsText(text = place.type, fontSize = 13.sp)
+                            if (place.type != null) {
+                                MontsText(text = place.type, fontSize = 13.sp)
+                            }
 
                             Spacer(modifier = Modifier.weight(1f))
 
@@ -759,17 +1181,26 @@ fun PlaceInfoBottomSheet(
                         }
 
                         Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                MontsText(text = place.address, fontSize = 11.sp)
-                                CopyIcon(data = place.address, onClick = { showSnackBar = true })
+
+                            if (place.address != null) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    MontsText(text = place.address, fontSize = 11.sp)
+                                    CopyIcon(
+                                        data = place.address,
+                                        onClick = { showSnackBar = true })
+                                }
                             }
 
-                            MontsText(text = place.workTime, fontSize = 11.sp)
+                            if (place.workTime != null) {
+                                MontsText(text = place.workTime, fontSize = 11.sp)
+                            }
 
-                            MontsText(text = place.phone, fontSize = 11.sp)
+                            if (place.phone != null) {
+                                MontsText(text = place.phone, fontSize = 11.sp)
+                            }
 
                             MontsText(
                                 text = stringResource(id = R.string.avg_receipt) + " " + place.cost + "₽",
@@ -884,44 +1315,6 @@ fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun FullScreenPhotoPager(images: List<String>) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
-    Box(
-        modifier = Modifier
-            .requiredWidth(screenWidth)
-            .requiredHeight(screenHeight)
-            .background(Color.Black)
-    ) {
-        val pagerState = rememberPagerState { images.size }
-        val zoomState = rememberZoomState(maxScale = 5f)
-
-        LaunchedEffect(pagerState.currentPage) {
-            zoomState.reset()
-        }
-
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { index ->
-            val url = images[index]
-
-            // Image from URL. We can also use painterResource to load images from resources
-            val imagePainter = rememberAsyncImagePainter(url) // From coil-compose
-
-            Image(
-                painter = imagePainter,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.zoomable(zoomState)
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
@@ -951,6 +1344,27 @@ fun SearchPlaceContentPreview() {
                 .padding(10.dp)
         ) {
             SearchPlaceScreen(onSearch = {}, toResultScreen = {})
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ConstructorSearchPreview() {
+    TripNNTheme {
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+            ConstructorSearchResultScreen(
+                sort = {},
+                result = ResourceState(listOf(PLACE_1)),
+                removeFromFavourite = {},
+                addToFavourite = {},
+                popBack = { /*TODO*/ },
+                toPhotos = { _, _ -> },
+                onChoose = {},
+                filters = SearchFilters(),
+                previousPlaceId = "",
+                onSearch = {}
+            )
         }
     }
 }

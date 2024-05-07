@@ -55,8 +55,8 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.data.stub_data.ROUTES
 import ru.nn.tripnn.data.stub_data.ROUTE_1
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.DragHandle
@@ -70,6 +70,7 @@ import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -89,8 +90,9 @@ fun FavouriteScreen(
     removeRouteFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit,
-    toPhotos: (String, Int) -> Unit
+    onTakeTheRoute: (Route) -> Unit,
+    toPhotos: (String, Int) -> Unit,
+    alreadyHasRoute: Boolean
 ) {
     val navController = rememberNavController()
 
@@ -179,7 +181,8 @@ fun FavouriteScreen(
                     addPlaceToFavourite = addPlaceToFavourite,
                     onTakeTheRoute = onTakeTheRoute,
                     onEmpty = { FavouriteEmptyResult() },
-                    toPhotos = toPhotos
+                    toPhotos = toPhotos,
+                    alreadyHasRoute = alreadyHasRoute
                 )
             }
         }
@@ -268,8 +271,9 @@ fun RoutesColumn(
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit,
-    toPhotos: (String, Int) -> Unit
+    onTakeTheRoute: (Route) -> Unit,
+    toPhotos: (String, Int) -> Unit,
+    alreadyHasRoute: Boolean
 ) {
     if (routes.isError) {
         InternetProblem()
@@ -331,7 +335,8 @@ fun RoutesColumn(
                 removePlaceFromFavourite = removePlaceFromFavourite,
                 addPlaceToFavourite = addPlaceToFavourite,
                 onTakeTheRoute = onTakeTheRoute,
-                toPhotos = toPhotos
+                toPhotos = toPhotos,
+                alreadyHasRoute = alreadyHasRoute
             )
         }
     }
@@ -395,14 +400,18 @@ fun RouteInfoBottomSheetContent(
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    onTakeTheRoute: (String) -> Unit,
-    toPhotos: (String, Int) -> Unit
+    onTakeTheRoute: (Route) -> Unit,
+    toPhotos: (String, Int) -> Unit,
+    alreadyHasRoute: Boolean
 ) {
     var favourite by rememberSaveable { mutableStateOf(route.favourite) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showCardInfo by rememberSaveable { mutableStateOf(false) }
     var pickedPlace by rememberSaveable { mutableIntStateOf(0) }
+    var showReplaceCurrentRouteDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Box(
         modifier = Modifier
@@ -479,7 +488,9 @@ fun RouteInfoBottomSheetContent(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                itemsIndexed(items = route.places, key = { index, place -> place.id }) { index, place ->
+                itemsIndexed(
+                    items = route.places,
+                    key = { _, place -> place.id }) { index, place ->
                     val option: @Composable () -> Unit = if (place.favourite) {
                         @Composable {
                             RemoveFromFavouriteGoldCardOption(
@@ -502,8 +513,24 @@ fun RouteInfoBottomSheetContent(
 
         PrimaryButton(
             text = stringResource(id = R.string.take_the_route),
-            onClick = { onTakeTheRoute(route.id) },
+            onClick = {
+                if (alreadyHasRoute) {
+                    showReplaceCurrentRouteDialog = true
+                } else {
+                    onTakeTheRoute(route)
+                }
+            },
             modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+
+    if (showReplaceCurrentRouteDialog) {
+        TwoButtonBottomSheetDialog(
+            title = stringResource(id = R.string.delete_current_route_title),
+            text = stringResource(id = R.string.delete_current_route_text),
+            rightButtonText = stringResource(id = R.string.delete_current_route_right_button_text),
+            onSubmit = { onTakeTheRoute(route) },
+            onClose = { showReplaceCurrentRouteDialog = false }
         )
     }
 
@@ -534,7 +561,8 @@ fun FavouriteScreenPreview() {
             addPlaceToFavourite = { /*TODO*/ },
             addRouteToFavourite = { /*TODO*/ },
             onTakeTheRoute = {},
-            toPhotos = {_,_->}
+            toPhotos = { _, _ -> },
+            alreadyHasRoute = false
         )
     }
 }
@@ -555,7 +583,8 @@ fun RouteInfoPreview() {
                 removePlaceFromFavourite = {},
                 addPlaceToFavourite = {},
                 onTakeTheRoute = {},
-                toPhotos = {_, _ -> }
+                toPhotos = { _, _ -> },
+                alreadyHasRoute = false
             )
         }
     }

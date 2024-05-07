@@ -1,8 +1,8 @@
 package ru.nn.tripnn.data.remote.auth
 
 import kotlinx.coroutines.delay
-import ru.nn.tripnn.domain.model.LoginData
-import ru.nn.tripnn.domain.model.RegistrationData
+import ru.nn.tripnn.domain.LoginData
+import ru.nn.tripnn.domain.RegistrationData
 import ru.nn.tripnn.data.RemoteResource
 
 class FakeAuthenticationServiceImpl : AuthenticationService {

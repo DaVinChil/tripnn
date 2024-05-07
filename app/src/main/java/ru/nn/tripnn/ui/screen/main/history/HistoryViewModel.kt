@@ -9,14 +9,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
+import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.data.remote.history.HistoryRepository
 import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.data.remote.route.RouteRepository
-import ru.nn.tripnn.data.RemoteResource
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class HistoryViewModel @Inject constructor(
     @Fake private val historyRepository: HistoryRepository,
     @Fake private val placeRepository: PlaceRepository,
-    @Fake private val routeRepository: RouteRepository
+    @Fake private val routeRepository: RouteRepository,
+    private val currentRouteRepository: CurrentRouteRepository
 ) : ViewModel() {
 
     var visitedPlaces by mutableStateOf(ResourceState<List<Place>>())
@@ -33,9 +35,13 @@ class HistoryViewModel @Inject constructor(
     var takenRoutes by mutableStateOf(ResourceState<List<Route>>())
     private var savedTakenRoutes = immutableListOf<Route>()
 
+    var hasCurrentRoute by mutableStateOf(false)
+        private set
+
     fun init() {
         loadVisitedPlaces()
         loadTakenRoutes()
+        checkExistsCurrentRoute()
     }
 
     private fun loadVisitedPlaces() {
@@ -66,6 +72,14 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    private fun checkExistsCurrentRoute() {
+        viewModelScope.launch {
+            resourceStateFromRequest(currentRouteRepository::getCurrentRoute).collectLatest {
+                hasCurrentRoute = it.value != null
+            }
+        }
+    }
+
     fun removePlaceFromFavourite(id: String) {
         viewModelScope.launch {
             placeRepository.removeFromFavourite(id)
@@ -87,6 +101,12 @@ class HistoryViewModel @Inject constructor(
     fun addRouteToFavourite(id: String) {
         viewModelScope.launch {
             routeRepository.addToFavourite(id)
+        }
+    }
+
+    fun setCurrentRoute(route: Route) {
+        viewModelScope.launch {
+            currentRouteRepository.saveCurrentRoute(convertRouteToCurrentRoute(route))
         }
     }
 

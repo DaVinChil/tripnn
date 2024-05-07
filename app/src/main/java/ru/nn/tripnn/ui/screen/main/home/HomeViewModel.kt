@@ -8,14 +8,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import ru.nn.tripnn.data.remote.currentroute.CurrentRouteRepository
+import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
 import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.data.remote.route.RouteRepository
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.CurrentRoute
-import ru.nn.tripnn.domain.model.HomeScreenData
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.CurrentRoute
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
@@ -23,18 +23,18 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository,
-    @Fake private val currentRouteRepository: CurrentRouteRepository
+    private val currentRouteRepository: CurrentRouteRepository
 ) : ViewModel() {
-    var homeScreenState by mutableStateOf(ResourceState<HomeScreenData>())
-        private set
     var currentRoute by mutableStateOf(ResourceState<CurrentRoute>())
         private set
     var recommendedRoutes by mutableStateOf(ResourceState<List<Route>>())
         private set
 
-    init {
+    fun init() {
         loadCurrentRoute()
-        loadRecommendedRoutes()
+        if (recommendedRoutes.value == null) {
+            loadRecommendedRoutes()
+        }
     }
 
     private fun loadCurrentRoute() {
@@ -74,6 +74,12 @@ class HomeViewModel @Inject constructor(
     fun addRouteToFavourite(id: String) {
         viewModelScope.launch {
             routeRepository.addToFavourite(id)
+        }
+    }
+
+    fun setCurrentRoute(route: Route) {
+        viewModelScope.launch {
+            currentRouteRepository.saveCurrentRoute(convertRouteToCurrentRoute(route))
         }
     }
 }

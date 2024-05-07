@@ -1,8 +1,6 @@
 package ru.nn.tripnn.ui.common
 
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -37,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -52,14 +49,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.valentinilk.shimmer.ShimmerBounds
-import com.valentinilk.shimmer.defaultShimmerTheme
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.util.darkShimmer
 import kotlin.math.roundToInt
 
 val CARD_HEIGHT = 140.dp
@@ -67,47 +64,11 @@ val CARD_WIDTH = 340.dp
 
 enum class DragValue { Start, End }
 
-val lightShimmer = defaultShimmerTheme.copy(
-    animationSpec = infiniteRepeatable(
-        animation = tween(
-            durationMillis = 1000,
-            delayMillis = 1_200,
-            easing = LinearEasing,
-        ),
-    ),
-    blendMode = BlendMode.Hardlight,
-    rotation = 25f,
-    shaderColors = listOf(
-        Color.White.copy(alpha = 0.0f),
-        Color.White.copy(alpha = 0.2f),
-        Color.White.copy(alpha = 0.0f),
-    ),
-    shaderColorStops = null
-)
-
-val darkShimmer = defaultShimmerTheme.copy(
-    animationSpec = infiniteRepeatable(
-        animation = tween(
-            durationMillis = 1000,
-            delayMillis = 1_200,
-            easing = LinearEasing,
-        ),
-    ),
-    blendMode = BlendMode.Hardlight,
-    rotation = 25f,
-    shaderColors = listOf(
-        Color.Black.copy(alpha = 0.0f),
-        Color.Black.copy(alpha = 0.2f),
-        Color.Black.copy(alpha = 0.0f),
-    ),
-    shaderColorStops = null
-)
-
 @Composable
 fun BaseCard(
     modifier: Modifier = Modifier,
-    imageUrl: String,
-    type: String,
+    imageUrl: String?,
+    type: String?,
     name: String,
     onCardClick: () -> Unit,
     shadowColor: Color = Color(0x00FFFFFF),
@@ -142,7 +103,7 @@ fun BaseCard(
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                MontsText(text = type, fontSize = 10.sp)
+                MontsText(text = type ?: "", fontSize = 10.sp)
                 MontsText(text = name, fontSize = 16.sp, maxLines = 2)
                 if (info != null) {
                     Box(
@@ -248,7 +209,9 @@ fun PlaceCard(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 RatingInfo(rating = place.rating)
-                CostInfo(cost = place.cost)
+                if (place.cost != null) {
+                    CostInfo(cost = place.cost)
+                }
             }
         }
     } else {
@@ -473,7 +436,7 @@ fun PlaceCardPreview() {
 @Preview
 @Composable
 fun DraggablePlaceCardPreview() {
-    TripNNTheme() {
+    TripNNTheme {
         Box(
             modifier = Modifier
                 .background(Color.White)

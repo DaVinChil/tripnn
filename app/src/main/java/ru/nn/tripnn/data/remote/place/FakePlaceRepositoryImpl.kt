@@ -2,8 +2,8 @@ package ru.nn.tripnn.data.remote.place
 
 import kotlinx.coroutines.delay
 import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.SearchFilters
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.SearchFilters
 import ru.nn.tripnn.data.RemoteResource
 
 class FakePlaceRepositoryImpl: PlaceRepository {

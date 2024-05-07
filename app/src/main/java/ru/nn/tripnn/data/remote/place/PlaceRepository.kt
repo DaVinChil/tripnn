@@ -1,7 +1,7 @@
 package ru.nn.tripnn.data.remote.place
 
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.SearchFilters
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.SearchFilters
 import ru.nn.tripnn.data.RemoteResource
 
 interface PlaceRepository {

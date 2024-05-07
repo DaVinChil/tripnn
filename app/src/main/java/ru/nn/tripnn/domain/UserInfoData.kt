@@ -1,8 +1,8 @@
-package ru.nn.tripnn.domain.model
+package ru.nn.tripnn.domain
 
 import android.graphics.Bitmap
 
-data class UserInfo(
+data class UserInfoData(
     val name: String,
     val email: String,
     val avatar: Bitmap?

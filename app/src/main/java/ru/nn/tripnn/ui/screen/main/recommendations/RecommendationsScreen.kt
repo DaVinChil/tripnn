@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTE_1
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.MontsText
@@ -61,7 +61,9 @@ fun RecommendationsScreen(
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    toPhotos: (String, Int) -> Unit
+    toPhotos: (String, Int) -> Unit,
+    onTakeTheRoute: (Route) -> Unit,
+    alreadyHasRoute: Boolean
 ) {
     if (routes.isError) {
         InternetProblem()
@@ -161,8 +163,9 @@ fun RecommendationsScreen(
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
                     route = pickedRoute,
-                    onTakeTheRoute = { TODO() },
-                    toPhotos = toPhotos
+                    onTakeTheRoute = onTakeTheRoute,
+                    toPhotos = toPhotos,
+                    alreadyHasRoute = alreadyHasRoute
                 )
             }
         }

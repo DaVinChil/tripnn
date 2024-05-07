@@ -1,9 +1,9 @@
 package ru.nn.tripnn.data.stub_data
 
-import ru.nn.tripnn.domain.model.UserInfo
+import ru.nn.tripnn.domain.UserInfoData
 
-val userInfo =
-    UserInfo(
+val userInfoData =
+    UserInfoData(
         name = "Sasha",
         email = "hz.com@gmai.com",
         avatar = null

@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.UserInfo
+import ru.nn.tripnn.domain.UserInfoData
 import ru.nn.tripnn.data.remote.userinfo.UserInfoRepository
 import ru.nn.tripnn.data.RemoteResource
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
@@ -20,7 +20,7 @@ import javax.inject.Inject
 class AccountViewModel @Inject constructor(
     @Fake private val userInfoRepository: UserInfoRepository
 ) : ViewModel() {
-    var userInfo by mutableStateOf(ResourceState<UserInfo>())
+    var userInfoData by mutableStateOf(ResourceState<UserInfoData>())
         private set
 
     fun init() {
@@ -29,21 +29,21 @@ class AccountViewModel @Inject constructor(
 
     private fun loadUserState() {
         viewModelScope.launch {
-            userInfo = userInfo.copy(
+            userInfoData = userInfoData.copy(
                 isLoading = true,
                 error = null
             )
 
             when(val result = userInfoRepository.getUserInfo()) {
                 is RemoteResource.Success -> {
-                    userInfo = userInfo.copy(
+                    userInfoData = userInfoData.copy(
                         isLoading = false,
                         error = null,
                         value = result.data
                     )
                 }
                 is RemoteResource.Error -> {
-                    userInfo = userInfo.copy(
+                    userInfoData = userInfoData.copy(
                         isLoading = false,
                         error = result.message,
                         value = null

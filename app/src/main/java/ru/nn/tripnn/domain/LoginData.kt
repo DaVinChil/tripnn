@@ -1,4 +1,4 @@
-package ru.nn.tripnn.domain.model
+package ru.nn.tripnn.domain
 
 data class LoginData(
     val email: String,

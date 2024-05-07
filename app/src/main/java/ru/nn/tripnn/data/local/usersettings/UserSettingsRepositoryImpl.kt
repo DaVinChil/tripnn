@@ -14,9 +14,8 @@ class UserSettingsRepositoryImpl(
         }
     }
 
-
     override suspend fun saveUserSettings(userSettings: UserSettings) =
         withContext(Dispatchers.IO) {
-            userSettingsDao.save(userSettings)
+            userSettingsDao.saveUserSettings(userSettings)
         }
 }

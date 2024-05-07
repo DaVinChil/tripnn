@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.screen.authentication.event.Dismiss
+import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
 
 @Composable
@@ -44,7 +44,7 @@ fun LoginScreen(
     authenticated: ResourceState<Boolean>,
     emailState: ResourceState<*>,
     passwordState: ResourceState<*>,
-    dismissError: (Dismiss) -> Unit
+    dismissError: (DismissAuthError) -> Unit
 ) {
     var rememberMe by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
@@ -68,7 +68,7 @@ fun LoginScreen(
                     title = stringResource(id = R.string.email),
                     onValueChanged = { email = it },
                     placeholder = stringResource(id = R.string.enter_email),
-                    dismissError = { dismissError(Dismiss.EmailError) },
+                    dismissError = { dismissError(DismissAuthError.EmailError) },
                     isError = emailState.isError
                 )
 
@@ -79,7 +79,7 @@ fun LoginScreen(
                     title = stringResource(id = R.string.password),
                     onValueChanged = { pass = it },
                     placeholder = stringResource(id = R.string.enter_password),
-                    dismissError = { dismissError(Dismiss.PasswordError) },
+                    dismissError = { dismissError(DismissAuthError.PasswordError) },
                     isError = passwordState.isError
                 )
 

@@ -12,5 +12,5 @@ interface UserSettingsDao {
     fun getUserSettings(): UserSettings
 
     @Insert(entity = UserSettings::class, onConflict = OnConflictStrategy.REPLACE)
-    fun save(userSettings: UserSettings)
+    fun saveUserSettings(userSettings: UserSettings)
 }

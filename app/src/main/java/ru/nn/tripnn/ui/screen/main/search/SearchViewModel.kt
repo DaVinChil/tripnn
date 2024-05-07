@@ -6,14 +6,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.SearchFilters
 import ru.nn.tripnn.data.remote.place.PlaceRepository
-import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.SearchFilters
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,51 +26,30 @@ class AllPlacesViewModel @Inject constructor(
         private set
     private var savedSearchResult: List<Place> by mutableStateOf(immutableListOf())
 
+    var searchFilters: SearchFilters = SearchFilters()
+        private set
+
     fun search(searchFilters: SearchFilters) {
         viewModelScope.launch {
-            searchResult = searchResult.copy(isLoading = true)
-            when (val resource = placeRepository.find(searchFilters)) {
-                is RemoteResource.Success -> {
-                    searchResult = searchResult.copy(value = resource.data)
-                    savedSearchResult = resource.data ?: listOf()
-                }
-
-                is RemoteResource.Error -> {
-                    searchResult = searchResult.copy(
-                        value = null,
-                        error = resource.message,
-                        isError = true,
-                    )
-
-                    savedSearchResult = listOf()
-                }
+            this@AllPlacesViewModel.searchFilters = searchFilters
+            resourceStateFromRequest { placeRepository.find(searchFilters) }.collectLatest {
+                searchResult = it
+                savedSearchResult = searchResult.value ?: listOf()
             }
-            searchResult = searchResult.copy(isLoading = false)
         }
     }
 
     fun sort(sortState: SortState) {
         viewModelScope.launch {
-            val sorted = mutableListOf<Place>()
-            savedSearchResult.forEach {
-                if (sortState.word.isNullOrBlank() ||
-                    it.name.contains(
-                        sortState.word,
-                        ignoreCase = true
-                    )
-                ) sorted.add(it)
+            searchFilters = searchFilters.copy(
+                sortByDistance = sortState.closer,
+                sortByRating = sortState.byRating
+            )
+            resourceStateFromRequest { placeRepository.find(searchFilters) }.collectLatest {
+                searchResult = it
+                savedSearchResult = searchResult.value ?: listOf()
             }
-            sorted.sortWith { a, b ->
-                if (sortState.byRating && (a.rating != b.rating)) {
-                    (a.rating - b.rating).toInt()
-                } else if (sortState.byPrice && (a.cost != b.cost)) {
-                    a.cost.toInt() - b.cost.toInt()
-                }
-                0
-            }
-            searchResult = searchResult.copy(value = sorted)
         }
-
     }
 
     fun removeFromFavourite(id: String) {
@@ -86,7 +66,7 @@ class AllPlacesViewModel @Inject constructor(
 }
 
 data class SortState(
-    val byPrice: Boolean = false,
+    val closer: Boolean = false,
     val byRating: Boolean = false,
     val word: (String)? = null
 )

@@ -1,6 +1,10 @@
 package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -67,23 +71,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.valentinilk.shimmer.ShimmerBounds
-import com.valentinilk.shimmer.rememberShimmer
-import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTES
 import ru.nn.tripnn.data.stub_data.ROUTE_1
-import ru.nn.tripnn.domain.model.CurrentRoute
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.CurrentRoute
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.CARD_WIDTH
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.LoadingCard
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteCard
-import ru.nn.tripnn.ui.common.lightShimmer
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -101,6 +102,7 @@ fun HomeScreen(
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
     onCurrentRouteClick: () -> Unit,
+    onTakeTheRoute: (Route) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
@@ -123,8 +125,8 @@ fun HomeScreen(
         drawerState = drawerState
     ) {
         HomeContent(
-            currentRoute = currentRoute.value,
-            recommendedRoutes = recommendedRoutes.value ?: listOf(),
+            currentRoute = currentRoute,
+            recommendedRoutes = recommendedRoutes,
             onCurrentRouteClick = onCurrentRouteClick,
             onAllRoutesClick = onAllRoutesClick,
             onNewRouteClick = onNewRouteClick,
@@ -133,12 +135,11 @@ fun HomeScreen(
                     drawerState.open()
                 }
             },
+            onTakeTheRoute = onTakeTheRoute,
             removeRouteFromFavourite = removeRouteFromFavourite,
             addRouteToFavourite = addRouteToFavourite,
             removePlaceFromFavourite = removePlaceFromFavourite,
             addPlaceToFavourite = addPlaceToFavourite,
-            isLoading = currentRoute.isLoading || recommendedRoutes.isLoading,
-            isError = currentRoute.isError || recommendedRoutes.isError,
             toPhotos = toPhotos
         )
     }
@@ -147,31 +148,32 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
-    isLoading: Boolean,
-    isError: Boolean,
-    recommendedRoutes: List<Route>,
+    recommendedRoutes: ResourceState<List<Route>>,
+    currentRoute: ResourceState<CurrentRoute>,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
-    currentRoute: CurrentRoute?,
     onCurrentRouteClick: () -> Unit,
     onMenuClick: () -> Unit,
+    onTakeTheRoute: (Route) -> Unit,
     removeRouteFromFavourite: (String) -> Unit,
     addRouteToFavourite: (String) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     toPhotos: (String, Int) -> Unit
 ) {
+    var showSearch by rememberSaveable { mutableStateOf(false) }
+    var showRouteInfo by rememberSaveable { mutableStateOf(false) }
+    var pickedRoute by rememberSaveable { mutableIntStateOf(0) }
+    var showDeleteCurrentRouteDialog by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(onMenuClick = onMenuClick)
         }
     ) { paddings ->
-        var showSearch by rememberSaveable { mutableStateOf(false) }
-        var showRouteInfo by rememberSaveable { mutableStateOf(false) }
-        var pickedRoute by rememberSaveable { mutableIntStateOf(0) }
 
-        if (isError) {
+        if (recommendedRoutes.isError || currentRoute.isError) {
             InternetProblem()
             return@Scaffold
         }
@@ -204,11 +206,11 @@ fun HomeContent(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                if (isLoading) {
+                if (recommendedRoutes.isLoading) {
                     LoadingRecommendedRoutes()
                 } else {
                     RecommendedRoutes(
-                        routes = recommendedRoutes,
+                        routes = recommendedRoutes.value ?: listOf(),
                         onRouteClick = {
                             pickedRoute = it
                             showRouteInfo = true
@@ -223,25 +225,38 @@ fun HomeContent(
                 Spacer(modifier = Modifier.height(30.dp))
             }
 
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(16.dp)
             ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    NewRouteButton(
-                        modifier = Modifier.align(Alignment.Center),
-                        onClick = onNewRouteClick
-                    )
-                }
-                if (currentRoute != null) {
-                    CurrentRouteBar(
-                        percent = currentRoute.currentPlaceIndex * 100 / currentRoute.route.places.size,
-                        onClick = onCurrentRouteClick
-                    )
-                } else if (isLoading) {
-                    LoadingCurrentRouteBar()
+                NewRouteButton(
+                    modifier = Modifier.align(Alignment.Center),
+                    onClick = {
+                        if (currentRoute.value != null) {
+                            showDeleteCurrentRouteDialog = true
+                        } else {
+                            onNewRouteClick()
+                        }
+                    }
+                )
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = currentRoute.value != null && !currentRoute.value.buildInProgress,
+                    enter = slideInVertically { it } + fadeIn(),
+                    exit = slideOutVertically { it } + fadeOut(),
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                ) {
+                    if (currentRoute.value != null && !currentRoute.value.buildInProgress) {
+                        CurrentRouteBar(
+                            percent = if (currentRoute.value.places.isNotEmpty() && currentRoute.value.currentPlaceIndex != null) {
+                                currentRoute.value.currentPlaceIndex * 100 / currentRoute.value.places.size
+                            } else {
+                                0
+                            },
+                            onClick = onCurrentRouteClick
+                        )
+                    }
                 }
             }
         }
@@ -250,7 +265,7 @@ fun HomeContent(
             SearchPlaceBottomSheet(onDismissRequest = { showSearch = false }, toPhotos = toPhotos)
         }
 
-        if (showRouteInfo) {
+        if (showRouteInfo && recommendedRoutes.value != null) {
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { showRouteInfo = false },
@@ -260,15 +275,26 @@ fun HomeContent(
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
-                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes[pickedRoute].id) },
-                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes[pickedRoute].id) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.value[pickedRoute].id) },
+                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.value[pickedRoute].id) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    route = recommendedRoutes[pickedRoute],
-                    onTakeTheRoute = { TODO() },
-                    toPhotos = toPhotos
+                    route = recommendedRoutes.value[pickedRoute],
+                    onTakeTheRoute = onTakeTheRoute,
+                    toPhotos = toPhotos,
+                    alreadyHasRoute = currentRoute.value != null
                 )
             }
+        }
+
+        if (showDeleteCurrentRouteDialog) {
+            TwoButtonBottomSheetDialog(
+                title = stringResource(id = R.string.delete_current_route_title),
+                text = stringResource(id = R.string.delete_current_route_text),
+                rightButtonText = stringResource(id = R.string.delete_current_route_right_button_text),
+                onSubmit = onNewRouteClick,
+                onClose = { showDeleteCurrentRouteDialog = false }
+            )
         }
     }
 }
@@ -495,8 +521,10 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-
+fun NewRouteButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     val buttonInteractionSource = remember { MutableInteractionSource() }
     val pressed by buttonInteractionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(targetValue = if (pressed) 0.85f else 1f, label = "")
@@ -560,31 +588,6 @@ fun NewRouteButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun LoadingCurrentRouteBar() {
-    val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View, theme = lightShimmer)
-
-    Box(
-        modifier = Modifier
-            .shadow(
-                borderRadius = 6.dp,
-                blurRadius = 10.dp,
-                spread = (-5).dp,
-                color = Color.Black.copy(alpha = 0.3f)
-            )
-            .clip(RoundedCornerShape(6.dp))
-            .fillMaxWidth()
-            .height(60.dp)
-            .shimmer(shimmer)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.tertiary)
-        )
-    }
-}
-
-@Composable
 fun CurrentRouteBar(
     modifier: Modifier = Modifier,
     percent: Int,
@@ -617,7 +620,7 @@ fun CurrentRouteBar(
             MontsText(
                 text = stringResource(id = R.string.current_route),
                 fontSize = 16.sp,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.background,
                 fontWeight = FontWeight.Medium
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -629,7 +632,6 @@ fun CurrentRouteBar(
                     tint = Color.White
                 )
             }
-
         }
     }
 }
@@ -665,7 +667,12 @@ fun HomeScreenPreview() {
         ) {
             Box {
                 HomeScreen(
-                    currentRoute = ResourceState(CurrentRoute(route = ROUTE_1, currentPlaceIndex = 2)),
+                    currentRoute = ResourceState(
+                        CurrentRoute(
+                            places = ROUTE_1.places,
+                            currentPlaceIndex = 2
+                        )
+                    ),
                     recommendedRoutes = ResourceState(ROUTES),
                     onAllRoutesClick = {},
                     onCurrentRouteClick = {},
@@ -678,7 +685,8 @@ fun HomeScreenPreview() {
                     addRouteToFavourite = {},
                     removePlaceFromFavourite = {},
                     removeRouteFromFavourite = {},
-                    toPhotos = { _, _ -> }
+                    toPhotos = { _, _ -> },
+                    onTakeTheRoute = {}
                 )
             }
         }

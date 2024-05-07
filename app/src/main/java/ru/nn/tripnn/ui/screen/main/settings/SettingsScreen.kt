@@ -34,6 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.data.local.usersettings.Currency
+import ru.nn.tripnn.data.local.usersettings.Language
+import ru.nn.tripnn.data.local.usersettings.Theme
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.main.account.BottomSheetDialog
@@ -41,41 +44,15 @@ import ru.nn.tripnn.ui.theme.TripNNTheme
 
 enum class DialogType { THEME, LANGUAGE, CURRENCY }
 
-data class Option(
-    val text: String,
-    val onClick: () -> Unit,
-    val id: Int
-)
-
-@Composable
-fun <T> toOptions(
-    entries: List<T>,
-    id: T.() -> Int,
-    resId: T.() -> Int,
-    onClick: (Int) -> Unit
-): List<Option> {
-    val options = mutableListOf<Option>()
-    for (entry in entries) {
-        options.add(
-            Option(
-                text = stringResource(id = entry.resId()),
-                onClick = { onClick(entry.id()) },
-                id = entry.id()
-            )
-        )
-    }
-    return options;
-}
-
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
-    onThemeChange: (Int) -> Unit,
-    onLanguageChange: (Int) -> Unit,
-    onCurrencyChange: (Int) -> Unit,
-    currentTheme: Int,
-    currentLanguage: Int,
-    currentCurrency: Int
+    onThemeChange: (Theme) -> Unit,
+    onLanguageChange: (Language) -> Unit,
+    onCurrencyChange: (Currency) -> Unit,
+    currentTheme: Theme,
+    currentLanguage: Language,
+    currentCurrency: Currency
 ) {
     var dialogState by remember { mutableStateOf(DialogType.THEME) }
     var showDialog by remember { mutableStateOf(false) }
@@ -127,13 +104,11 @@ fun SettingsScreen(
                     SettingsBottomSheetDialog(
                         onClose = { showDialog = false },
                         title = stringResource(id = R.string.theme),
-                        options = toOptions(
-                            entries = Theme.entries,
-                            id = Theme::id,
-                            resId = Theme::resId,
-                            onClick = onThemeChange
-                        ),
-                        chosen = currentTheme
+                        options = Theme.entries,
+                        getId = Theme::id,
+                        getResId = Theme::resId,
+                        onChoose = onThemeChange,
+                        chosen = currentTheme.id
                     )
                 }
 
@@ -141,13 +116,11 @@ fun SettingsScreen(
                     SettingsBottomSheetDialog(
                         onClose = { showDialog = false },
                         title = stringResource(id = R.string.currency),
-                        options = toOptions(
-                            entries = Currency.entries,
-                            id = Currency::id,
-                            resId = Currency::resId,
-                            onClick = onCurrencyChange
-                        ),
-                        chosen = currentCurrency
+                        options = Currency.entries,
+                        getId = Currency::id,
+                        getResId = Currency::resId,
+                        onChoose = onCurrencyChange,
+                        chosen = currentCurrency.id
                     )
                 }
 
@@ -155,13 +128,11 @@ fun SettingsScreen(
                     SettingsBottomSheetDialog(
                         onClose = { showDialog = false },
                         title = stringResource(id = R.string.language),
-                        options = toOptions(
-                            entries = Language.entries,
-                            id = Language::id,
-                            resId = Language::resId,
-                            onClick = onLanguageChange
-                        ),
-                        chosen = currentLanguage
+                        options = Language.entries,
+                        getId = Language::id,
+                        getResId = Language::resId,
+                        onChoose = onLanguageChange,
+                        chosen = currentLanguage.id
                     )
                 }
             }
@@ -171,23 +142,16 @@ fun SettingsScreen(
 
 @Composable
 fun Options(
-    currentCurrency: Int,
-    currentLanguage: Int,
-    currentTheme: Int,
+    currentCurrency: Currency,
+    currentLanguage: Language,
+    currentTheme: Theme,
     openDialog: (DialogType) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-
         val themeTitle = stringResource(id = R.string.theme)
         Option(
             title = themeTitle,
-            current = stringResource(
-                getEntryById(
-                    Theme.entries,
-                    Theme::id,
-                    currentTheme
-                ).resId
-            ),
+            current = stringResource(currentTheme.resId),
             onClick = {
                 openDialog(DialogType.THEME)
             }
@@ -196,13 +160,7 @@ fun Options(
         val languageTitle = stringResource(id = R.string.language)
         Option(
             title = languageTitle,
-            current = stringResource(
-                getEntryById(
-                    Language.entries,
-                    Language::id,
-                    currentLanguage
-                ).resId
-            ),
+            current = stringResource(currentLanguage.resId),
             onClick = {
                 openDialog(DialogType.LANGUAGE)
             }
@@ -211,13 +169,7 @@ fun Options(
         val currencyTitle = stringResource(id = R.string.currency)
         Option(
             title = currencyTitle,
-            current = stringResource(
-                getEntryById(
-                    Currency.entries,
-                    Currency::id,
-                    currentCurrency
-                ).resId
-            ),
+            current = stringResource(currentCurrency.resId),
             onClick = {
                 openDialog(DialogType.CURRENCY)
             }
@@ -245,10 +197,13 @@ fun Option(
 }
 
 @Composable
-fun SettingsBottomSheetDialog(
+fun <T> SettingsBottomSheetDialog(
     onClose: () -> Unit,
     title: String,
-    options: List<Option>,
+    options: List<T>,
+    getId: T.() -> Int,
+    getResId: T.() -> Int,
+    onChoose: (T) -> Unit,
     chosen: Int
 ) {
     BottomSheetDialog(onClose = onClose) {
@@ -270,7 +225,7 @@ fun SettingsBottomSheetDialog(
             for (i in options.indices) {
                 var background = Color.White
                 var textColor = MaterialTheme.colorScheme.tertiary
-                if (options[i].id == chosen) {
+                if (options[i].getId() == chosen) {
                     background = MaterialTheme.colorScheme.primary
                     textColor = Color.White
                 }
@@ -288,40 +243,19 @@ fun SettingsBottomSheetDialog(
                         .fillMaxWidth()
                         .height(65.dp)
                         .background(background)
-                        .clickable(onClick = { options[i].onClick() })
+                        .clickable(onClick = { onChoose(options[i]) })
                         .padding(start = 20.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    MontsText(text = options[i].text, fontSize = 18.sp, color = textColor)
+                    MontsText(
+                        text = stringResource(id = options[i].getResId()),
+                        fontSize = 18.sp,
+                        color = textColor
+                    )
                 }
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
-    }
-}
-
-@Preview
-@Composable
-fun SettingsBottomSheetStatePreview() {
-    TripNNTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
-
-        }
-        SettingsBottomSheetDialog(
-            onClose = { },
-            title = stringResource(id = R.string.language),
-            options = toOptions(
-                entries = Language.entries,
-                id = Language::id,
-                resId = Language::resId,
-                onClick = { }
-            ),
-            chosen = 0
-        )
     }
 }
 
@@ -335,9 +269,9 @@ fun SettingsScreenPreview() {
                 onThemeChange = {},
                 onLanguageChange = {},
                 onCurrencyChange = {},
-                currentTheme = 0,
-                currentLanguage = 0,
-                currentCurrency = 0
+                currentTheme = Theme.SYSTEM,
+                currentLanguage = Language.RUSSIAN,
+                currentCurrency = Currency.RUB
             )
         }
     }

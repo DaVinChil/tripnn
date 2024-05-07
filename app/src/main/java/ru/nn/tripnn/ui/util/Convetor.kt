@@ -7,6 +7,8 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import ru.nn.tripnn.domain.CurrentRoute
+import ru.nn.tripnn.domain.Route
 import java.io.ByteArrayOutputStream
 
 fun Uri?.toBitmap(contentResolver: ContentResolver): Bitmap? =
@@ -29,4 +31,12 @@ fun Bitmap?.toByteArray(): ByteArray? =
 
 fun convertImageByteArrayToBitmap(imageData: ByteArray): Bitmap {
     return BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
+}
+
+fun convertRouteToCurrentRoute(route: Route): CurrentRoute {
+    return CurrentRoute(
+        places = route.places,
+        buildInProgress = false,
+        routeId = route.id
+    )
 }

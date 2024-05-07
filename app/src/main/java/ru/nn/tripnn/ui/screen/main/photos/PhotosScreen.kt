@@ -167,7 +167,7 @@ fun Modifier.swipeable(enabled: Boolean = true, onLeftSwipe: () -> Unit, onRight
                 onDragCancel = {
                     count = 0f
                 },
-                onHorizontalDrag = { change, amount ->
+                onHorizontalDrag = { _, amount ->
                     count += amount
                 }
             )

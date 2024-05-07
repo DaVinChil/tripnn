@@ -23,6 +23,7 @@
     <string name="show_password">Показать пароль</string>
     <string name="remember">Запомнить</string>
     <string name="logo_txt">Лого</string>
+    <string name="from_lower">от</string>
     <string name="light_theme">Светлая</string>
     <string name="dark_theme">Темная</string>
     <string name="system_theme">Системная</string>
@@ -48,6 +49,9 @@
     <string name="new_route">НОВЫЙ МАРШРУТ</string>
     <string name="current_route">Текущий маршрут</string>
     <string name="map_desc_icon">Карта</string>
+    <string name="rating_star">Звезда ратинга</string>
+    <string name="rating">Рейтинг</string>
+    <string name="choose_all">Выбрать все</string>
 
     <string name="culture">Культура</string>
     <string name="leisure">Досуг</string>
@@ -76,7 +80,7 @@
 
     <string name="search">Search</string>
 
-    <string name="by_price">по цене</string>
+    <string name="closer">поближе</string>
     <string name="by_rating">по рейтингу</string>
     <string name="cancel">Отменить</string>
 
@@ -100,6 +104,10 @@
     <string name="yesterday">Завтра</string>
     <string name="from">С</string>
     <string name="until">до</string>
+    <string name="km">км</string>
+    <string name="distance">Удаленность</string>
+    <string name="add_place">Добавить место</string>
+    <string name="apply">Применить</string>
     <string name="ok">ок</string>
     <string name="calendar">каледаль</string>
     <string name="pick_a_date">выберите дату</string>
@@ -152,4 +160,11 @@
 
     <string name="close">Закрыть</string>
     <string name="of">из</string>
+    <string name="build_route">Постройте маршрут</string>
+    <string name="minute_short">мин</string>
+    <string name="continue_building">Продолжить постройку</string>
+
+    <string name="delete_current_route_title">Удалить текущий маршрут</string>
+    <string name="delete_current_route_text">У вас уже есть маршрут. Вы уверены, что хотите создать новый? Вы не сможете восстановить текущий маршрут.</string>
+    <string name="delete_current_route_right_button_text">Продолжить</string>
 </resources>

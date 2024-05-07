@@ -1,7 +1,7 @@
 package ru.nn.tripnn.data.remote.history
 
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.data.RemoteResource
 
 interface HistoryRepository {

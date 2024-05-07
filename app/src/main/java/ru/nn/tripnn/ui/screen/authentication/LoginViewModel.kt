@@ -7,12 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.LoginData
-import ru.nn.tripnn.data.remote.auth.AuthenticationService
-import ru.nn.tripnn.data.local.token.TokenRepository
 import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.ui.screen.authentication.event.Dismiss
+import ru.nn.tripnn.data.local.token.TokenRepository
+import ru.nn.tripnn.data.remote.auth.AuthenticationService
+import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.domain.LoginData
+import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +31,8 @@ class LoginViewModel @Inject constructor(
     fun authenticate(
         rememberMe: Boolean,
         email: String,
-        password: String
+        password: String,
+        onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
             authenticated = authenticated.copy(isLoading = true)
@@ -47,12 +48,10 @@ class LoginViewModel @Inject constructor(
                 return@launch
             }
 
-            when (val result = authenticationService.login(
-                LoginData(
-                    password = password,
-                    email = email
+            when (
+                val result = authenticationService.login(
+                    LoginData(password = password, email = email)
                 )
-            )
             ) {
                 is RemoteResource.Success -> {
                     tokenRepository.saveToken(result.data!!)
@@ -62,6 +61,7 @@ class LoginViewModel @Inject constructor(
                         error = null,
                         value = true
                     )
+                    onSuccess()
                 }
 
                 is RemoteResource.Error -> {
@@ -98,12 +98,12 @@ class LoginViewModel @Inject constructor(
         return true
     }
 
-    fun dismissError(event: Dismiss) {
+    fun dismissError(event: DismissAuthError) {
         viewModelScope.launch {
-            when(event) {
-                is Dismiss.EmailError -> dismissEmailError()
-                is Dismiss.PasswordError -> dismissPasswordError()
-                is Dismiss.UserNameError -> {}
+            when (event) {
+                is DismissAuthError.EmailError -> dismissEmailError()
+                is DismissAuthError.PasswordError -> dismissPasswordError()
+                is DismissAuthError.UserNameError -> {}
             }
         }
     }

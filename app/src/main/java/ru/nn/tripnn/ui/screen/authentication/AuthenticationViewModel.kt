@@ -11,6 +11,7 @@ import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.data.remote.auth.AuthenticationService
 import ru.nn.tripnn.data.local.token.TokenRepository
 import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,20 +22,16 @@ class AuthenticationViewModel @Inject constructor(
 
     var isLoading by mutableStateOf(false)
         private set
-    var message: String? by mutableStateOf(null)
-        private set
     var isAuthenticated by mutableStateOf(false)
         private set
-    
-    var isEmailError by mutableStateOf(false)
-        private set
-    var isPasswordError by mutableStateOf(false)
-        private set
+
+    init {
+        authenticate()
+    }
 
     fun authenticate() {
         isLoading = true
         viewModelScope.launch {
-
             val token = tokenRepository.getToken()
             if (token == null) {
                 isAuthenticated = false
@@ -42,17 +39,7 @@ class AuthenticationViewModel @Inject constructor(
                 return@launch
             }
 
-            when (val result = authenticationService.authenticate(token)) {
-                is RemoteResource.Success -> {
-                    isAuthenticated = true
-                }
-
-                is RemoteResource.Error -> {
-                    message = result.message
-                    isAuthenticated = false
-                }
-            }
-
+            isAuthenticated = authenticationService.authenticate(token) is RemoteResource.Success
             isLoading = false
         }
     }

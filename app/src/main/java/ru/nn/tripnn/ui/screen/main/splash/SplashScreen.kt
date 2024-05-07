@@ -22,9 +22,11 @@ import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
 
 @Composable
-fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
+fun HeartSplashScreen(onFinish: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.White),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -57,19 +59,14 @@ fun HeartSplashScreen(onFinish: () -> Unit, isLoading: Boolean) {
             )
         }
 
-        if (isLoading) {
-            LaunchedEffect(Unit) {
+        LaunchedEffect(Unit) {
+            size.animateTo(300f, tween(1000))
+            repeat(2) {
+                size.animateTo(200f, tween(1000))
                 size.animateTo(300f, tween(1000))
-                do {
-                    size.animateTo(200f, tween(1000))
-                    size.animateTo(300f, tween(1000))
-                } while (true)
             }
-        } else {
-            LaunchedEffect(Unit) {
-                size.animateTo(1000f, tween(1000))
-                onFinish()
-            }
+            size.animateTo(1000f, tween(1000))
+            onFinish()
         }
     }
 }

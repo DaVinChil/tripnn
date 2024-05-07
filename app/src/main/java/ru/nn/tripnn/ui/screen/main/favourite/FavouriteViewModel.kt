@@ -9,20 +9,22 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
 import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.data.remote.route.RouteRepository
-import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
 class FavouriteViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
-    @Fake private val routeRepository: RouteRepository
+    @Fake private val routeRepository: RouteRepository,
+    private val currentRouteRepository: CurrentRouteRepository
 ) : ViewModel() {
 
     var favouritePlaces by mutableStateOf(ResourceState<List<Place>>())
@@ -31,9 +33,13 @@ class FavouriteViewModel @Inject constructor(
     var favouriteRoutes by mutableStateOf(ResourceState<List<Route>>())
     private var savedFavouriteRoutes = immutableListOf<Route>()
 
+    var hasCurrentRoute by mutableStateOf(false)
+        private set
+
     fun init() {
         loadFavouritePlaces()
         loadFavouriteRoutes()
+        checkExistsCurrentRoute()
     }
 
     private fun loadFavouritePlaces() {
@@ -58,6 +64,14 @@ class FavouriteViewModel @Inject constructor(
             resourceStateFromRequest(routeRepository::getFavourite).collectLatest {
                 favouriteRoutes = it
                 savedFavouriteRoutes = it.value ?: listOf()
+            }
+        }
+    }
+
+    private fun checkExistsCurrentRoute() {
+        viewModelScope.launch {
+            resourceStateFromRequest(currentRouteRepository::getCurrentRoute).collectLatest {
+                hasCurrentRoute = it.value != null
             }
         }
     }
@@ -94,6 +108,12 @@ class FavouriteViewModel @Inject constructor(
     fun filterPlaces(word: String) {
         val filtered = filterByWord(word, savedFavouritePlaces, Place::name)
         favouritePlaces = favouritePlaces.copy(value = filtered)
+    }
+
+    fun setCurrentRoute(route: Route) {
+        viewModelScope.launch {
+            currentRouteRepository.saveCurrentRoute(convertRouteToCurrentRoute(route))
+        }
     }
 
     private fun <T> filterByWord(word: String, list: List<T>, getName: T.() -> String): List<T> {

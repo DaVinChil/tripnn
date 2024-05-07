@@ -49,7 +49,7 @@ fun CatalogNavigation(
     Box(
         Modifier
             .clip(RoundedCornerShape(8.dp))
-            .height(IntrinsicSize.Max)
+            .height(IntrinsicSize.Min)
             .then(modifier)
             .background(MaterialTheme.colorScheme.secondary)
     ) {
@@ -73,7 +73,7 @@ fun CatalogNavigation(
                             interactionSource = remember { MutableInteractionSource() },
                             onClick = { if (chosen != i) onCatalogChange(i) }
                         )
-                        .padding(vertical = 5.dp)
+                        .padding(vertical = 8.dp)
                         .onGloballyPositioned { catalogSize = it.size.width }
                 ) {
                     MontsText(

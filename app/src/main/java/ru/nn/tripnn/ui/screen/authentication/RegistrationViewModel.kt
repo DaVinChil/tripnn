@@ -8,11 +8,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.RegistrationData
+import ru.nn.tripnn.domain.RegistrationData
 import ru.nn.tripnn.data.remote.auth.AuthenticationService
 import ru.nn.tripnn.data.local.token.TokenRepository
 import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.ui.screen.authentication.event.Dismiss
+import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,7 +35,8 @@ class RegistrationViewModel @Inject constructor(
         email: String,
         userName: String,
         password: String,
-        confirmPassword: String
+        confirmPassword: String,
+        onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
             authenticated = authenticated.copy(isLoading = true)
@@ -69,6 +70,7 @@ class RegistrationViewModel @Inject constructor(
                         error = null,
                         value = true
                     )
+                    onSuccess()
                 }
 
                 is RemoteResource.Error -> {
@@ -122,12 +124,12 @@ class RegistrationViewModel @Inject constructor(
         return true
     }
 
-    fun dismissError(event: Dismiss) {
+    fun dismissError(event: DismissAuthError) {
         viewModelScope.launch {
             when(event) {
-                is Dismiss.EmailError -> dismissEmailError()
-                is Dismiss.PasswordError -> dismissPasswordError()
-                is Dismiss.UserNameError -> dismissUserNameError()
+                is DismissAuthError.EmailError -> dismissEmailError()
+                is DismissAuthError.PasswordError -> dismissPasswordError()
+                is DismissAuthError.UserNameError -> dismissUserNameError()
             }
         }
     }

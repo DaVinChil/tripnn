@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -60,14 +62,14 @@ import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.domain.model.UserInfo
+import ru.nn.tripnn.domain.UserInfoData
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.common.darkShimmer
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
+import ru.nn.tripnn.ui.util.darkShimmer
 
 enum class DialogType {
     CHANGE_EMAIL, CHANGE_PASSWORD, CLEAR_HISTORY, DELETE_ACCOUNT, EXIT_DIALOG
@@ -77,7 +79,7 @@ val AVATAR_SIZE = 170.dp
 
 @Composable
 fun AccountScreen(
-    userInfo: ResourceState<UserInfo>,
+    userInfoData: ResourceState<UserInfoData>,
     onBackClick: () -> Unit,
     onUserNameChange: (String) -> Unit,
     onClearHistory: () -> Unit,
@@ -85,7 +87,7 @@ fun AccountScreen(
     onLeaveAccount: () -> Unit,
     onAvatarChange: (Uri) -> Unit
 ) {
-    if (userInfo.isError || (!userInfo.isLoading && userInfo.value == null)) {
+    if (userInfoData.isError || (!userInfoData.isLoading && userInfoData.value == null)) {
         InternetProblem()
         return
     }
@@ -122,11 +124,11 @@ fun AccountScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            if (userInfo.isLoading) {
+            if (userInfoData.isLoading) {
                 LoadingUserInfoBlock()
             } else {
                 UserInfoBlock(
-                    userInfo = userInfo.value ?: UserInfo(name = "", email = "", avatar = null),
+                    userInfoData = userInfoData.value ?: UserInfoData(name = "", email = "", avatar = null),
                     onAvatarChange = onAvatarChange,
                     onUserNameChange = onUserNameChange
                 )
@@ -245,7 +247,7 @@ fun LoadingUserInfoBlock() {
 
 @Composable
 fun UserInfoBlock(
-    userInfo: UserInfo,
+    userInfoData: UserInfoData,
     onAvatarChange: (Uri) -> Unit,
     onUserNameChange: (String) -> Unit
 ) {
@@ -264,14 +266,14 @@ fun UserInfoBlock(
                     launcher.launch("image/*")
                 }
         ) {
-            if (userInfo.avatar == null) {
+            if (userInfoData.avatar == null) {
                 Image(
                     painter = painterResource(id = R.drawable.account_avatar_placeholder),
                     contentDescription = stringResource(R.string.avatar)
                 )
             } else {
                 Image(
-                    bitmap = userInfo.avatar.asImageBitmap(),
+                    bitmap = userInfoData.avatar.asImageBitmap(),
                     contentDescription = stringResource(R.string.avatar)
                 )
             }
@@ -285,7 +287,7 @@ fun UserInfoBlock(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             var name by remember {
-                mutableStateOf(userInfo.name)
+                mutableStateOf(userInfoData.name)
             }
             val focusRequester = remember { FocusRequester() }
 
@@ -328,7 +330,7 @@ fun UserInfoBlock(
 
         MontsText(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = userInfo.email,
+            text = userInfoData.email,
             fontSize = 14.sp
         )
     }
@@ -404,11 +406,13 @@ fun TwoButtonBottomSheetDialog(
         onDismissRequest = onClose,
         sheetState = sheetState,
         dragHandle = null,
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        windowInsets = WindowInsets(0)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = 20.dp)
         ) {
             Row(
@@ -455,7 +459,7 @@ fun TwoButtonBottomSheetDialog(
                     modifier = Modifier
                         .height(55.dp)
                         .width(140.dp),
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.background,
                     textColor = MaterialTheme.colorScheme.tertiary,
                     onClick = {
                         coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
@@ -464,9 +468,8 @@ fun TwoButtonBottomSheetDialog(
                 PrimaryButton(
                     text = rightButtonText,
                     modifier = Modifier
-                        .height(55.dp)
-                        .width(140.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
+                        .height(55.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
                     onClick = {
                         onSubmit()
                         coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
@@ -490,11 +493,13 @@ fun BottomSheetDialog(
         onDismissRequest = onClose,
         sheetState = sheetState,
         dragHandle = null,
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        windowInsets = WindowInsets(0)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = 20.dp)
         ) {
             IconButton(
@@ -538,8 +543,8 @@ fun AccountScreenPreview() {
         Surface {
             AccountScreen(
                 onBackClick = {},
-                userInfo = ResourceState(
-                    value = UserInfo(
+                userInfoData = ResourceState(
+                    value = UserInfoData(
                         name = "Sasha",
                         email = "hz.com@gmail.com",
                         avatar = null

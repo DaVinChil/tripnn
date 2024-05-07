@@ -47,6 +47,9 @@
     <string name="new_route">NEW ROUTE</string>
     <string name="current_route">Current Route</string>
     <string name="map_desc_icon">Map</string>
+    <string name="rating_star">rating star</string>
+    <string name="rating">Rating</string>
+    <string name="choose_all">Choose all</string>
 
     <string name="culture">Culture</string>
     <string name="leisure">Leisure</string>
@@ -75,7 +78,7 @@
 
     <string name="search">Search</string>
 
-    <string name="by_price">by price</string>
+    <string name="closer">closer</string>
     <string name="by_rating">by rating</string>
     <string name="cancel">Cancel</string>
     <string name="avatar">Avatar</string>
@@ -96,7 +99,12 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <string name="from">From</string>
-    <string name="until">until</string>
+    <string name="from_lower">from</string>
+    <string name="until">less</string>
+    <string name="km">km</string>
+    <string name="distance">Distance</string>
+    <string name="add_place">Add place</string>
+    <string name="apply">Apply</string>
     <string name="ok">OK</string>
     <string name="calendar">calendar</string>
     <string name="pick_a_date">pick a date</string>
@@ -149,4 +157,11 @@
 
     <string name="close">Close</string>
     <string name="of">of</string>
+    <string name="build_route">Build route</string>
+    <string name="minute_short">min</string>
+    <string name="continue_building">Continue building</string>
+
+    <string name="delete_current_route_title">Delete current route</string>
+    <string name="delete_current_route_text">You already have a route. Are you sure you want to build new a one? You would not be able to recover current route.</string>
+    <string name="delete_current_route_right_button_text">Continue</string>
 </resources>

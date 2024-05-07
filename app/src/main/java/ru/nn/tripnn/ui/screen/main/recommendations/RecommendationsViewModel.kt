@@ -9,19 +9,21 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
+import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.data.remote.route.RouteRepository
-import ru.nn.tripnn.data.RemoteResource
 import ru.nn.tripnn.ui.screen.authentication.ResourceState
+import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
 import javax.inject.Inject
 
 @HiltViewModel
 class RecommendationsViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository,
-    @Fake private val routeRepository: RouteRepository
+    @Fake private val routeRepository: RouteRepository,
+    private val currentRouteRepository: CurrentRouteRepository
 ) : ViewModel() {
     var recommendedRoutes by mutableStateOf(ResourceState<List<Route>>())
         private set
@@ -29,9 +31,11 @@ class RecommendationsViewModel @Inject constructor(
         get() = savedRoutes.isEmpty()
     private var savedRoutes = immutableListOf<Route>()
 
+    var hasCurrentRoute by mutableStateOf(false)
 
     fun init() {
         loadRecommended()
+        checkExistsCurrentRoute()
     }
 
     private fun loadRecommended() {
@@ -44,6 +48,14 @@ class RecommendationsViewModel @Inject constructor(
             resourceStateFromRequest(routeRepository::getRecommendations).collectLatest {
                 recommendedRoutes = it
                 savedRoutes = it.value ?: listOf()
+            }
+        }
+    }
+
+    private fun checkExistsCurrentRoute() {
+        viewModelScope.launch {
+            resourceStateFromRequest(currentRouteRepository::getCurrentRoute).collectLatest {
+                hasCurrentRoute = it.value != null
             }
         }
     }
@@ -69,6 +81,12 @@ class RecommendationsViewModel @Inject constructor(
     fun addRouteToFavourite(id: String) {
         viewModelScope.launch {
             routeRepository.addToFavourite(id)
+        }
+    }
+
+    fun setCurrentRoute(route: Route) {
+        viewModelScope.launch {
+            currentRouteRepository.saveCurrentRoute(convertRouteToCurrentRoute(route))
         }
     }
 

@@ -1,8 +1,7 @@
 package ru.nn.tripnn.data.remote.route
 
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.domain.model.CurrentRoute
 
 interface RouteRepository {
     suspend fun getRecommendations(): RemoteResource<List<Route>>

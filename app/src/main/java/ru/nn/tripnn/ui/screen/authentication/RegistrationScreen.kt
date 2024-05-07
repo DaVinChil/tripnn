@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.screen.authentication.event.Dismiss
+import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
@@ -70,7 +70,7 @@ fun RegistrationScreen(
         confirmPassword: String
     ) -> Unit,
     onSignInClick: () -> Unit,
-    dismissError: (Dismiss) -> Unit,
+    dismissError: (DismissAuthError) -> Unit,
     authenticated: ResourceState<Boolean>,
     emailState: ResourceState<*>,
     userNameState: ResourceState<*>,
@@ -98,7 +98,7 @@ fun RegistrationScreen(
                 title = stringResource(id = R.string.email),
                 onValueChanged = { email = it },
                 placeholder = stringResource(id = R.string.enter_email),
-                dismissError = { dismissError(Dismiss.EmailError) },
+                dismissError = { dismissError(DismissAuthError.EmailError) },
                 isError = emailState.isError
             )
 
@@ -107,7 +107,7 @@ fun RegistrationScreen(
                 title = stringResource(id = R.string.enter_user_name),
                 onValueChanged = { username = it },
                 placeholder = stringResource(id = R.string.user_name),
-                dismissError = { dismissError(Dismiss.UserNameError) },
+                dismissError = { dismissError(DismissAuthError.UserNameError) },
                 isError = userNameState.isError
             )
 
@@ -116,7 +116,7 @@ fun RegistrationScreen(
                 title = stringResource(id = R.string.password),
                 onValueChanged = { password = it },
                 placeholder = stringResource(id = R.string.enter_password),
-                dismissError = { dismissError(Dismiss.PasswordError) },
+                dismissError = { dismissError(DismissAuthError.PasswordError) },
                 isError = passwordState.isError
             )
 
@@ -125,7 +125,7 @@ fun RegistrationScreen(
                 title = stringResource(id = R.string.confirm_password),
                 onValueChanged = { confirmPassword = it },
                 placeholder = stringResource(id = R.string.confirm_password),
-                dismissError = { dismissError(Dismiss.PasswordError) },
+                dismissError = { dismissError(DismissAuthError.PasswordError) },
                 isError = passwordState.isError
             )
         }

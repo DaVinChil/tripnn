@@ -1,6 +1,6 @@
 package ru.nn.tripnn.data.stub_data
 
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Route
 import java.util.Date
 
 val ROUTE_1 = Route(
@@ -14,9 +14,6 @@ val ROUTE_1 = Route(
         PLACE_1,
         PLACE_1.copy(id = "2"),
         PLACE_1.copy(id = "3")
-    ),
-    timeToWalk = listOf(
-        5, 13
     ),
     wasTaken = Date(),
     desc = "Рекомендованное время начала не позднее 18:00"

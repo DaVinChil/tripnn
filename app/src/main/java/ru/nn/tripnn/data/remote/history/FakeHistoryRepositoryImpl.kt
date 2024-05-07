@@ -3,8 +3,8 @@ package ru.nn.tripnn.data.remote.history
 import kotlinx.coroutines.delay
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.data.stub_data.ROUTES
-import ru.nn.tripnn.domain.model.Place
-import ru.nn.tripnn.domain.model.Route
+import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.data.RemoteResource
 
 class FakeHistoryRepositoryImpl : HistoryRepository {
