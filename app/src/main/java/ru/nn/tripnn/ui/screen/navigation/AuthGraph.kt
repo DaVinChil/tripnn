@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.navigation
+package ru.nn.tripnn.ui.screen.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel

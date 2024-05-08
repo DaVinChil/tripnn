@@ -46,10 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.CurrentRoute
@@ -61,10 +59,10 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.RemoveFromRouteCardOption
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
-import ru.nn.tripnn.ui.screen.main.home.InternetProblem
+import ru.nn.tripnn.ui.common.LoadingCircleScreen
+import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
-import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
+import ru.nn.tripnn.ui.common.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -105,7 +103,7 @@ fun ConstructorScreen(
             if (currentRoute.isLoading) {
                 LoadingCircleScreen()
             } else if (currentRoute.isError) {
-                InternetProblem()
+                InternetProblemScreen()
             } else {
                 Column(
                     modifier = Modifier

@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.navigation
+package ru.nn.tripnn.ui.screen.navigation
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -28,10 +28,10 @@ import ru.nn.tripnn.ui.screen.main.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
 import ru.nn.tripnn.ui.screen.main.takingroute.TakingTheRouteScreen
 import ru.nn.tripnn.ui.util.changeLocales
-import ru.nn.tripnn.ui.util.fullSlideInHorizontal
-import ru.nn.tripnn.ui.util.fullSlideInVertical
-import ru.nn.tripnn.ui.util.fullSlideOutHorizontal
-import ru.nn.tripnn.ui.util.fullSlideOutVertical
+import ru.nn.tripnn.ui.common.fullSlideInHorizontal
+import ru.nn.tripnn.ui.common.fullSlideInVertical
+import ru.nn.tripnn.ui.common.fullSlideOutHorizontal
+import ru.nn.tripnn.ui.common.fullSlideOutVertical
 
 enum class AppRoutes(
     val route: String

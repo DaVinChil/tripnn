@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.navigation
+package ru.nn.tripnn.ui.screen.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

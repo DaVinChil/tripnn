@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.util
+package ru.nn.tripnn.ui.common
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition

@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.screen.main
+package ru.nn.tripnn.ui.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -7,11 +7,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
-import ru.nn.tripnn.ui.navigation.AppRoutes
-import ru.nn.tripnn.ui.navigation.AuthRoutes
-import ru.nn.tripnn.ui.navigation.addAppGraph
-import ru.nn.tripnn.ui.navigation.addAuthGraph
-import ru.nn.tripnn.ui.navigation.rememberTripNnNavController
+import ru.nn.tripnn.ui.screen.navigation.AppRoutes
+import ru.nn.tripnn.ui.screen.navigation.AuthRoutes
+import ru.nn.tripnn.ui.screen.navigation.addAppGraph
+import ru.nn.tripnn.ui.screen.navigation.addAuthGraph
+import ru.nn.tripnn.ui.screen.navigation.rememberTripNnNavController
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
 import ru.nn.tripnn.ui.screen.main.splash.HeartSplashScreen

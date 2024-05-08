@@ -46,9 +46,9 @@ import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
-import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
-import ru.nn.tripnn.ui.screen.main.home.InternetProblem
+import ru.nn.tripnn.ui.common.LoadingCircleScreen
+import ru.nn.tripnn.ui.common.RouteInfoBottomSheetContent
+import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +67,7 @@ fun RecommendationsScreen(
     alreadyHasRoute: Boolean
 ) {
     if (routes.isError) {
-        InternetProblem()
+        InternetProblemScreen()
         return
     }
 

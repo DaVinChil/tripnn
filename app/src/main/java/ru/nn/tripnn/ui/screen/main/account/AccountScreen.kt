@@ -9,14 +9,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,18 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,13 +53,12 @@ import androidx.compose.ui.unit.sp
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
-import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.UserInfoData
 import ru.nn.tripnn.ui.common.MontsText
-import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.screen.main.home.InternetProblem
+import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -88,7 +80,7 @@ fun AccountScreen(
     onAvatarChange: (Uri) -> Unit
 ) {
     if (userInfoData.isError || (!userInfoData.isLoading && userInfoData.value == null)) {
-        InternetProblem()
+        InternetProblemScreen()
         return
     }
 
@@ -135,7 +127,6 @@ fun AccountScreen(
             }
 
             Spacer(modifier = Modifier.height(40.dp))
-
 
             Column(verticalArrangement = Arrangement.spacedBy(30.dp)) {
                 MontsText(
@@ -190,7 +181,8 @@ fun AccountScreen(
                 DialogType.DELETE_ACCOUNT ->
                     DeleteAccountDialog(
                         onSubmit = onDeleteAccount,
-                        onClose = { showDialog = false })
+                        onClose = { showDialog = false }
+                    )
 
                 DialogType.CLEAR_HISTORY ->
                     ClearHistoryDialog(onSubmit = onClearHistory, onClose = { showDialog = false })
@@ -286,11 +278,9 @@ fun UserInfoBlock(
                 .align(Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            var name by remember {
-                mutableStateOf(userInfoData.name)
-            }
-            val focusRequester = remember { FocusRequester() }
+            var name by remember { mutableStateOf(userInfoData.name) }
 
+            val focusRequester = remember { FocusRequester() }
             val focusManager = LocalFocusManager.current
 
             BasicTextField(
@@ -390,154 +380,6 @@ fun LeaveAccountDialog(onSubmit: () -> Unit, onClose: () -> Unit) {
         onSubmit = onSubmit,
         onClose = onClose
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TwoButtonBottomSheetDialog(
-    title: String,
-    text: String,
-    leftButtonText: String = stringResource(id = R.string.cancel),
-    rightButtonText: String,
-    onSubmit: () -> Unit,
-    onLeftButton: () -> Unit = {},
-    onClose: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val coroutine = rememberCoroutineScope()
-    ModalBottomSheet(
-        onDismissRequest = onClose,
-        sheetState = sheetState,
-        dragHandle = null,
-        containerColor = TripNnTheme.colorScheme.background,
-        windowInsets = WindowInsets(0)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = 20.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    IconButton(
-                        onClick = {
-                            coroutine.launch {
-                                sheetState.hide()
-                            }.invokeOnCompletion { onClose() }
-                        }
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(15.dp),
-                            painter = painterResource(id = R.drawable.cross_gray),
-                            contentDescription = stringResource(id = R.string.close_btm_sheet),
-                            tint = Color.Unspecified
-                        )
-                    }
-                }
-                MontsText(text = title, style = MaterialTheme.typography.titleSmall)
-                Spacer(modifier = Modifier.weight(1f))
-            }
-
-            Spacer(modifier = Modifier.height(44.dp))
-
-            MontsText(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(0.8f),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(44.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                PrimaryButton(
-                    text = leftButtonText,
-                    modifier = Modifier
-                        .height(55.dp)
-                        .width(140.dp),
-                    containerColor = TripNnTheme.colorScheme.secondary,
-                    textColor = TripNnTheme.colorScheme.textColor,
-                    onClick = {
-                        onLeftButton()
-                        coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
-                    }
-                )
-                PrimaryButton(
-                    text = rightButtonText,
-                    modifier = Modifier.height(55.dp),
-                    onClick = {
-                        onSubmit()
-                        coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
-                    }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BottomSheetDialog(
-    onClose: () -> Unit,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val coroutine = rememberCoroutineScope()
-
-    ModalBottomSheet(
-        onDismissRequest = onClose,
-        sheetState = sheetState,
-        dragHandle = null,
-        containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
-        windowInsets = WindowInsets(0)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp, bottom = 20.dp)
-        ) {
-            IconButton(
-                onClick = {
-                    coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
-                }
-            ) {
-                Icon(
-                    modifier = Modifier.size(15.dp),
-                    painter = painterResource(id = R.drawable.cross_gray),
-                    contentDescription = stringResource(id = R.string.close_btm_sheet),
-                    tint = Color.Unspecified
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                content()
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun BtmSheetPreview() {
-    TripNNTheme {
-        Surface {
-            LeaveAccountDialog(onSubmit = {}, onClose = {})
-        }
-    }
 }
 
 @Preview

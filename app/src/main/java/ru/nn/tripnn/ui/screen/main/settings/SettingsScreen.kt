@@ -38,7 +38,7 @@ import ru.nn.tripnn.data.local.usersettings.Language
 import ru.nn.tripnn.data.local.usersettings.Theme
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.main.account.BottomSheetDialog
+import ru.nn.tripnn.ui.common.BottomSheetDialog
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 

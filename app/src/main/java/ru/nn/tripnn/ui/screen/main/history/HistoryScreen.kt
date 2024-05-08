@@ -38,11 +38,11 @@ import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.screen.main.favourite.DESTINATION
+import ru.nn.tripnn.ui.screen.main.favourite.CATALOGS
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
-import ru.nn.tripnn.ui.screen.main.favourite.PlacesColumn
+import ru.nn.tripnn.ui.common.PlacesColumn
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
-import ru.nn.tripnn.ui.screen.main.favourite.RoutesColumn
+import ru.nn.tripnn.ui.common.RoutesColumn
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
@@ -100,9 +100,9 @@ fun HistoryScreen(
                 } else {
                     filterRoutes(word)
                 }
-                navController.navigate(DESTINATION[it]) {
+                navController.navigate(CATALOGS[it]) {
                     launchSingleTop = true
-                    popUpTo(DESTINATION[it]) {
+                    popUpTo(CATALOGS[it]) {
                         inclusive = true
                     }
                 }
@@ -128,8 +128,8 @@ fun HistoryScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        NavHost(navController = navController, startDestination = DESTINATION[PLACES_INDEX]) {
-            composable(route = DESTINATION[PLACES_INDEX]) {
+        NavHost(navController = navController, startDestination = CATALOGS[PLACES_INDEX]) {
+            composable(route = CATALOGS[PLACES_INDEX]) {
                 PlacesColumn(
                     places = places,
                     removeFromFavourite = removePlaceFromFavourite,
@@ -138,7 +138,7 @@ fun HistoryScreen(
                     toPhotos = toPhotos
                 )
             }
-            composable(route = DESTINATION[ROUTES_INDEX]) {
+            composable(route = CATALOGS[ROUTES_INDEX]) {
                 RoutesColumn(
                     routes = routes,
                     removeRouteFromFavourite = removeRouteFromFavourite,

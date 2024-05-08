@@ -44,5 +44,4 @@ fun <T> getEntryById(entries: List<T>, getId: T.() -> Int, id: Int): T {
 fun getIsoLang(language: Language) = when (language) {
     Language.RUSSIAN -> "ru"
     Language.ENGLISH -> "en"
-    else -> "en"
 }

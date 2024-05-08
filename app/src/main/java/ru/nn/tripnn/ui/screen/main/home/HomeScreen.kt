@@ -1,6 +1,5 @@
 package ru.nn.tripnn.ui.screen.main.home
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -8,12 +7,9 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,12 +25,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.PagerScope
-import androidx.compose.foundation.pager.PagerSnapDistance
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,51 +36,46 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.CURRENT_ROUTE
 import ru.nn.tripnn.data.stub_data.ROUTES
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.CARD_WIDTH
 import ru.nn.tripnn.ui.common.DragHandle
+import ru.nn.tripnn.ui.common.InfiniteCarousel
+import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.LoadingCard
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.NewRouteButton
 import ru.nn.tripnn.ui.common.RouteCard
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
-import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
+import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
+import ru.nn.tripnn.ui.common.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
-import kotlin.math.absoluteValue
 
 @Composable
 fun HomeScreen(
@@ -177,7 +163,7 @@ fun HomeContent(
     ) { paddings ->
 
         if (recommendedRoutes.isError || currentRoute.isError) {
-            InternetProblem()
+            InternetProblemScreen()
             return@Scaffold
         }
 
@@ -298,16 +284,6 @@ fun HomeContent(
 }
 
 @Composable
-fun InternetProblem() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        MontsText(
-            text = "Internet problems",
-            style = MaterialTheme.typography.headlineLarge
-        )
-    }
-}
-
-@Composable
 fun TopAppBar(onMenuClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -419,63 +395,6 @@ fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun InfiniteCarousel(
-    modifier: Modifier = Modifier,
-    count: Int,
-    contentPadding: PaddingValues = PaddingValues(0.dp),
-    pageSize: PageSize = PageSize.Fill,
-    pageSpacing: Dp = 0.dp,
-    key: (index: Int) -> Any,
-    pageContent: @Composable PagerScope.(page: Int) -> Unit
-) {
-    if (count == 0) return
-
-    val state = rememberPagerState(pageCount = { 10000 }, initialPage = 5000)
-    val flingBehavior = PagerDefaults.flingBehavior(
-        state = state,
-        pagerSnapDistance = PagerSnapDistance.atMost(10),
-    )
-    val scaleFactor = 3f
-
-    HorizontalPager(
-        modifier = modifier,
-        state = state,
-        pageSpacing = pageSpacing,
-        pageSize = pageSize,
-        contentPadding = contentPadding,
-        flingBehavior = flingBehavior,
-        key = { key(it % count) }
-    ) { index ->
-        val scale = if (state.currentPage == index) {
-            1 - state.currentPageOffsetFraction.absoluteValue / scaleFactor
-        } else if ((state.currentPage - index).absoluteValue == 1 &&
-            (state.currentPage < index && state.currentPageOffsetFraction > 0 ||
-                    state.currentPage > index && state.currentPageOffsetFraction < 0)
-        ) {
-            (scaleFactor - 1) / scaleFactor + state.currentPageOffsetFraction.absoluteValue / scaleFactor
-        } else {
-            (scaleFactor - 1) / scaleFactor
-        }
-
-        val offset = (CARD_WIDTH - CARD_WIDTH * scale) / 2
-
-        Box(
-            modifier = Modifier
-                .offset(
-                    x = offset * if (state.currentPage < index) -1
-                    else if (state.currentPage > index) 1
-                    else if (state.currentPageOffsetFraction <= 0) -1
-                    else 1
-                )
-                .scale(scale = scale)
-        ) {
-            pageContent(index % count)
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
 fun LoadingRecommendedRoutes() {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     Box(modifier = Modifier.requiredWidth(screenWidth)) {
@@ -521,149 +440,6 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
                 text = stringResource(id = R.string.all_places_nn_txt),
                 style = MaterialTheme.typography.labelMedium
             )
-        }
-    }
-}
-
-@Composable
-fun NewRouteButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val buttonInteractionSource = remember { MutableInteractionSource() }
-    val pressed by buttonInteractionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(targetValue = if (pressed) 0.85f else 1f, label = "")
-
-    val height = 140.dp
-    val lineHeight = 30.sp
-    val yOffset = (-9).dp
-
-    Box(
-        modifier = modifier
-            .scale(scale)
-            .height(height)
-            .width(230.dp)
-            .clickable(
-                onClick = onClick,
-                indication = null,
-                interactionSource = buttonInteractionSource
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(height)
-                .shadow(
-                    borderRadius = 100.dp,
-                    blurRadius = 20.dp,
-                    color = TripNnTheme.colorScheme.newRouteGlow
-                )
-                .clip(RoundedCornerShape(100))
-                .background(TripNnTheme.colorScheme.secondary)
-        )
-        Column(
-            modifier = Modifier.fillMaxHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = stringResource(id = R.string.new_route),
-                style = MaterialTheme.typography.titleLarge,
-                color = TripNnTheme.colorScheme.textColor,
-                textAlign = TextAlign.Center,
-                lineHeight = lineHeight,
-                letterSpacing = (-0.5).sp,
-                modifier = Modifier.width(IntrinsicSize.Min)
-            )
-
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
-                MontsText(
-                    text = stringResource(id = R.string.create),
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.offset(y = yOffset)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CurrentRouteBar(
-    modifier: Modifier = Modifier,
-    route: CurrentRoute?,
-    onClick: () -> Unit
-) {
-    val percent = if (route != null && route.places.isNotEmpty() && route.currentPlaceIndex != null) {
-        route.currentPlaceIndex * 100 / route.places.size
-    } else {
-        0
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .clickable(
-                onClick = onClick,
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() })
-            .shadow(
-                borderRadius = 6.dp,
-                blurRadius = 10.dp,
-                spread = (-5).dp,
-                color = Color.Black.copy(alpha = 0.3f)
-            )
-            .clip(RoundedCornerShape(6.dp))
-            .background(TripNnTheme.colorScheme.currentRoute)
-            .padding(vertical = 10.dp, horizontal = 20.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            MontsText(
-                text = stringResource(id = R.string.current_route),
-                style = MaterialTheme.typography.displayMedium,
-                color = TripNnTheme.colorScheme.onPrimary
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                MontsText(
-                    text = "$percent%",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TripNnTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.map_icon),
-                    contentDescription = stringResource(id = R.string.map_desc_icon),
-                    tint = TripNnTheme.colorScheme.onPrimary
-                )
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun CurrentRouteBarPreview() {
-    TripNNTheme {
-        CurrentRouteBar(route = CURRENT_ROUTE, onClick = {})
-    }
-}
-
-@Preview
-@Composable
-fun NewRouteButtonPreview() {
-    TripNNTheme {
-        Box(
-            modifier = Modifier
-                .background(TripNnTheme.colorScheme.background)
-                .padding(10.dp)
-        ) {
-            NewRouteButton(onClick = {})
         }
     }
 }
