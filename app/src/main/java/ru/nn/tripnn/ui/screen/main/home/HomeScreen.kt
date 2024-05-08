@@ -65,7 +65,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -73,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
+import ru.nn.tripnn.data.stub_data.CURRENT_ROUTE
 import ru.nn.tripnn.data.stub_data.ROUTES
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.CurrentRoute
@@ -237,7 +237,7 @@ fun HomeContent(
                 NewRouteButton(
                     modifier = Modifier.align(Alignment.Center),
                     onClick = {
-                        if (currentRoute.value != null) {
+                        if (currentRoute.value?.buildInProgress == false) {
                             showDeleteCurrentRouteDialog = true
                         } else {
                             onNewRouteClick()
@@ -251,16 +251,10 @@ fun HomeContent(
                     exit = slideOutVertically { it } + fadeOut(),
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
-                    if (currentRoute.value != null && !currentRoute.value.buildInProgress) {
-                        CurrentRouteBar(
-                            percent = if (currentRoute.value.places.isNotEmpty() && currentRoute.value.currentPlaceIndex != null) {
-                                currentRoute.value.currentPlaceIndex * 100 / currentRoute.value.places.size
-                            } else {
-                                0
-                            },
-                            onClick = onCurrentRouteClick
-                        )
-                    }
+                    CurrentRouteBar(
+                        route = currentRoute.value,
+                        onClick = onCurrentRouteClick
+                    )
                 }
             }
         }
@@ -597,9 +591,15 @@ fun NewRouteButton(
 @Composable
 fun CurrentRouteBar(
     modifier: Modifier = Modifier,
-    percent: Int,
+    route: CurrentRoute?,
     onClick: () -> Unit
 ) {
+    val percent = if (route != null && route.places.isNotEmpty() && route.currentPlaceIndex != null) {
+        route.currentPlaceIndex * 100 / route.places.size
+    } else {
+        0
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -650,14 +650,14 @@ fun CurrentRouteBar(
 @Composable
 fun CurrentRouteBarPreview() {
     TripNNTheme {
-        CurrentRouteBar(percent = 13, onClick = {})
+        CurrentRouteBar(route = CURRENT_ROUTE, onClick = {})
     }
 }
 
 @Preview
 @Composable
 fun NewRouteButtonPreview() {
-    TripNNTheme() {
+    TripNNTheme {
         Box(
             modifier = Modifier
                 .background(TripNnTheme.colorScheme.background)

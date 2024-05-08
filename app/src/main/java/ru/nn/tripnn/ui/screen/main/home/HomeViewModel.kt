@@ -30,6 +30,20 @@ class HomeViewModel @Inject constructor(
     var recommendedRoutes by mutableStateOf(ResourceState<List<Route>>())
         private set
 
+    fun isRouteIsBuilding(): Boolean {
+        return !currentRoute.isLoading &&
+                !currentRoute.isError &&
+                currentRoute.value != null &&
+                currentRoute.value?.buildInProgress == true
+    }
+
+    fun isRouteInProgress(): Boolean {
+        return !currentRoute.isLoading &&
+                !currentRoute.isError &&
+                currentRoute.value != null &&
+                currentRoute.value?.buildInProgress == false
+    }
+
     fun init() {
         loadCurrentRoute()
         if (recommendedRoutes.value == null) {
@@ -68,6 +82,12 @@ class HomeViewModel @Inject constructor(
     fun removeRouteFromFavourite(id: String) {
         viewModelScope.launch {
             routeRepository.removeFromFavourite(id)
+        }
+    }
+
+    fun deleteCurrentRoute() {
+        viewModelScope.launch {
+            currentRouteRepository.deleteCurrentRoute()
         }
     }
 

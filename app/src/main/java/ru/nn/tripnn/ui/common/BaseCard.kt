@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -331,9 +332,7 @@ fun DraggableCard(
                 .offset {
                     IntOffset(
                         y = 0,
-                        x = dragState
-                            .requireOffset()
-                            .roundToInt()
+                        x = dragState.requireOffset().roundToInt()
                     )
                 }
                 .anchoredDraggable(dragState, Orientation.Horizontal)
@@ -356,7 +355,11 @@ fun CardOption(
         modifier = Modifier
             .height(CARD_HEIGHT)
             .fillMaxWidth(1f / 4f)
-            .clickable(onClick = onClick),
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onClick
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

@@ -1,6 +1,5 @@
 package ru.nn.tripnn.ui.navigation
 
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -104,18 +103,19 @@ fun NavGraphBuilder.home(
             onFavouriteClick = { navigateTo(AppRoutes.FAVOURITE.route) },
             onSettingsClick = { navigateTo(AppRoutes.SETTINGS.route) },
             onAllRoutesClick = { navigateTo(AppRoutes.RECOMMENDED_ROUTES.route) },
-            onNewRouteClick = { navigateTo(AppRoutes.CONSTRUCTOR_ROUTE.route) },
+            onNewRouteClick = {
+                if (homeViewModel.isRouteInProgress()) {
+                    homeViewModel.deleteCurrentRoute()
+                }
+                navigateTo(AppRoutes.CONSTRUCTOR_ROUTE.route)
+            },
             onTakeTheRoute = {
                 homeViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
             onCurrentRouteClick = {
-                if (!homeViewModel.currentRoute.isLoading &&
-                    !homeViewModel.currentRoute.isError &&
-                    homeViewModel.currentRoute.value != null &&
-                    homeViewModel.currentRoute.value?.buildInProgress == true
-                ) {
-                    navigateTo(AppRoutes.CONSTRUCTOR_ROUTE.route)
+                if (homeViewModel.isRouteInProgress()) {
+                    navigateTo(AppRoutes.CUR_ROUTE.route)
                 }
             },
             removeRouteFromFavourite = homeViewModel::removeRouteFromFavourite,

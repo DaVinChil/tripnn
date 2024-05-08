@@ -70,7 +70,6 @@ import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
-import ru.nn.tripnn.ui.theme.darkShimmer
 
 enum class DialogType {
     CHANGE_EMAIL, CHANGE_PASSWORD, CLEAR_HISTORY, DELETE_ACCOUNT, EXIT_DIALOG
@@ -398,8 +397,10 @@ fun LeaveAccountDialog(onSubmit: () -> Unit, onClose: () -> Unit) {
 fun TwoButtonBottomSheetDialog(
     title: String,
     text: String,
+    leftButtonText: String = stringResource(id = R.string.cancel),
     rightButtonText: String,
     onSubmit: () -> Unit,
+    onLeftButton: () -> Unit = {},
     onClose: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -424,7 +425,9 @@ fun TwoButtonBottomSheetDialog(
                 Box(modifier = Modifier.weight(1f)) {
                     IconButton(
                         onClick = {
-                            coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
+                            coroutine.launch {
+                                sheetState.hide()
+                            }.invokeOnCompletion { onClose() }
                         }
                     ) {
                         Icon(
@@ -457,13 +460,14 @@ fun TwoButtonBottomSheetDialog(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 PrimaryButton(
-                    text = stringResource(id = R.string.cancel),
+                    text = leftButtonText,
                     modifier = Modifier
                         .height(55.dp)
                         .width(140.dp),
                     containerColor = TripNnTheme.colorScheme.secondary,
                     textColor = TripNnTheme.colorScheme.textColor,
                     onClick = {
+                        onLeftButton()
                         coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
                     }
                 )
@@ -563,7 +567,7 @@ fun AccountScreenPreview() {
 @Preview
 @Composable
 fun LoadingUserInfo() {
-    TripNNTheme () {
+    TripNNTheme {
         Box(modifier = Modifier.background(TripNnTheme.colorScheme.background)) {
             LoadingUserInfoBlock()
         }

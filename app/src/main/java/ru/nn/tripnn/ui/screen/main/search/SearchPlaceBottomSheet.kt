@@ -699,7 +699,10 @@ fun SearchResultScreen(
                     text = stringResource(id = R.string.closer),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (sortState.closer) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.onMinor,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
                         sortState = sortState.copy(closer = true, byRating = false)
                         sort(sortState)
                     }
@@ -709,7 +712,10 @@ fun SearchResultScreen(
                     text = stringResource(id = R.string.by_rating),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (sortState.byRating) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.onMinor,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
                         sortState = sortState.copy(closer = false, byRating = true)
                         sort(sortState)
                     }
