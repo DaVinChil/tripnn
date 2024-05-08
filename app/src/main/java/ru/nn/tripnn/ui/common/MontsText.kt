@@ -10,6 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun MontsText(
@@ -17,7 +18,7 @@ fun MontsText(
     text: String,
     fontSize: TextUnit = TextUnit.Unspecified,
     fontWeight: FontWeight? = null,
-    color: Color = MaterialTheme.colorScheme.tertiary,
+    color: Color = TripNnTheme.colorScheme.textColor,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,

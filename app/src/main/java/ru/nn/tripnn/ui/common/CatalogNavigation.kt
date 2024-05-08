@@ -24,13 +24,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun CatalogNavigation(
@@ -50,7 +49,7 @@ fun CatalogNavigation(
             .clip(RoundedCornerShape(8.dp))
             .height(IntrinsicSize.Min)
             .then(modifier)
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(TripNnTheme.colorScheme.minor)
     ) {
         Box(
             modifier = Modifier
@@ -58,7 +57,7 @@ fun CatalogNavigation(
                 .clip(RoundedCornerShape(8.dp))
                 .fillMaxHeight()
                 .fillMaxWidth(1f / catalogs.size)
-                .background(MaterialTheme.colorScheme.primary)
+                .background(TripNnTheme.colorScheme.primary)
         )
         Row(
             modifier = Modifier
@@ -79,8 +78,8 @@ fun CatalogNavigation(
                         text = catalog,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
-                        color = if (chosen == i) MaterialTheme.colorScheme.background
-                        else MaterialTheme.colorScheme.onSecondary,
+                        color = if (chosen == i) TripNnTheme.colorScheme.onPrimary
+                        else TripNnTheme.colorScheme.onMinor,
                         style = MaterialTheme.typography.headlineSmall
                     )
                 }
@@ -92,7 +91,7 @@ fun CatalogNavigation(
 @Preview
 @Composable
 fun CatalogNavigationPreview() {
-    TripNNTheme(false) {
+    TripNNTheme() {
         var chosen by remember {
             mutableIntStateOf(0)
         }

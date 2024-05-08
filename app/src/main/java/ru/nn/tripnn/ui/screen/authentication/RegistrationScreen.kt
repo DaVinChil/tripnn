@@ -57,6 +57,7 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
 val SPACE_BETWEEN_INPUT = 22.dp
@@ -80,7 +81,7 @@ fun RegistrationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .systemBarsPadding()
             .padding(start = 25.dp, end = 25.dp, top = 40.dp)
     ) {
@@ -163,7 +164,7 @@ fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
         MontsText(
             text = stringResource(id = R.string.have_account),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondary
+            color = TripNnTheme.colorScheme.onMinor
         )
         Spacer(modifier = Modifier.width(5.dp))
         MontsText(
@@ -299,13 +300,13 @@ fun AuthInputField(
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
-        focusedContainerColor = MaterialTheme.colorScheme.secondary,
-        unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary,
+        focusedContainerColor = TripNnTheme.colorScheme.fieldBackground,
+        unfocusedContainerColor = TripNnTheme.colorScheme.fieldBackground,
+        focusedPlaceholderColor = TripNnTheme.colorScheme.hint,
+        unfocusedPlaceholderColor = TripNnTheme.colorScheme.hint,
         errorTextColor = Color.Red,
         errorIndicatorColor = Color.Transparent,
-        errorContainerColor = MaterialTheme.colorScheme.secondary
+        errorContainerColor = TripNnTheme.colorScheme.fieldBackground
     ),
     isError: Boolean = false
 ) {
@@ -321,7 +322,7 @@ fun AuthInputField(
         interactionSource = interactionSource,
         singleLine = true,
         textStyle = TextStyle(
-            color = Color.Black,
+            color = TripNnTheme.colorScheme.textColor,
             fontFamily = montserratFamily,
             fontWeight = FontWeight.Normal,
             fontSize = fontSize

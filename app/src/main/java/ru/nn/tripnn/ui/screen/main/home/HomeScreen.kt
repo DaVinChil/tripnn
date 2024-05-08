@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
@@ -88,7 +88,7 @@ import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
-import ru.nn.tripnn.ui.theme.montserratFamily
+import ru.nn.tripnn.ui.theme.TripNnTheme
 import kotlin.math.absoluteValue
 
 @Composable
@@ -167,10 +167,13 @@ fun HomeContent(
     var showDeleteCurrentRouteDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize(),
         topBar = {
             TopAppBar(onMenuClick = onMenuClick)
-        }
+        },
+        containerColor = TripNnTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0)
     ) { paddings ->
 
         if (recommendedRoutes.isError || currentRoute.isError) {
@@ -181,11 +184,12 @@ fun HomeContent(
         Column(
             modifier = Modifier
                 .padding(paddings)
+                .navigationBarsPadding()
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.onSurface)
+                    .background(TripNnTheme.colorScheme.secondaryBackground)
                     .padding(16.dp)
             ) {
                 Row(
@@ -199,7 +203,8 @@ fun HomeContent(
                     MontsText(
                         modifier = Modifier.clickable(onClick = onAllRoutesClick),
                         text = stringResource(id = R.string.all_txt),
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.displayMedium,
+                        color = TripNnTheme.colorScheme.primary
                     )
                 }
 
@@ -270,7 +275,7 @@ fun HomeContent(
                 onDismissRequest = { showRouteInfo = false },
                 dragHandle = { DragHandle() },
                 sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.background,
+                containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
@@ -315,7 +320,7 @@ fun TopAppBar(onMenuClick: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.onSurface)
+            .background(TripNnTheme.colorScheme.secondaryBackground)
             .statusBarsPadding()
             .padding(16.dp)
     ) {
@@ -325,12 +330,14 @@ fun TopAppBar(onMenuClick: () -> Unit) {
                     .clickable(onClick = onMenuClick),
                 painter = painterResource(id = R.drawable.burger_menu),
                 contentDescription = stringResource(id = R.string.menu_txt),
+                tint = TripNnTheme.colorScheme.tertiary
             )
         }
-        Image(
+        Icon(
             modifier = Modifier,
             painter = painterResource(id = R.drawable.tripnn_logo),
-            contentDescription = stringResource(id = R.string.logo_txt)
+            contentDescription = stringResource(id = R.string.logo_txt),
+            tint = TripNnTheme.colorScheme.textColor
         )
         Spacer(modifier = Modifier.weight(1f))
     }
@@ -348,7 +355,7 @@ fun Menu(
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth(0.8f)
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.bottomSheetBackground)
             .statusBarsPadding()
             .padding(16.dp)
     ) {
@@ -360,7 +367,8 @@ fun Menu(
                 Icon(
                     painter = painterResource(id = R.drawable.cross_menu),
                     contentDescription = stringResource(id = R.string.close_menu),
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
+                    tint = TripNnTheme.colorScheme.tertiary
                 )
             }
 
@@ -502,7 +510,7 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
             .fillMaxWidth()
             .height(50.dp)
             .clickable(onClick = onClick)
-            .background(Color.White)
+            .background(TripNnTheme.colorScheme.cardBackground)
             .padding(vertical = 10.dp, horizontal = 20.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -512,7 +520,8 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.list_icon),
-                contentDescription = stringResource(id = R.string.all_places)
+                contentDescription = stringResource(id = R.string.all_places),
+                tint = TripNnTheme.colorScheme.tertiary
             )
             MontsText(
                 text = stringResource(id = R.string.all_places_nn_txt),
@@ -553,10 +562,10 @@ fun NewRouteButton(
                 .shadow(
                     borderRadius = 100.dp,
                     blurRadius = 20.dp,
-                    color = Color.Black.copy(alpha = 0.3f)
+                    color = TripNnTheme.colorScheme.newRouteGlow
                 )
                 .clip(RoundedCornerShape(100))
-                .background(MaterialTheme.colorScheme.onSurface)
+                .background(TripNnTheme.colorScheme.secondary)
         )
         Column(
             modifier = Modifier.fillMaxHeight(),
@@ -567,7 +576,7 @@ fun NewRouteButton(
             Text(
                 text = stringResource(id = R.string.new_route),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.tertiary,
+                color = TripNnTheme.colorScheme.textColor,
                 textAlign = TextAlign.Center,
                 lineHeight = lineHeight,
                 letterSpacing = (-0.5).sp,
@@ -606,7 +615,7 @@ fun CurrentRouteBar(
                 color = Color.Black.copy(alpha = 0.3f)
             )
             .clip(RoundedCornerShape(6.dp))
-            .background(MaterialTheme.colorScheme.tertiary)
+            .background(TripNnTheme.colorScheme.currentRoute)
             .padding(vertical = 10.dp, horizontal = 20.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -618,19 +627,19 @@ fun CurrentRouteBar(
             MontsText(
                 text = stringResource(id = R.string.current_route),
                 style = MaterialTheme.typography.displayMedium,
-                color = MaterialTheme.colorScheme.background
+                color = TripNnTheme.colorScheme.onPrimary
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MontsText(
                     text = "$percent%",
                     style = MaterialTheme.typography.labelMedium,
-                    color = Color.White
+                    color = TripNnTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     painter = painterResource(id = R.drawable.map_icon),
                     contentDescription = stringResource(id = R.string.map_desc_icon),
-                    tint = Color.White
+                    tint = TripNnTheme.colorScheme.onPrimary
                 )
             }
         }
@@ -648,10 +657,10 @@ fun CurrentRouteBarPreview() {
 @Preview
 @Composable
 fun NewRouteButtonPreview() {
-    TripNNTheme {
+    TripNNTheme() {
         Box(
             modifier = Modifier
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
             NewRouteButton(onClick = {})

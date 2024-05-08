@@ -41,12 +41,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
@@ -56,7 +54,7 @@ import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.theme.TripNNTheme
-import ru.nn.tripnn.ui.util.darkShimmer
+import ru.nn.tripnn.ui.theme.TripNnTheme
 import kotlin.math.roundToInt
 
 val CARD_HEIGHT = 140.dp
@@ -83,7 +81,7 @@ fun BaseCard(
             )
             .clip(RoundedCornerShape(10.dp))
             .height(CARD_HEIGHT)
-            .background(Color.White)
+            .background(TripNnTheme.colorScheme.cardBackground)
             .clickable(onClick = onCardClick)
     ) {
         Row {
@@ -92,7 +90,7 @@ fun BaseCard(
                 contentDescription = "image",
                 modifier = Modifier
                     .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.onSecondary)
+                    .background(TripNnTheme.colorScheme.undefined)
                     .fillMaxWidth(0.5f),
                 contentScale = ContentScale.Crop
             )
@@ -125,7 +123,7 @@ fun LoadingCard(
     shadowColor: Color = Color(0x00FFFFFF)
 ) {
     val shimmerInstance =
-        rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = darkShimmer)
+        rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = TripNnTheme.shimmer)
 
     Box(
         modifier = modifier
@@ -136,7 +134,7 @@ fun LoadingCard(
             )
             .clip(RoundedCornerShape(10.dp))
             .height(CARD_HEIGHT)
-            .background(Color.White)
+            .background(TripNnTheme.colorScheme.cardBackground)
     ) {
         Row {
             Box(
@@ -149,7 +147,7 @@ fun LoadingCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.secondary)
+                        .background(TripNnTheme.colorScheme.undefined)
                 )
             }
 
@@ -168,7 +166,7 @@ fun LoadingCard(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.secondary)
+                            .background(TripNnTheme.colorScheme.undefined)
                     )
                 }
                 Spacer(modifier = Modifier.height(30.dp))
@@ -182,7 +180,7 @@ fun LoadingCard(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.secondary)
+                            .background(TripNnTheme.colorScheme.undefined)
                     )
                 }
             }
@@ -254,7 +252,8 @@ fun CostInfo(cost: String) {
         Icon(
             modifier = Modifier.size(15.dp),
             painter = painterResource(id = R.drawable.wallet),
-            contentDescription = "Cost"
+            contentDescription = "Cost",
+            tint = TripNnTheme.colorScheme.tertiary
         )
         MontsText(
             text = "$cost ₽",
@@ -272,7 +271,8 @@ fun RatingInfo(rating: Double) {
         Icon(
             modifier = Modifier.size(15.dp),
             painter = painterResource(id = R.drawable.outlined_gray_star),
-            contentDescription = "Rating"
+            contentDescription = "Rating",
+            tint = TripNnTheme.colorScheme.tertiary
         )
         MontsText(
             text = rating.toString(),
@@ -350,7 +350,7 @@ fun CardOption(
     @DrawableRes painter: Int,
     text: String,
     onClick: () -> Unit,
-    color: Color = Color.Unspecified
+    color: Color = TripNnTheme.colorScheme.textColor
 ) {
     Column(
         modifier = Modifier
@@ -365,7 +365,12 @@ fun CardOption(
             contentDescription = "",
             tint = color
         )
-        MontsText(text = text, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, color = color)
+        MontsText(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            textAlign = TextAlign.Center,
+            color = color
+        )
     }
 }
 
@@ -418,14 +423,14 @@ fun PlaceCardPreview() {
     TripNNTheme {
         Box(
             modifier = Modifier
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
             PlaceCard(
                 modifier = Modifier.fillMaxWidth(),
                 place = PLACE_1,
                 onCardClick = { /*TODO*/ },
-                shadowColor = Color.Black
+                shadowColor = TripNnTheme.colorScheme.shadow
             )
         }
     }
@@ -437,7 +442,7 @@ fun DraggablePlaceCardPreview() {
     TripNNTheme {
         Box(
             modifier = Modifier
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
             DraggableCard(
@@ -447,7 +452,7 @@ fun DraggablePlaceCardPreview() {
                     PlaceCard(
                         place = PLACE_1,
                         onCardClick = { /*TODO*/ },
-                        shadowColor = Color.Black
+                        shadowColor = TripNnTheme.colorScheme.shadow
                     )
                 }
             )
@@ -461,7 +466,7 @@ fun LoadingCardPreview() {
     TripNNTheme {
         Box(
             modifier = Modifier
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
             LoadingCard(shadowColor = Color.Black)

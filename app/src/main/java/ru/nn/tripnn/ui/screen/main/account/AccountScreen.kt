@@ -68,8 +68,9 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
-import ru.nn.tripnn.ui.util.darkShimmer
+import ru.nn.tripnn.ui.theme.darkShimmer
 
 enum class DialogType {
     CHANGE_EMAIL, CHANGE_PASSWORD, CLEAR_HISTORY, DELETE_ACCOUNT, EXIT_DIALOG
@@ -95,7 +96,7 @@ fun AccountScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
         var dialogType by remember { mutableStateOf(DialogType.CHANGE_EMAIL) }
@@ -112,7 +113,8 @@ fun AccountScreen(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = stringResource(R.string.back_txt)
+                    contentDescription = stringResource(R.string.back_txt),
+                    tint = TripNnTheme.colorScheme.tertiary
                 )
             }
 
@@ -208,7 +210,7 @@ fun AccountScreen(
 @Composable
 fun LoadingUserInfoBlock() {
     val shimmerInstance =
-        rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = darkShimmer)
+        rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = TripNnTheme.shimmer)
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
@@ -216,7 +218,7 @@ fun LoadingUserInfoBlock() {
                 .align(Alignment.CenterHorizontally)
                 .clip(CircleShape)
                 .size(AVATAR_SIZE)
-                .background(MaterialTheme.colorScheme.secondary)
+                .background(TripNnTheme.colorScheme.minor)
                 .shimmer(shimmerInstance)
         )
 
@@ -227,7 +229,7 @@ fun LoadingUserInfoBlock() {
                 .clip(CircleShape)
                 .width(60.dp)
                 .height(20.dp)
-                .background(MaterialTheme.colorScheme.secondary)
+                .background(TripNnTheme.colorScheme.minor)
                 .shimmer(shimmerInstance)
         )
 
@@ -238,7 +240,7 @@ fun LoadingUserInfoBlock() {
                 .clip(CircleShape)
                 .width(150.dp)
                 .height(20.dp)
-                .background(MaterialTheme.colorScheme.secondary)
+                .background(TripNnTheme.colorScheme.minor)
                 .shimmer(shimmerInstance)
         )
     }
@@ -310,7 +312,7 @@ fun UserInfoBlock(
                 ),
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = TripNnTheme.colorScheme.textColor,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = montserratFamily,
@@ -321,7 +323,8 @@ fun UserInfoBlock(
             Icon(
                 painter = painterResource(id = R.drawable.edit_icon),
                 contentDescription = stringResource(id = R.string.edit_name_txt),
-                modifier = Modifier.clickable { focusRequester.requestFocus() }
+                modifier = Modifier.clickable { focusRequester.requestFocus() },
+                tint = TripNnTheme.colorScheme.tertiary
             )
         }
 
@@ -405,7 +408,7 @@ fun TwoButtonBottomSheetDialog(
         onDismissRequest = onClose,
         sheetState = sheetState,
         dragHandle = null,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = TripNnTheme.colorScheme.background,
         windowInsets = WindowInsets(0)
     ) {
         Column(
@@ -458,17 +461,15 @@ fun TwoButtonBottomSheetDialog(
                     modifier = Modifier
                         .height(55.dp)
                         .width(140.dp),
-                    containerColor = MaterialTheme.colorScheme.background,
-                    textColor = MaterialTheme.colorScheme.tertiary,
+                    containerColor = TripNnTheme.colorScheme.secondary,
+                    textColor = TripNnTheme.colorScheme.textColor,
                     onClick = {
                         coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
                     }
                 )
                 PrimaryButton(
                     text = rightButtonText,
-                    modifier = Modifier
-                        .height(55.dp),
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.height(55.dp),
                     onClick = {
                         onSubmit()
                         coroutine.launch { sheetState.hide() }.invokeOnCompletion { onClose() }
@@ -492,7 +493,7 @@ fun BottomSheetDialog(
         onDismissRequest = onClose,
         sheetState = sheetState,
         dragHandle = null,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
         windowInsets = WindowInsets(0)
     ) {
         Box(
@@ -562,8 +563,8 @@ fun AccountScreenPreview() {
 @Preview
 @Composable
 fun LoadingUserInfo() {
-    TripNNTheme (false) {
-        Box(modifier = Modifier.background(Color.White)) {
+    TripNNTheme () {
+        Box(modifier = Modifier.background(TripNnTheme.colorScheme.background)) {
             LoadingUserInfoBlock()
         }
     }

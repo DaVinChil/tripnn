@@ -1,11 +1,22 @@
-package ru.nn.tripnn.ui.util
+package ru.nn.tripnn.ui.theme
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import com.valentinilk.shimmer.defaultShimmerTheme
+import ru.nn.tripnn.data.local.usersettings.Theme
+
+val LocalShimmer = compositionLocalOf { lightShimmer }
+
+@Composable
+fun getShimmer(theme: Theme) = when(theme) {
+    Theme.LIGHT -> darkShimmer
+    else -> lightShimmer
+}
 
 val lightShimmer = defaultShimmerTheme.copy(
     animationSpec = infiniteRepeatable(

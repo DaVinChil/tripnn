@@ -36,6 +36,7 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun LoginScreen(
@@ -54,7 +55,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .statusBarsPadding()
             .padding(start = 25.dp, end = 25.dp, top = 40.dp, bottom = 40.dp)
     ) {
@@ -143,7 +144,7 @@ fun DontHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
         MontsText(
             text = stringResource(id = R.string.dont_have_account),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondary
+            color = TripNnTheme.colorScheme.onMinor
         )
         Spacer(modifier = Modifier.width(5.dp))
         MontsText(

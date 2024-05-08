@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.local.usersettings.Currency
 import ru.nn.tripnn.data.local.usersettings.Language
@@ -41,6 +40,7 @@ import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.main.account.BottomSheetDialog
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 enum class DialogType { THEME, LANGUAGE, CURRENCY }
 
@@ -60,7 +60,7 @@ fun SettingsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
 
@@ -75,7 +75,8 @@ fun SettingsScreen(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = stringResource(id = R.string.back_txt)
+                    contentDescription = stringResource(id = R.string.back_txt),
+                    tint = TripNnTheme.colorScheme.tertiary
                 )
             }
 
@@ -198,7 +199,7 @@ fun Option(
         MontsText(
             text = current,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondary
+            color = TripNnTheme.colorScheme.onMinor
         )
     }
 }
@@ -230,11 +231,11 @@ fun <T> SettingsBottomSheetDialog(
                 .align(Alignment.CenterHorizontally)
         ) {
             for (i in options.indices) {
-                var background = Color.White
-                var textColor = MaterialTheme.colorScheme.tertiary
+                var background = TripNnTheme.colorScheme.cardBackground
+                var textColor = TripNnTheme.colorScheme.textColor
                 if (options[i].getId() == chosen) {
-                    background = MaterialTheme.colorScheme.primary
-                    textColor = Color.White
+                    background = TripNnTheme.colorScheme.primary
+                    textColor = TripNnTheme.colorScheme.onPrimary
                 }
 
                 if (i != 0) {

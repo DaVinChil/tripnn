@@ -74,6 +74,7 @@ import ru.nn.tripnn.ui.screen.main.account.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 val DESTINATION = listOf("places", "routes")
 const val PLACES_INDEX = 0
@@ -102,7 +103,7 @@ fun FavouriteScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .padding(10.dp)
             .systemBarsPadding()
     ) {
@@ -111,7 +112,7 @@ fun FavouriteScreen(
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
                 contentDescription = stringResource(id = R.string.back_txt),
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = TripNnTheme.colorScheme.tertiary
             )
         }
 
@@ -324,7 +325,7 @@ fun RoutesColumn(
         ModalBottomSheet(
             onDismissRequest = { showRouteInfo = false },
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
             dragHandle = { DragHandle() },
             windowInsets = WindowInsets(0)
         ) {
@@ -475,7 +476,7 @@ fun RouteInfoBottomSheetContent(
                 MontsText(
                     text = route.desc,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondary
+                    color = TripNnTheme.colorScheme.onMinor
                 )
             }
 
@@ -573,7 +574,7 @@ fun RouteInfoPreview() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
         ) {
             RouteInfoBottomSheetContent(
                 route = ROUTE_1,

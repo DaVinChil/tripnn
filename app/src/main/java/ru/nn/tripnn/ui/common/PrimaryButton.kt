@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun PrimaryButton(
     modifier: Modifier = Modifier,
     text: String,
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    textColor: Color = Color.White,
+    containerColor: Color = TripNnTheme.colorScheme.primary,
+    textColor: Color = TripNnTheme.colorScheme.onPrimary,
     paddingValues: PaddingValues = PaddingValues(vertical = 17.dp, horizontal = 25.dp),
     isLoading: Boolean = false,
     enabled: Boolean = true,
@@ -72,8 +73,8 @@ fun PrimaryButton(
                     modifier = Modifier
                         .size(35.dp)
                         .align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.secondary,
-                    trackColor = MaterialTheme.colorScheme.tertiary,
+                    color = TripNnTheme.colorScheme.minor,
+                    trackColor = TripNnTheme.colorScheme.tertiary,
                 )
             }
         }
@@ -87,7 +88,7 @@ fun PrimaryButtonPreview() {
     TripNNTheme {
         Surface(
             modifier = Modifier
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
                 .size(100.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -103,7 +104,7 @@ fun PrimaryButtonLoadingPreview() {
     TripNNTheme {
         Surface(
             modifier = Modifier
-                .background(Color.White)
+                .background(TripNnTheme.colorScheme.background)
                 .size(100.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {

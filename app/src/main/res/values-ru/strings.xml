@@ -167,4 +167,6 @@
     <string name="delete_current_route_title">Удалить текущий маршрут</string>
     <string name="delete_current_route_text">У вас уже есть маршрут. Вы уверены, что хотите создать новый? Вы не сможете восстановить текущий маршрут.</string>
     <string name="delete_current_route_right_button_text">Продолжить</string>
+
+    <string name="moonlight">Лунная</string>
 </resources>

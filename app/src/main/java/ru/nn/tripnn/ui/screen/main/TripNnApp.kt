@@ -1,6 +1,5 @@
 package ru.nn.tripnn.ui.screen.main
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,7 +7,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
-import ru.nn.tripnn.data.local.usersettings.Theme
 import ru.nn.tripnn.ui.navigation.AppRoutes
 import ru.nn.tripnn.ui.navigation.AuthRoutes
 import ru.nn.tripnn.ui.navigation.addAppGraph
@@ -28,11 +26,7 @@ fun TripNnApp() {
     val isAuthenticated = authViewModel.isAuthenticated
 
     TripNNTheme(
-        darkTheme = when (userSettings.theme) {
-            Theme.LIGHT -> false
-            Theme.DARK -> true
-            Theme.SYSTEM -> isSystemInDarkTheme()
-        }
+        theme = userSettings.theme
     ) {
         var splashScreenFinished by rememberSaveable { mutableStateOf(false) }
         if (!splashScreenFinished) {

@@ -6,7 +6,8 @@ import ru.nn.tripnn.R
 enum class Theme(@StringRes val resId: Int, val id: Int) {
     LIGHT(R.string.light_theme, 0),
     DARK(R.string.dark_theme, 1),
-    SYSTEM(R.string.system_theme, 2);
+    SYSTEM(R.string.system_theme, 2),
+    MOONLIGHT(R.string.moonlight, 3);
 
     companion object {
         fun fromId(id: Int) = getEntryById(Theme.entries, Theme::id, id)

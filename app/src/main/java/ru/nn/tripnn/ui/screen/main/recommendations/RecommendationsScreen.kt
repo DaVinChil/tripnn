@@ -49,6 +49,7 @@ import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.favourite.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +86,7 @@ fun RecommendationsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .padding(10.dp)
             .systemBarsPadding()
     ) {
@@ -93,7 +94,7 @@ fun RecommendationsScreen(
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
                 contentDescription = stringResource(id = R.string.back_txt),
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = TripNnTheme.colorScheme.tertiary
             )
         }
 
@@ -154,7 +155,7 @@ fun RecommendationsScreen(
                 onDismissRequest = { showRouteInfo = false },
                 sheetState = sheetState,
                 dragHandle = { DragHandle() },
-                containerColor = MaterialTheme.colorScheme.background,
+                containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
@@ -199,7 +200,7 @@ fun NoRecommendedRoutes(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .padding(10.dp)
             .systemBarsPadding()
     ) {
@@ -207,7 +208,7 @@ fun NoRecommendedRoutes(onBack: () -> Unit) {
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
                 contentDescription = stringResource(id = R.string.back_txt),
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = TripNnTheme.colorScheme.tertiary
             )
         }
 

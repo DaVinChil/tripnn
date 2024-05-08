@@ -164,4 +164,6 @@
     <string name="delete_current_route_title">Delete current route</string>
     <string name="delete_current_route_text">You already have a route. Are you sure you want to build new a one? You would not be able to recover current route.</string>
     <string name="delete_current_route_right_button_text">Continue</string>
+
+    <string name="moonlight">Moonlight</string>
 </resources>

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,12 +53,10 @@ fun Search(modifier: Modifier = Modifier, onSearch: (String) -> Unit) {
         modifier = Modifier
             .clip(RoundedCornerShape(15.dp))
             .then(modifier)
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(TripNnTheme.colorScheme.fieldBackground)
             .clickable { focusRequester.requestFocus() }
     ) {
-        var searchValue by remember {
-            mutableStateOf("")
-        }
+        var searchValue by remember { mutableStateOf("") }
         BasicTextField(
             value = searchValue,
             modifier = Modifier.focusRequester(focusRequester),
@@ -76,7 +75,7 @@ fun Search(modifier: Modifier = Modifier, onSearch: (String) -> Unit) {
             ),
             singleLine = true,
             textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.tertiary,
+                color = TripNnTheme.colorScheme.textColor,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium,
                 fontFamily = montserratFamily,
@@ -95,7 +94,7 @@ fun Search(modifier: Modifier = Modifier, onSearch: (String) -> Unit) {
                         fontFamily = montserratFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.onSecondary,
+                        color = TripNnTheme.colorScheme.hint,
                     )
                 },
                 interactionSource = remember { MutableInteractionSource() },
@@ -109,10 +108,10 @@ fun Search(modifier: Modifier = Modifier, onSearch: (String) -> Unit) {
                 colors = TextFieldDefaults.colors(
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
-                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary,
-                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSecondary
+                    focusedContainerColor = TripNnTheme.colorScheme.fieldBackground,
+                    unfocusedContainerColor = TripNnTheme.colorScheme.fieldBackground,
+                    focusedPlaceholderColor = TripNnTheme.colorScheme.hint,
+                    unfocusedPlaceholderColor = TripNnTheme.colorScheme.hint
                 ),
                 leadingIcon = {
                     Icon(

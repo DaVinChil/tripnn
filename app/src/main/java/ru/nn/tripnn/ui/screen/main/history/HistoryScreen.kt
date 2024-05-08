@@ -43,6 +43,7 @@ import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.PlacesColumn
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.RoutesColumn
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun HistoryScreen(
@@ -67,7 +68,7 @@ fun HistoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .padding(10.dp)
             .systemBarsPadding()
     ) {
@@ -76,7 +77,7 @@ fun HistoryScreen(
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
                 contentDescription = stringResource(id = R.string.back_txt),
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = TripNnTheme.colorScheme.tertiary
             )
         }
 

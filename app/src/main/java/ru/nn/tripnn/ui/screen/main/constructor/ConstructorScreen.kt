@@ -66,6 +66,7 @@ import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
 import ru.nn.tripnn.ui.screen.main.search.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun ConstructorScreen(
@@ -81,7 +82,7 @@ fun ConstructorScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.background)
             .padding(start = 10.dp, end = 10.dp, top = 10.dp)
             .statusBarsPadding()
     ) {
@@ -90,7 +91,7 @@ fun ConstructorScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.back_arrow),
                     contentDescription = stringResource(id = R.string.back_txt),
-                    tint = MaterialTheme.colorScheme.tertiary
+                    tint = TripNnTheme.colorScheme.tertiary
                 )
             }
 
@@ -136,14 +137,14 @@ fun ConstructorScreen(
                 onClick = takeRoute,
                 enabled = isEnabled,
                 containerColor = if (isEnabled) {
-                    MaterialTheme.colorScheme.primaryContainer
+                    TripNnTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.secondary
+                    TripNnTheme.colorScheme.secondary
                 },
                 textColor = if (isEnabled) {
-                    MaterialTheme.colorScheme.background
+                    TripNnTheme.colorScheme.onPrimary
                 } else {
-                    MaterialTheme.colorScheme.onSecondary
+                    TripNnTheme.colorScheme.onMinor
                 }
             )
         }
@@ -204,7 +205,7 @@ fun RouteColumn(
                         Icon(
                             painter = painterResource(id = R.drawable.steps),
                             contentDescription = "",
-                            tint = MaterialTheme.colorScheme.onSecondary
+                            tint = TripNnTheme.colorScheme.onMinor
                         )
                     }
 
@@ -261,7 +262,7 @@ fun AddPlaceButton(
             .fillMaxWidth()
             .height(45.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(TripNnTheme.colorScheme.primary)
             .clickable {
                 showPlaceSearch = true
             }
@@ -272,7 +273,7 @@ fun AddPlaceButton(
         Icon(
             painter = painterResource(id = R.drawable.plus),
             contentDescription = stringResource(R.string.add_place),
-            tint = MaterialTheme.colorScheme.background
+            tint = TripNnTheme.colorScheme.onPrimary
         )
 
         Spacer(modifier = Modifier.width(10.dp))
@@ -280,7 +281,7 @@ fun AddPlaceButton(
         MontsText(
             text = stringResource(id = R.string.add_place),
             style = MaterialTheme.typography.displayMedium,
-            color = MaterialTheme.colorScheme.background
+            color = TripNnTheme.colorScheme.onPrimary
         )
     }
 

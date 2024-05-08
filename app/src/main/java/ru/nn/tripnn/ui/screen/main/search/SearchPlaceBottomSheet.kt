@@ -101,6 +101,7 @@ import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.LoadingCircleScreen
 import ru.nn.tripnn.ui.screen.main.home.InternetProblem
 import ru.nn.tripnn.ui.theme.TripNNTheme
+import ru.nn.tripnn.ui.theme.TripNnTheme
 import java.time.LocalTime
 
 val LEISURE_TYPES = listOf(
@@ -165,7 +166,7 @@ fun ConstructorSearchBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
         sheetState = sheetState,
         dragHandle = { DragHandle() },
         windowInsets = WindowInsets(0)
@@ -226,7 +227,7 @@ fun SearchPlaceBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
         sheetState = sheetState,
         dragHandle = { DragHandle() },
         windowInsets = WindowInsets(0)
@@ -307,7 +308,7 @@ fun SearchPlaceScreen(
     Box(
         modifier = Modifier
             .fillMaxHeight(5f / 6f)
-            .background(MaterialTheme.colorScheme.background)
+            .background(TripNnTheme.colorScheme.bottomSheetBackground)
     ) {
         Column(
             modifier = Modifier
@@ -409,7 +410,7 @@ fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(color = if (picked[i]) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .background(color = if (picked[i]) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
                         .clickable(
                             indication = null,
                             interactionSource = remember {
@@ -422,7 +423,7 @@ fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
                     MontsText(
                         text = price,
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (picked[i]) Color.White else MaterialTheme.colorScheme.tertiary
+                        color = if (picked[i]) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
                     )
                 }
             }
@@ -448,7 +449,7 @@ fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(color = if (picked == i) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .background(color = if (picked == i) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
                         .clickable(
                             indication = null,
                             interactionSource = remember {
@@ -467,7 +468,7 @@ fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
                         MontsText(
                             text = stringResource(id = R.string.from_lower) + " $minRating",
                             style = MaterialTheme.typography.labelMedium,
-                            color = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary
+                            color = if (picked == i) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
                         )
 
                         Icon(
@@ -475,7 +476,7 @@ fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
                             contentDescription = stringResource(
                                 id = R.string.rating_star
                             ),
-                            tint = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary,
+                            tint = if (picked == i) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.tertiary,
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .aspectRatio(1f)
@@ -506,7 +507,7 @@ fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(CircleShape)
-                        .background(color = if (picked == i) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .background(color = if (picked == i) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
                         .clickable(
                             indication = null,
                             interactionSource = remember {
@@ -520,7 +521,7 @@ fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
                         text = stringResource(id = R.string.until) + " $distance " +
                                 stringResource(id = R.string.km),
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (picked == i) Color.White else MaterialTheme.colorScheme.tertiary
+                        color = if (picked == i) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
                     )
                 }
             }
@@ -570,7 +571,7 @@ fun TypeChoice(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(color = if (pickedTypes[i]) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .background(color = if (pickedTypes[i]) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
                         .clickable(
                             indication = null,
                             interactionSource = remember {
@@ -583,7 +584,7 @@ fun TypeChoice(
                     MontsText(
                         text = stringResource(id = type),
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (pickedTypes[i]) Color.White else MaterialTheme.colorScheme.tertiary
+                        color = if (pickedTypes[i]) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
                     )
                 }
             }
@@ -688,7 +689,7 @@ fun SearchResultScreen(
                     Icon(
                         painter = painterResource(id = R.drawable.back_arrow),
                         contentDescription = stringResource(id = R.string.back_txt),
-                        tint = MaterialTheme.colorScheme.onSecondary
+                        tint = TripNnTheme.colorScheme.onMinor
                     )
                 }
 
@@ -697,7 +698,7 @@ fun SearchResultScreen(
                 MontsText(
                     text = stringResource(id = R.string.closer),
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (sortState.closer) MaterialTheme.colorScheme.primary else Color.Black,
+                    color = if (sortState.closer) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.onMinor,
                     modifier = Modifier.clickable {
                         sortState = sortState.copy(closer = true, byRating = false)
                         sort(sortState)
@@ -707,7 +708,7 @@ fun SearchResultScreen(
                 MontsText(
                     text = stringResource(id = R.string.by_rating),
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (sortState.byRating) MaterialTheme.colorScheme.primary else Color.Black,
+                    color = if (sortState.byRating) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.onMinor,
                     modifier = Modifier.clickable {
                         sortState = sortState.copy(closer = false, byRating = true)
                         sort(sortState)
@@ -717,7 +718,7 @@ fun SearchResultScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.filter_settings),
                     contentDescription = "",
-                    tint = MaterialTheme.colorScheme.tertiary,
+                    tint = TripNnTheme.colorScheme.tertiary,
                     modifier = Modifier.clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
@@ -885,14 +886,13 @@ fun SearchFiltersScreen(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
         dragHandle = { DragHandle() },
         windowInsets = WindowInsets(0)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxHeight(5f / 6f)
-                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -1008,9 +1008,9 @@ fun CardWithRadioButton(
                     onClick = { onChoose(index) }
                 ),
             tint = if (chosenPlace == index) {
-                Color.Unspecified
+                TripNnTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.onSecondary
+                TripNnTheme.colorScheme.onMinor
             }
         )
     }
@@ -1028,7 +1028,7 @@ fun SearchEmptyResult(popBack: () -> Unit) {
             Icon(
                 painter = painterResource(id = R.drawable.back_arrow),
                 contentDescription = stringResource(id = R.string.back_txt),
-                tint = MaterialTheme.colorScheme.onSecondary
+                tint = TripNnTheme.colorScheme.onMinor
             )
         }
 
@@ -1086,7 +1086,7 @@ fun PlaceInfoBottomSheet(
                             contentDescription = stringResource(id = R.string.image),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(MaterialTheme.colorScheme.onSecondary)
+                                .background(TripNnTheme.colorScheme.onMinor)
                                 .width(220.dp)
                                 .height(160.dp)
                                 .clickable {
@@ -1108,7 +1108,7 @@ fun PlaceInfoBottomSheet(
                                 bottomEnd = 0.dp, bottomStart = 0.dp
                             )
                         )
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(TripNnTheme.colorScheme.bottomSheetBackground)
                         .padding(top = 10.dp)
                         .navigationBarsPadding()
                 ) {
@@ -1240,7 +1240,7 @@ fun CopyIcon(data: String, onClick: () -> Unit) {
     Icon(
         painter = painterResource(id = R.drawable.copy_icon),
         contentDescription = stringResource(id = R.string.copy),
-        tint = MaterialTheme.colorScheme.onSecondary,
+        tint = TripNnTheme.colorScheme.onMinor,
         modifier = Modifier.clickable(
             indication = rememberRipple(radius = 1.dp, color = Color.White),
             interactionSource = remember { MutableInteractionSource() },
@@ -1268,7 +1268,7 @@ fun CopiedToClipBoardSnackBar(modifier: Modifier = Modifier, onHide: () -> Unit)
             .alpha(alpha.value)
             .then(modifier)
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(TripNnTheme.colorScheme.primary)
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -1276,12 +1276,12 @@ fun CopiedToClipBoardSnackBar(modifier: Modifier = Modifier, onHide: () -> Unit)
         Icon(
             painter = painterResource(id = R.drawable.info),
             contentDescription = stringResource(id = R.string.info),
-            tint = Color.White
+            tint = TripNnTheme.colorScheme.onPrimary
         )
         MontsText(
             text = stringResource(id = R.string.address_copied),
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White
+            color = TripNnTheme.colorScheme.onPrimary
         )
     }
 
@@ -1322,7 +1322,7 @@ fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
         Icon(
             painter = painterResource(id = R.drawable.reversed_link_icon),
             contentDescription = "",
-            tint = MaterialTheme.colorScheme.tertiary
+            tint = TripNnTheme.colorScheme.tertiary
         )
     }
 }
@@ -1332,7 +1332,7 @@ fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
 @Composable
 fun CardInfoBottomSheetPreview() {
     TripNNTheme {
-        Box(modifier = Modifier.background(Color.White)) {
+        Box(modifier = Modifier.background(TripNnTheme.colorScheme.background)) {
             PlaceInfoBottomSheet(
                 place = PLACE_1,
                 removeFromFavourite = { },
@@ -1348,11 +1348,11 @@ fun CardInfoBottomSheetPreview() {
 @Preview
 @Composable
 fun SearchPlaceContentPreview() {
-    TripNNTheme(false) {
+    TripNNTheme() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
             SearchPlaceScreen(onSearch = {}, toResultScreen = {})
@@ -1364,7 +1364,7 @@ fun SearchPlaceContentPreview() {
 @Composable
 fun ConstructorSearchPreview() {
     TripNNTheme {
-        Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+        Box(modifier = Modifier.background(TripNnTheme.colorScheme.background)) {
             ConstructorSearchResultScreen(
                 sort = {},
                 result = ResourceState(listOf(PLACE_1)),
