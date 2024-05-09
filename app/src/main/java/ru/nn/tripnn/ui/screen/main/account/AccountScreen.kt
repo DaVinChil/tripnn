@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -55,10 +56,10 @@ import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.UserInfoData
+import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -306,7 +307,8 @@ fun UserInfoBlock(
                     fontWeight = FontWeight.Medium,
                     fontFamily = montserratFamily,
                     textAlign = TextAlign.Center
-                )
+                ),
+                cursorBrush = SolidColor(TripNnTheme.colorScheme.textColor)
             )
 
             Icon(

@@ -36,13 +36,13 @@ import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.PlacesColumn
+import ru.nn.tripnn.ui.common.RoutesColumn
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.CATALOGS
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
-import ru.nn.tripnn.ui.common.PlacesColumn
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
-import ru.nn.tripnn.ui.common.RoutesColumn
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
@@ -53,9 +53,9 @@ fun HistoryScreen(
     places: ResourceState<List<Place>>,
     routes: ResourceState<List<Route>>,
     removePlaceFromFavourite: (String) -> Unit,
-    removeRouteFromFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
     alreadyHasRoute: Boolean

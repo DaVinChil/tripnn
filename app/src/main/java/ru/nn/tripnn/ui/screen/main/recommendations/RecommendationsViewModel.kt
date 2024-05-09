@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
-import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.data.remote.route.RouteRepository
+import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
@@ -72,15 +72,17 @@ class RecommendationsViewModel @Inject constructor(
         }
     }
 
-    fun removeRouteFromFavourite(id: String) {
+    fun removeRouteFromFavourite(route: Route) {
         viewModelScope.launch {
-            routeRepository.removeFromFavourite(id)
+            if (route.id == null) return@launch
+            routeRepository.removeFromFavourite(route.id)
         }
     }
 
-    fun addRouteToFavourite(id: String) {
+    fun addRouteToFavourite(route: Route) {
         viewModelScope.launch {
-            routeRepository.addToFavourite(id)
+            if (route.id == null) return@launch
+            routeRepository.addToFavourite(route.id)
         }
     }
 

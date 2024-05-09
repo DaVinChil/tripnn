@@ -46,9 +46,6 @@ fun RouteCard(
         shadowColor = shadowColor
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            if (route.cost != null) {
-                CostInfo(cost = route.cost)
-            }
             if (route.rating != null) {
                 RatingInfo(rating = route.rating)
             }

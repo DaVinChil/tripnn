@@ -4,8 +4,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.nn.tripnn.data.remote.history.FakeHistoryRepositoryImpl
-import ru.nn.tripnn.data.remote.history.HistoryRepository
 import ru.nn.tripnn.data.remote.place.FakePlaceRepositoryImpl
 import ru.nn.tripnn.data.remote.place.PlaceRepository
 import ru.nn.tripnn.data.remote.route.FakeRouteRepositoryImpl
@@ -32,9 +30,4 @@ object RepositoryModule {
     @Singleton
     @Fake
     fun routeRepository(): RouteRepository = FakeRouteRepositoryImpl()
-
-    @Provides
-    @Singleton
-    @Fake
-    fun historyRepository(): HistoryRepository = FakeHistoryRepositoryImpl()
 }

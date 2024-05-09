@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import ru.nn.tripnn.domain.Place
+import java.util.Date
 
 
 class Converters {
@@ -41,5 +42,15 @@ class Converters {
     @TypeConverter
     fun jsonFromTime(timeToWalk: List<Int>): String {
         return Gson().toJson(timeToWalk)
+    }
+
+    @TypeConverter
+    fun fromDate(date: Date?): Long? {
+        return date?.time
+    }
+
+    @TypeConverter
+    fun toDate(long: Long?): Date? {
+        return long?.let { Date(it) }
     }
 }

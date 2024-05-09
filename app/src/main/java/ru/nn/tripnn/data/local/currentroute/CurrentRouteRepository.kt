@@ -4,13 +4,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.nn.tripnn.data.RemoteResource
 import ru.nn.tripnn.data.remote.place.PlaceRepository
-import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Place
 
 class CurrentRouteRepository(
     private val currentRouteDao: CurrentRouteDao,
-    @Fake private val placeRepository: PlaceRepository
+    private val placeRepository: PlaceRepository
 ) {
     suspend fun getCurrentRoute(): RemoteResource<CurrentRoute> {
         return withContext(Dispatchers.IO) {

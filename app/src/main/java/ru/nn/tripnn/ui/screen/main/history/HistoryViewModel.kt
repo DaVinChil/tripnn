@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
+import ru.nn.tripnn.data.local.history.HistoryRepository
+import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.remote.route.RouteRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
-import ru.nn.tripnn.data.remote.history.HistoryRepository
-import ru.nn.tripnn.data.remote.place.PlaceRepository
-import ru.nn.tripnn.data.remote.route.RouteRepository
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
 import ru.nn.tripnn.ui.util.resourceStateFromRequest
@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    @Fake private val historyRepository: HistoryRepository,
+    private val historyRepository: HistoryRepository,
     @Fake private val placeRepository: PlaceRepository,
     @Fake private val routeRepository: RouteRepository,
     private val currentRouteRepository: CurrentRouteRepository
@@ -92,15 +92,17 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun removeRouteFromFavourite(id: String) {
+    fun removeRouteFromFavourite(route: Route) {
         viewModelScope.launch {
-            routeRepository.removeFromFavourite(id)
+            if (route.id == null) return@launch
+            routeRepository.removeFromFavourite(route.id)
         }
     }
 
-    fun addRouteToFavourite(id: String) {
+    fun addRouteToFavourite(route: Route) {
         viewModelScope.launch {
-            routeRepository.addToFavourite(id)
+            if (route.id == null) return@launch
+            routeRepository.addToFavourite(route.id)
         }
     }
 
@@ -128,5 +130,29 @@ class HistoryViewModel @Inject constructor(
             }
         }
         return filtered
+    }
+
+    fun deleteFromHistory(route: Route) {
+        viewModelScope.launch {
+            historyRepository.deleteRoute(route)
+        }
+    }
+
+    fun deleteFromHistory(place: Place) {
+        viewModelScope.launch {
+            historyRepository.deletePlace(place)
+        }
+    }
+
+    fun clearRoutesHistory() {
+        viewModelScope.launch {
+            historyRepository.clearRoutesHistory()
+        }
+    }
+
+    fun clearPlacesHistory() {
+        viewModelScope.launch {
+            historyRepository.clearPlacesHistory()
+        }
     }
 }

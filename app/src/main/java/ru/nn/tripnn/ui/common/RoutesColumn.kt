@@ -29,8 +29,8 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 fun RoutesColumn(
     routes: ResourceState<List<Route>>,
     onEmpty: @Composable () -> Unit,
-    removeRouteFromFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
@@ -62,11 +62,11 @@ fun RoutesColumn(
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = routes.value, key = Route::id) { route ->
+        items(items = routes.value, key = { it.id ?: it.hashCode() }) { route ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteRedCardOption(
-                        onClick = { removeRouteFromFavourite(route.id) })
+                        onClick = { removeRouteFromFavourite(route) })
                 }
             RouteCard(
                 route = route,
@@ -90,8 +90,8 @@ fun RoutesColumn(
         ) {
             RouteInfoBottomSheetContent(
                 route = pickedRoute,
-                removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
-                addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
+                removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute) },
+                addRouteToFavourite = { addRouteToFavourite(pickedRoute) },
                 removePlaceFromFavourite = removePlaceFromFavourite,
                 addPlaceToFavourite = addPlaceToFavourite,
                 onTakeTheRoute = onTakeTheRoute,

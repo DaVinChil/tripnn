@@ -79,9 +79,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun removeRouteFromFavourite(id: String) {
+    fun removeRouteFromFavourite(route: Route) {
         viewModelScope.launch {
-            routeRepository.removeFromFavourite(id)
+            if (route.id == null) return@launch
+            routeRepository.removeFromFavourite(route.id)
         }
     }
 
@@ -92,9 +93,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun addRouteToFavourite(id: String) {
+    fun addRouteToFavourite(route: Route) {
         viewModelScope.launch {
-            routeRepository.addToFavourite(id)
+            if (route.id == null) return@launch
+            routeRepository.addToFavourite(route.id)
         }
     }
 

@@ -87,8 +87,8 @@ fun HomeScreen(
     onNewRouteClick: () -> Unit,
     onCurrentRouteClick: () -> Unit,
     onTakeTheRoute: (Route) -> Unit,
-    removeRouteFromFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     toPhotos: (String, Int) -> Unit
@@ -139,8 +139,8 @@ fun HomeContent(
     onCurrentRouteClick: () -> Unit,
     onMenuClick: () -> Unit,
     onTakeTheRoute: (Route) -> Unit,
-    removeRouteFromFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     toPhotos: (String, Int) -> Unit
@@ -258,8 +258,8 @@ fun HomeContent(
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
-                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.value[pickedRoute].id) },
-                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.value[pickedRoute].id) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.value[pickedRoute]) },
+                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.value[pickedRoute]) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
                     route = recommendedRoutes.value[pickedRoute],
@@ -379,7 +379,7 @@ fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
         pageSpacing = 11.dp,
         pageSize = PageSize.Fixed(CARD_WIDTH),
         contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
-        key = { routes[it].id },
+        key = { routes[it].id ?: routes[it].hashCode() },
         count = routes.size
     ) {
         RouteCard(

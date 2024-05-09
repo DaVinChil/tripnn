@@ -51,8 +51,8 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 @Composable
 fun RouteInfoBottomSheetContent(
     route: Route,
-    removeRouteFromFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
@@ -110,10 +110,10 @@ fun RouteInfoBottomSheetContent(
                                 },
                                 onClick = {
                                     favourite = if (favourite) {
-                                        removeRouteFromFavourite(route.id)
+                                        removeRouteFromFavourite(route)
                                         false
                                     } else {
-                                        addRouteToFavourite(route.id)
+                                        addRouteToFavourite(route)
                                         true
                                     }
                                 }

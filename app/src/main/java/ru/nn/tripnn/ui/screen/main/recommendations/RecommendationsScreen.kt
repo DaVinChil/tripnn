@@ -56,8 +56,8 @@ fun RecommendationsScreen(
     isEmpty: Boolean,
     filterRoutes: (String) -> Unit,
     routes: ResourceState<List<Route>>,
-    removeRouteFromFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
     toPhotos: (String, Int) -> Unit,
@@ -127,11 +127,11 @@ fun RecommendationsScreen(
                 contentPadding = PaddingValues(vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                items(items = routes.value, key = Route::id) { route ->
+                items(items = routes.value, key = { it.id ?: it.hashCode() }) { route ->
                     val option: @Composable () -> Unit =
                         @Composable {
                             RemoveFromFavouriteRedCardOption(
-                                onClick = { removeRouteFromFavourite(route.id) })
+                                onClick = { removeRouteFromFavourite(route) })
                         }
                     RouteCard(
                         route = route,
@@ -155,8 +155,8 @@ fun RecommendationsScreen(
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
-                    removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute.id) },
-                    addRouteToFavourite = { addRouteToFavourite(pickedRoute.id) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(pickedRoute) },
+                    addRouteToFavourite = { addRouteToFavourite(pickedRoute) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
                     route = pickedRoute,

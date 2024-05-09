@@ -58,9 +58,9 @@ fun FavouriteScreen(
     favouritePlaces: ResourceState<List<Place>>,
     favouriteRoutes: ResourceState<List<Route>>,
     removePlaceFromFavourite: (String) -> Unit,
-    removeRouteFromFavourite: (String) -> Unit,
+    removeRouteFromFavourite: (Route) -> Unit,
     addPlaceToFavourite: (String) -> Unit,
-    addRouteToFavourite: (String) -> Unit,
+    addRouteToFavourite: (Route) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
     alreadyHasRoute: Boolean
