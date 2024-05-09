@@ -288,7 +288,11 @@ fun NavGraphBuilder.history(
                 historyViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
-            alreadyHasRoute = historyViewModel.hasCurrentRoute
+            alreadyHasRoute = historyViewModel.hasCurrentRoute,
+            clearRoutesHistory = historyViewModel::clearRoutesHistory,
+            clearPlacesHistory = historyViewModel::clearPlacesHistory,
+            removeRouteFromHistory = historyViewModel::removeRouteFromFavourite,
+            removePlaceFromHistory = historyViewModel::removePlaceFromFavourite
         )
     }
 }

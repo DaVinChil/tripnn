@@ -28,6 +28,7 @@ fun PlacesColumn(
     places: ResourceState<List<Place>>,
     removeFromFavourite: (String) -> Unit,
     addToFavourite: (String) -> Unit,
+    option2: @Composable ((String) -> Unit)? = null,
     toPhotos: (String, Int) -> Unit
 ) {
     if (places.isError) {
@@ -68,7 +69,12 @@ fun PlacesColumn(
                     pickedPlace = place
                     showCardInfo = true
                 },
-                option1 = option
+                option1 = option,
+                option2 = if (option2 != null) {
+                    @Composable { option2(place.id) }
+                } else {
+                    null
+                }
             )
         }
     }

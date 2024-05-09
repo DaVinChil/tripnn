@@ -177,4 +177,8 @@
     <string name="filter_by_word">Фильтр по слову</string>
 
     <string name="draft">Черновик</string>
+    <string name="delete_from_history">Удалить из истории</string>
+
+    <string name="clear_history_title">Очистить историю</string>
+    <string name="clear_history_text">Вы действительно хотите очистить историю данной категории? Восстановить ее будет не возможно.</string>
 </resources>

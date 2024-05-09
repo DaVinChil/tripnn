@@ -35,7 +35,8 @@ fun RoutesColumn(
     addPlaceToFavourite: (String) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
-    alreadyHasRoute: Boolean
+    alreadyHasRoute: Boolean,
+    option2: @Composable ((Route) -> Unit)? = null
 ) {
     if (routes.isError) {
         InternetProblemScreen()
@@ -75,7 +76,12 @@ fun RoutesColumn(
                     showRouteInfo = true
                 },
                 modifier = Modifier.fillMaxWidth(),
-                option1 = option
+                option1 = option,
+                option2 = if (option2 != null) {
+                    @Composable { option2(route)}
+                } else {
+                    null
+                }
             )
         }
     }

@@ -114,7 +114,7 @@ fun CardOption(
     @DrawableRes painter: Int,
     text: String,
     onClick: () -> Unit,
-    color: Color = TripNnTheme.colorScheme.textColor
+    color: Color = TripNnTheme.colorScheme.tertiary
 ) {
     Column(
         modifier = Modifier
@@ -176,7 +176,7 @@ fun RemoveFromRouteCardOption(onClick: () -> Unit) {
         painter = R.drawable.trashcan_outlined,
         text = stringResource(id = R.string.remove_from_route),
         onClick = onClick,
-        color = Color.Red
+        color = Color.Unspecified
     )
 }
 
@@ -186,6 +186,15 @@ fun ReplaceCardOption(onClick: () -> Unit) {
         painter = R.drawable.change_icon,
         text = stringResource(id = R.string.replace_place),
         onClick = onClick
+    )
+}
+@Composable
+fun RemoveFromHistoryOption(onClick: () -> Unit) {
+    CardOption(
+        painter = R.drawable.trashcan_outlined,
+        text = stringResource(id = R.string.delete_from_history),
+        onClick = onClick,
+        color = Color.Unspecified
     )
 }
 
