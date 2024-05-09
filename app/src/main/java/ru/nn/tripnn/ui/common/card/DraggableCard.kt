@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -131,13 +133,17 @@ fun CardOption(
         Icon(
             painter = painterResource(id = painter),
             contentDescription = "option",
+            modifier = Modifier.size(20.dp),
             tint = color
         )
+
+        Spacer(modifier = Modifier.height(7.dp))
+
         MontsText(
             text = text,
             style = MaterialTheme.typography.labelSmall,
             textAlign = TextAlign.Center,
-            color = color
+            color = TripNnTheme.colorScheme.textColor
         )
     }
 }
@@ -156,7 +162,8 @@ fun RemoveFromFavouriteGoldCardOption(onClick: () -> Unit) {
     CardOption(
         painter = R.drawable.gold_bookmark,
         text = stringResource(id = R.string.remove_from_favourite),
-        onClick = onClick
+        onClick = onClick,
+        color = Color.Unspecified
     )
 }
 
@@ -176,7 +183,7 @@ fun RemoveFromRouteCardOption(onClick: () -> Unit) {
         painter = R.drawable.trashcan_outlined,
         text = stringResource(id = R.string.remove_from_route),
         onClick = onClick,
-        color = Color.Unspecified
+        color = Color.Red
     )
 }
 
@@ -194,7 +201,7 @@ fun RemoveFromHistoryOption(onClick: () -> Unit) {
         painter = R.drawable.trashcan_outlined,
         text = stringResource(id = R.string.delete_from_history),
         onClick = onClick,
-        color = Color.Unspecified
+        color = Color.Red
     )
 }
 

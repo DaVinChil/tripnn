@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -88,7 +87,10 @@ fun ConstructorScreen(
             .statusBarsPadding()
     ) {
         Column {
-            Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
                     Icon(
                         painter = painterResource(id = R.drawable.back_arrow),
@@ -98,11 +100,11 @@ fun ConstructorScreen(
                 }
 
                 if (currentRoute.onNullFailCheck { places.isNotEmpty() }) {
-                    IconButton(onClick = { showDeleteCurrentRouteDialog = true}) {
+                    IconButton(onClick = { showDeleteCurrentRouteDialog = true }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.trashcan_outlined),
+                            painter = painterResource(id = R.drawable.trashcan_small),
                             contentDescription = stringResource(id = R.string.delete),
-                            tint = Color.Unspecified
+                            tint = TripNnTheme.colorScheme.tertiary
                         )
                     }
                 }
@@ -209,7 +211,7 @@ fun RouteColumn(
     ) {
         itemsIndexed(
             items = currentRoute?.places ?: listOf(),
-            key = { index, place -> orderIds.getOrElse(index) { "$index|${place.id}"} }
+            key = { index, place -> orderIds.getOrElse(index) { "$index|${place.id}" } }
         ) { index, place ->
             val option: @Composable () -> Unit =
                 @Composable {

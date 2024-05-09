@@ -44,7 +44,7 @@ import ru.nn.tripnn.ui.common.LoadingCircleScreen
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteRedCardOption
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.card.RouteCard
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -130,7 +130,7 @@ fun RecommendationsScreen(
                 items(items = routes.value, key = { it.id ?: it.hashCode() }) { route ->
                     val option: @Composable () -> Unit =
                         @Composable {
-                            RemoveFromFavouriteRedCardOption(
+                            RemoveFromFavouriteGoldCardOption(
                                 onClick = { removeRouteFromFavourite(route) })
                         }
                     RouteCard(

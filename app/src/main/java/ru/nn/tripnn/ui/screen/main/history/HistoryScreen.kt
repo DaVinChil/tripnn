@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -104,9 +103,9 @@ fun HistoryScreen(
             ) {
                 IconButton(onClick = { showClearHistoryDialog = true }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.trashcan_outlined),
+                        painter = painterResource(id = R.drawable.trashcan_small),
                         contentDescription = stringResource(id = R.string.delete),
-                        tint = Color.Unspecified
+                        tint = TripNnTheme.colorScheme.tertiary
                     )
                 }
             }

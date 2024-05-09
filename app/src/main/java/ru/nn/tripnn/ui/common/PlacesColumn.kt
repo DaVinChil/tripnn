@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.card.PlaceCard
-import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteRedCardOption
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.screen.ResourceState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +59,7 @@ fun PlacesColumn(
         items(items = places.value, key = Place::id) { place ->
             val option: @Composable () -> Unit =
                 @Composable {
-                    RemoveFromFavouriteRedCardOption(
+                    RemoveFromFavouriteGoldCardOption(
                         onClick = { removeFromFavourite(place.id) })
                 }
             PlaceCard(

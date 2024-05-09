@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.Route
-import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteRedCardOption
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.card.RouteCard
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -66,7 +66,7 @@ fun RoutesColumn(
         items(items = routes.value, key = { it.id ?: it.hashCode() }) { route ->
             val option: @Composable () -> Unit =
                 @Composable {
-                    RemoveFromFavouriteRedCardOption(
+                    RemoveFromFavouriteGoldCardOption(
                         onClick = { removeRouteFromFavourite(route) })
                 }
             RouteCard(
