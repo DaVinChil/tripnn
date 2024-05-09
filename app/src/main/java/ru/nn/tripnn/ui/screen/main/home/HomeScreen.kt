@@ -64,7 +64,6 @@ import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InfiniteCarousel
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.MontsText
-import ru.nn.tripnn.ui.common.NewRouteButton
 import ru.nn.tripnn.ui.common.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.common.card.CARD_WIDTH
@@ -221,6 +220,7 @@ fun HomeContent(
             ) {
                 NewRouteButton(
                     modifier = Modifier.align(Alignment.Center),
+                    hasDraft = currentRoute.value?.buildInProgress == true,
                     onClick = {
                         if (currentRoute.value?.buildInProgress == false) {
                             showDeleteCurrentRouteDialog = true

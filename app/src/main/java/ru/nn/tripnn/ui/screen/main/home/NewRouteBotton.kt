@@ -1,4 +1,4 @@
-package ru.nn.tripnn.ui.common
+package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -31,13 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun NewRouteButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    hasDraft: Boolean
 ) {
     val buttonInteractionSource = remember { MutableInteractionSource() }
     val pressed by buttonInteractionSource.collectIsPressedAsState()
@@ -88,7 +91,7 @@ fun NewRouteButton(
 
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.TopCenter) {
                 MontsText(
-                    text = stringResource(id = R.string.create),
+                    text = if (hasDraft) stringResource(id = R.string.draft) else stringResource(id = R.string.create),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.offset(y = yOffset)
                 )
@@ -106,7 +109,7 @@ fun NewRouteButtonPreview() {
                 .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
-            NewRouteButton(onClick = {})
+            NewRouteButton(onClick = {}, hasDraft = false)
         }
     }
 }

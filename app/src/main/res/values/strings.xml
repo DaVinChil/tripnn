@@ -173,4 +173,6 @@
     <string name="replace_place">Replace place</string>
 
     <string name="filter_by_word">Filter by word</string>
+
+    <string name="draft">Draft</string>
 </resources>

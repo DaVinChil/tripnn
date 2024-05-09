@@ -175,4 +175,6 @@
     <string name="moonlight">Лунная</string>
 
     <string name="filter_by_word">Фильтр по слову</string>
+
+    <string name="draft">Черновик</string>
 </resources>
