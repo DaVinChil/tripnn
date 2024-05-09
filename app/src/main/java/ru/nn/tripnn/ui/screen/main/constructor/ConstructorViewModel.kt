@@ -25,7 +25,7 @@ class ConstructorViewModel @Inject constructor(
     @Fake private val placeRepository: PlaceRepository
 ) : ViewModel() {
 
-    var currentRouteState by mutableStateOf(ResourceState(CurrentRoute()))
+    var currentRouteState by mutableStateOf(ResourceState<CurrentRoute>())
         private set
 
     fun init() {

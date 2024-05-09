@@ -121,15 +121,14 @@ fun ConstructorScreen(
             }
         }
 
+        val isEnabled = currentRoute.isSuccessAndNotNull() &&
+                currentRoute.onNullFailCheck { places.isNotEmpty() }
         AnimatedVisibility(
-            visible = !currentRoute.isLoading && !currentRoute.isError,
+            visible = isEnabled,
             enter = slideInVertically { it } + fadeIn(),
             exit = slideOutVertically { it } + fadeOut(),
             modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 20.dp)
         ) {
-            val isEnabled = !currentRoute.isLoading && !currentRoute.isError
-                    && currentRoute.value != null && currentRoute.value.places.isNotEmpty()
-
             PrimaryButton(
                 text = stringResource(R.string.take_the_route),
                 onClick = takeRoute,
@@ -137,7 +136,7 @@ fun ConstructorScreen(
                 containerColor = if (isEnabled) {
                     TripNnTheme.colorScheme.primary
                 } else {
-                    TripNnTheme.colorScheme.secondary
+                    TripNnTheme.colorScheme.minor
                 },
                 textColor = if (isEnabled) {
                     TripNnTheme.colorScheme.onPrimary
