@@ -171,4 +171,6 @@
     <string name="remove_from_favourite">Remove from favourite</string>
     <string name="remove_from_route">Remove from route</string>
     <string name="replace_place">Replace place</string>
+
+    <string name="filter_by_word">Filter by word</string>
 </resources>

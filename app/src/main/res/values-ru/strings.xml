@@ -172,6 +172,7 @@
     <string name="remove_from_favourite">Убрать из избранного</string>
     <string name="remove_from_route">Убрать из маршрута</string>
     <string name="replace_place">Заменить место</string>
-
     <string name="moonlight">Лунная</string>
+
+    <string name="filter_by_word">Фильтр по слову</string>
 </resources>
