@@ -16,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.Route
@@ -75,7 +74,6 @@ fun RoutesColumn(
                     pickedRoute = route
                     showRouteInfo = true
                 },
-                shadowColor = Color.Black.copy(alpha = 0.2f),
                 modifier = Modifier.fillMaxWidth(),
                 option1 = option
             )

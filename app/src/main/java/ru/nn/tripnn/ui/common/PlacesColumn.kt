@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.Place
@@ -69,7 +68,6 @@ fun PlacesColumn(
                     pickedPlace = place
                     showCardInfo = true
                 },
-                shadowColor = Color.Black.copy(alpha = 0.2f),
                 option1 = option
             )
         }

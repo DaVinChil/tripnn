@@ -36,9 +36,9 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.local.usersettings.Currency
 import ru.nn.tripnn.data.local.usersettings.Language
 import ru.nn.tripnn.data.local.usersettings.Theme
+import ru.nn.tripnn.ui.common.BottomSheetDialog
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.common.BottomSheetDialog
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -225,7 +225,7 @@ fun <T> SettingsBottomSheetDialog(
 
         Column(
             modifier = Modifier
-                .shadow(borderRadius = 6.dp, blurRadius = 10.dp, color = Color.Black.copy(0.3f))
+                .shadow(borderRadius = 6.dp, blurRadius = 10.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .fillMaxWidth(0.9f)
                 .align(Alignment.CenterHorizontally)

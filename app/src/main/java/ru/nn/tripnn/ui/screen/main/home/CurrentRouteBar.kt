@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,8 +54,7 @@ fun CurrentRouteBar(
             .shadow(
                 borderRadius = 6.dp,
                 blurRadius = 10.dp,
-                spread = (-5).dp,
-                color = Color.Black.copy(alpha = 0.3f)
+                spread = (-5).dp
             )
             .clip(RoundedCornerShape(6.dp))
             .background(TripNnTheme.colorScheme.currentRoute)

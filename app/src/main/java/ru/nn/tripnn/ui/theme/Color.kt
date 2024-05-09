@@ -47,7 +47,7 @@ private val MoonlightColorScheme = TripNnColorScheme(
     bottomSheetBackground = Color(0xFF181818),
     fieldBackground = Color(0xFF2E2E2E),
     hint = Color(0xFFA9A9A9),
-    shadow = Color(0xFFFFFFFF),
+    shadow = Color(0xFF000000),
     minor = Color(0xFF2E2E2E),
     onMinor = Color(0xFFA9A9A9),
     tertiary = Color(0xFFF5F5F5),
@@ -67,13 +67,13 @@ private val LightColorScheme = TripNnColorScheme(
     bottomSheetBackground = Color(0xFFFFFFFF),
     fieldBackground = Color(0xFFF6F6F6),
     hint = Color(0xFFBDBDBD),
-    shadow = Color(0xFFFFFFFF),
+    shadow = Color(0x40000000),
     minor = Color(0xFFF6F6F6),
     onMinor = Color(0xFFA9A9A9),
     tertiary = Color(0xFF392033),
     currentRoute = Color(0xFFFF8967),
     newRouteGlow = Color(0x55000000),
-    undefined = Color(0xFFCECECE)
+    undefined = Color(0xFFDDDDDD)
 )
 
 data class TripNnColorScheme(

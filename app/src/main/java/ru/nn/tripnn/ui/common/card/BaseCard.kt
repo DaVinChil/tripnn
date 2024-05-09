@@ -137,7 +137,7 @@ fun RatingInfo(rating: Double) {
 @Composable
 fun LoadingCard(
     modifier: Modifier = Modifier,
-    shadowColor: Color = Color(0x00FFFFFF)
+    shadowColor: Color = TripNnTheme.colorScheme.shadow
 ) {
     val shimmerInstance =
         rememberShimmer(shimmerBounds = ShimmerBounds.Window, theme = TripNnTheme.shimmer)
@@ -214,7 +214,7 @@ fun LoadingCardPreview() {
                 .background(TripNnTheme.colorScheme.background)
                 .padding(10.dp)
         ) {
-            LoadingCard(shadowColor = Color.Black)
+            LoadingCard()
         }
     }
 }

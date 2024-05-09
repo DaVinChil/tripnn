@@ -9,13 +9,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun RouteCard(
     modifier: Modifier = Modifier,
     route: Route,
     onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF),
+    shadowColor: Color = TripNnTheme.colorScheme.shadow,
     option1: @Composable () -> Unit,
     option2: @Composable (() -> Unit)? = null
 ) {
@@ -34,7 +35,7 @@ fun RouteCard(
     modifier: Modifier = Modifier,
     route: Route,
     onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF)
+    shadowColor: Color = TripNnTheme.colorScheme.shadow
 ) {
     BaseCard(
         modifier = modifier,

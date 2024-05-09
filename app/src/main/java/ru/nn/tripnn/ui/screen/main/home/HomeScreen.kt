@@ -48,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -386,9 +385,7 @@ fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
         RouteCard(
             route = routes[it],
             onCardClick = { onRouteClick(it) },
-            shadowColor = Color.Black.copy(alpha = 0.2f),
-            modifier = Modifier
-                .width(CARD_WIDTH)
+            modifier = Modifier.width(CARD_WIDTH)
         )
     }
 }

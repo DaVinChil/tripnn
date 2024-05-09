@@ -157,7 +157,6 @@ fun RouteInfoBottomSheetContent(
                         modifier = Modifier.fillMaxWidth(),
                         place = place,
                         onCardClick = { showCardInfo = true; pickedPlace = index },
-                        shadowColor = TripNnTheme.colorScheme.shadow,
                         option1 = option
                     )
                 }

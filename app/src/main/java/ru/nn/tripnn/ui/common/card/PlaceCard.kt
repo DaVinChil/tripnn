@@ -21,7 +21,7 @@ fun PlaceCard(
     modifier: Modifier = Modifier,
     place: Place,
     onCardClick: () -> Unit,
-    shadowColor: Color = Color(0x00FFFFFF),
+    shadowColor: Color = TripNnTheme.colorScheme.shadow,
     option1: @Composable () -> Unit,
     option2: @Composable (() -> Unit)? = null,
 ) {

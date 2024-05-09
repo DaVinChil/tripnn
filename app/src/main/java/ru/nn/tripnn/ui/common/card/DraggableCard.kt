@@ -201,7 +201,6 @@ fun DraggablePlaceCardPreview() {
             PlaceCard(
                 place = PLACE_1,
                 onCardClick = { },
-                shadowColor = TripNnTheme.colorScheme.shadow,
                 option1 = { AddToFavouriteCardOption(onClick = {}) },
                 option2 = { RemoveFromRouteCardOption(onClick = {}) },
             )
