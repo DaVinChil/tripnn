@@ -52,17 +52,16 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Place
-import ru.nn.tripnn.ui.common.DraggableCard
+import ru.nn.tripnn.ui.common.InternetProblemScreen
+import ru.nn.tripnn.ui.common.LoadingCircleScreen
 import ru.nn.tripnn.ui.common.MontsText
-import ru.nn.tripnn.ui.common.PlaceCard
+import ru.nn.tripnn.ui.common.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.common.RemoveFromRouteCardOption
+import ru.nn.tripnn.ui.common.card.PlaceCard
+import ru.nn.tripnn.ui.common.card.RemoveFromRouteCardOption
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.common.LoadingCircleScreen
-import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
-import ru.nn.tripnn.ui.common.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -127,7 +126,10 @@ fun ConstructorScreen(
             visible = isEnabled,
             enter = slideInVertically { it } + fadeIn(),
             exit = slideOutVertically { it } + fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 20.dp)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp)
         ) {
             PrimaryButton(
                 text = stringResource(R.string.take_the_route),
@@ -209,17 +211,16 @@ fun RouteColumn(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 
-                DraggableCard(option1 = option) {
-                    PlaceCard(
-                        place = place,
-                        onCardClick = {
-                            pickedPlace = place
-                            showCardInfo = true
-                        },
-                        shadowColor = Color.Black.copy(alpha = 0.2f),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+                PlaceCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    place = place,
+                    onCardClick = {
+                        pickedPlace = place
+                        showCardInfo = true
+                    },
+                    shadowColor = Color.Black.copy(alpha = 0.2f),
+                    option1 = option
+                )
             }
 
         }

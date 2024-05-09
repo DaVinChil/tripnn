@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import ru.nn.tripnn.ui.common.card.CARD_WIDTH
 import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalFoundationApi::class)

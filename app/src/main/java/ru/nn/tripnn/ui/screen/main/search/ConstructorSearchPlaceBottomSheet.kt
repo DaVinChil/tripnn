@@ -34,8 +34,7 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.DragHandle
-import ru.nn.tripnn.ui.common.DraggableCard
-import ru.nn.tripnn.ui.common.PlaceCard
+import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -135,13 +134,13 @@ fun CardWithRadioButton(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        DraggableCard(option1 = option, modifier = Modifier.weight(1f)) {
-            PlaceCard(
-                place = place,
-                onCardClick = { onCardClick(place) },
-                shadowColor = Color.Black.copy(alpha = 0.2f)
-            )
-        }
+        PlaceCard(
+            place = place,
+            onCardClick = { onCardClick(place) },
+            shadowColor = Color.Black.copy(alpha = 0.2f),
+            option1 = option,
+            modifier = Modifier.weight(1f)
+        )
 
         Spacer(modifier = Modifier.width(10.dp))
 

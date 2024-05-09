@@ -51,17 +51,16 @@ import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.Place
-import ru.nn.tripnn.ui.common.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.DragHandle
-import ru.nn.tripnn.ui.common.DraggableCard
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.LoadingCircleScreen
 import ru.nn.tripnn.ui.common.MontsText
-import ru.nn.tripnn.ui.common.PlaceCard
 import ru.nn.tripnn.ui.common.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.common.PrimaryButton
-import ru.nn.tripnn.ui.common.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.Search
+import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
+import ru.nn.tripnn.ui.common.card.PlaceCard
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -302,17 +301,16 @@ fun SearchResultScreen(
                                 }
                             )
                         } else {
-                            DraggableCard(option1 = option) {
-                                PlaceCard(
-                                    place = place,
-                                    onCardClick = {
-                                        pickedPlace = place
-                                        showCardInfo = true
-                                    },
-                                    shadowColor = Color.Black.copy(alpha = 0.2f),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            PlaceCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                place = place,
+                                onCardClick = {
+                                    pickedPlace = place
+                                    showCardInfo = true
+                                },
+                                shadowColor = Color.Black.copy(alpha = 0.2f),
+                                option1 = option
+                            )
                         }
                     }
                 }

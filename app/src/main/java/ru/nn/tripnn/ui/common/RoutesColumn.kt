@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteRedCardOption
+import ru.nn.tripnn.ui.common.card.RouteCard
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -67,17 +69,16 @@ fun RoutesColumn(
                     RemoveFromFavouriteRedCardOption(
                         onClick = { removeRouteFromFavourite(route.id) })
                 }
-            DraggableCard(option1 = option) {
-                RouteCard(
-                    route = route,
-                    onCardClick = {
-                        pickedRoute = route
-                        showRouteInfo = true
-                    },
-                    shadowColor = Color.Black.copy(alpha = 0.2f),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            RouteCard(
+                route = route,
+                onCardClick = {
+                    pickedRoute = route
+                    showRouteInfo = true
+                },
+                shadowColor = Color.Black.copy(alpha = 0.2f),
+                modifier = Modifier.fillMaxWidth(),
+                option1 = option
+            )
         }
     }
 

@@ -40,15 +40,14 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.DragHandle
-import ru.nn.tripnn.ui.common.DraggableCard
-import ru.nn.tripnn.ui.common.MontsText
-import ru.nn.tripnn.ui.common.RemoveFromFavouriteRedCardOption
-import ru.nn.tripnn.ui.common.RouteCard
-import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.common.LoadingCircleScreen
-import ru.nn.tripnn.ui.common.RouteInfoBottomSheetContent
 import ru.nn.tripnn.ui.common.InternetProblemScreen
+import ru.nn.tripnn.ui.common.LoadingCircleScreen
+import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.RouteInfoBottomSheetContent
+import ru.nn.tripnn.ui.common.Search
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteRedCardOption
+import ru.nn.tripnn.ui.common.card.RouteCard
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,17 +134,16 @@ fun RecommendationsScreen(
                             RemoveFromFavouriteRedCardOption(
                                 onClick = { removeRouteFromFavourite(route.id) })
                         }
-                    DraggableCard(option1 = option) {
-                        RouteCard(
-                            route = route,
-                            onCardClick = {
-                                pickedRoute = route
-                                showRouteInfo = true
-                            },
-                            shadowColor = Color.Black.copy(alpha = 0.2f),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                    RouteCard(
+                        route = route,
+                        onCardClick = {
+                            pickedRoute = route
+                            showRouteInfo = true
+                        },
+                        shadowColor = Color.Black.copy(alpha = 0.2f),
+                        modifier = Modifier.fillMaxWidth(),
+                        option1 = option
+                    )
                 }
             }
         }

@@ -18,6 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.stub_data.PLACE_1
 import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.ui.common.card.PlaceCard
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteRedCardOption
 import ru.nn.tripnn.ui.screen.ResourceState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,17 +62,16 @@ fun PlacesColumn(
                     RemoveFromFavouriteRedCardOption(
                         onClick = { removeFromFavourite(place.id) })
                 }
-            DraggableCard(option1 = option) {
-                PlaceCard(
-                    place = place,
-                    onCardClick = {
-                        pickedPlace = place
-                        showCardInfo = true
-                    },
-                    shadowColor = Color.Black.copy(alpha = 0.2f),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            PlaceCard(
+                modifier = Modifier.fillMaxWidth(),
+                place = place,
+                onCardClick = {
+                    pickedPlace = place
+                    showCardInfo = true
+                },
+                shadowColor = Color.Black.copy(alpha = 0.2f),
+                option1 = option
+            )
         }
     }
 

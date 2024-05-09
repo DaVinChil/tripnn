@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.stub_data.ROUTE_1
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
+import ru.nn.tripnn.ui.common.card.PlaceCard
+import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -150,14 +153,13 @@ fun RouteInfoBottomSheetContent(
                     } else {
                         @Composable { AddToFavouriteCardOption(onClick = { addPlaceToFavourite(place.id) }) }
                     }
-                    DraggableCard(option1 = option) {
-                        PlaceCard(
-                            place = place,
-                            onCardClick = { showCardInfo = true; pickedPlace = index },
-                            shadowColor = Color.Black.copy(alpha = 0.2f),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                    PlaceCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        place = place,
+                        onCardClick = { showCardInfo = true; pickedPlace = index },
+                        shadowColor = TripNnTheme.colorScheme.shadow,
+                        option1 = option
+                    )
                 }
             }
         }
