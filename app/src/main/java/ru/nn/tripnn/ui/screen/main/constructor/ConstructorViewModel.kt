@@ -32,6 +32,13 @@ class ConstructorViewModel @Inject constructor(
         loadCurrentRoute()
     }
 
+    fun deleteCurrentRoute() {
+        viewModelScope.launch {
+            currentRouteState = ResourceState()
+            currentRouteRepository.deleteCurrentRoute()
+        }
+    }
+
     private fun loadCurrentRoute() {
         viewModelScope.launch {
             resourceStateFromRequest(currentRouteRepository::getCurrentRoute).collectLatest {

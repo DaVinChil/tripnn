@@ -9,6 +9,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import ru.nn.tripnn.data.local.usersettings.getIsoLang
+import ru.nn.tripnn.ui.common.fullSlideInHorizontal
+import ru.nn.tripnn.ui.common.fullSlideInVertical
+import ru.nn.tripnn.ui.common.fullSlideOutHorizontal
+import ru.nn.tripnn.ui.common.fullSlideOutVertical
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.screen.main.account.AccountScreen
 import ru.nn.tripnn.ui.screen.main.account.AccountViewModel
@@ -28,10 +32,6 @@ import ru.nn.tripnn.ui.screen.main.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
 import ru.nn.tripnn.ui.screen.main.takingroute.TakingTheRouteScreen
 import ru.nn.tripnn.ui.util.changeLocales
-import ru.nn.tripnn.ui.common.fullSlideInHorizontal
-import ru.nn.tripnn.ui.common.fullSlideInVertical
-import ru.nn.tripnn.ui.common.fullSlideOutHorizontal
-import ru.nn.tripnn.ui.common.fullSlideOutVertical
 
 enum class AppRoutes(
     val route: String
@@ -318,7 +318,8 @@ fun NavGraphBuilder.constructor(
             },
             toPhotos = navigateToPhotos,
             removePlaceFromFavourite = constructorViewModel::removePlaceFromFavourite,
-            addPlaceToFavourite = constructorViewModel::addPlaceToFavourite
+            addPlaceToFavourite = constructorViewModel::addPlaceToFavourite,
+            deleteCurrentRoute = constructorViewModel::deleteCurrentRoute
         )
     }
 }

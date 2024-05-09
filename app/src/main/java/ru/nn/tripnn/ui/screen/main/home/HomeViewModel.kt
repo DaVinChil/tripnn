@@ -87,6 +87,7 @@ class HomeViewModel @Inject constructor(
 
     fun deleteCurrentRoute() {
         viewModelScope.launch {
+            currentRoute = ResourceState()
             currentRouteRepository.deleteCurrentRoute()
         }
     }

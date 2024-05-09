@@ -38,9 +38,7 @@ fun HeartSplashScreen(onFinish: () -> Unit) {
             tint = Color.Unspecified
         )
 
-        val size = remember {
-            Animatable(0f)
-        }
+        val size = remember { Animatable(0f) }
 
         Box(
             modifier = Modifier

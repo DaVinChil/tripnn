@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,6 +57,7 @@ import ru.nn.tripnn.ui.common.LoadingCircleScreen
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromRouteCardOption
 import ru.nn.tripnn.ui.common.shadow
@@ -73,8 +75,11 @@ fun ConstructorScreen(
     takeRoute: () -> Unit,
     toPhotos: (String, Int) -> Unit,
     removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit
+    addPlaceToFavourite: (String) -> Unit,
+    deleteCurrentRoute: () -> Unit
 ) {
+    var showDeleteCurrentRouteDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,12 +88,24 @@ fun ConstructorScreen(
             .statusBarsPadding()
     ) {
         Column {
-            IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
-                Icon(
-                    painter = painterResource(id = R.drawable.back_arrow),
-                    contentDescription = stringResource(id = R.string.back_txt),
-                    tint = TripNnTheme.colorScheme.tertiary
-                )
+            Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween){
+                IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.back_arrow),
+                        contentDescription = stringResource(id = R.string.back_txt),
+                        tint = TripNnTheme.colorScheme.tertiary
+                    )
+                }
+
+                if (currentRoute.onNullFailCheck { places.isNotEmpty() }) {
+                    IconButton(onClick = { showDeleteCurrentRouteDialog = true}) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.trashcan_outlined),
+                            contentDescription = stringResource(id = R.string.delete),
+                            tint = Color.Unspecified
+                        )
+                    }
+                }
             }
 
             MontsText(
@@ -144,6 +161,16 @@ fun ConstructorScreen(
                 } else {
                     TripNnTheme.colorScheme.onMinor
                 }
+            )
+        }
+
+        if (showDeleteCurrentRouteDialog) {
+            TwoButtonBottomSheetDialog(
+                title = stringResource(id = R.string.delete_current_route_title),
+                text = stringResource(id = R.string.delete_current_route_text),
+                rightButtonText = stringResource(id = R.string.delete_current_route_right_button_text),
+                onSubmit = deleteCurrentRoute,
+                onClose = { showDeleteCurrentRouteDialog = false }
             )
         }
     }
@@ -314,7 +341,8 @@ fun ConstructorPreview() {
             takeRoute = { /*TODO*/ },
             toPhotos = { _, _ -> },
             removePlaceFromFavourite = {},
-            addPlaceToFavourite = {}
+            addPlaceToFavourite = {},
+            deleteCurrentRoute = {}
         )
     }
 }
