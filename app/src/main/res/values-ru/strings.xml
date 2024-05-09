@@ -168,5 +168,10 @@
     <string name="delete_current_route_text">У вас уже есть маршрут. Вы уверены, что хотите создать новый? Вы не сможете восстановить текущий маршрут.</string>
     <string name="delete_current_route_right_button_text">Продолжить</string>
 
+    <string name="add_to_favourite">Добавить в избранное</string>
+    <string name="remove_from_favourite">Убрать из избранного</string>
+    <string name="remove_from_route">Убрать из маршрута</string>
+    <string name="replace_place">Заменить место</string>
+
     <string name="moonlight">Лунная</string>
 </resources>

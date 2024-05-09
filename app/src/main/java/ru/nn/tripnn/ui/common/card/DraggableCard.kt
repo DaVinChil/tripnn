@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -129,7 +130,7 @@ fun CardOption(
     ) {
         Icon(
             painter = painterResource(id = painter),
-            contentDescription = "",
+            contentDescription = "option",
             tint = color
         )
         MontsText(
@@ -145,21 +146,25 @@ fun CardOption(
 fun AddToFavouriteCardOption(onClick: () -> Unit) {
     CardOption(
         painter = R.drawable.unselected_bookmark,
-        text = "Добавить в избранные",
+        text = stringResource(id = R.string.add_to_favourite),
         onClick = onClick
     )
 }
 
 @Composable
 fun RemoveFromFavouriteGoldCardOption(onClick: () -> Unit) {
-    CardOption(painter = R.drawable.gold_bookmark, text = "Убрать из избранных", onClick = onClick)
+    CardOption(
+        painter = R.drawable.gold_bookmark,
+        text = stringResource(id = R.string.remove_from_favourite),
+        onClick = onClick
+    )
 }
 
 @Composable
 fun RemoveFromFavouriteRedCardOption(onClick: () -> Unit) {
     CardOption(
         painter = R.drawable.unselected_bookmark,
-        text = "Убрать из избранных",
+        text = stringResource(id = R.string.remove_from_favourite),
         color = Color.Red,
         onClick = onClick
     )
@@ -169,7 +174,7 @@ fun RemoveFromFavouriteRedCardOption(onClick: () -> Unit) {
 fun RemoveFromRouteCardOption(onClick: () -> Unit) {
     CardOption(
         painter = R.drawable.trashcan_outlined,
-        text = "Удалить из маршрута",
+        text = stringResource(id = R.string.remove_from_route),
         onClick = onClick,
         color = Color.Red
     )
@@ -179,7 +184,7 @@ fun RemoveFromRouteCardOption(onClick: () -> Unit) {
 fun ReplaceCardOption(onClick: () -> Unit) {
     CardOption(
         painter = R.drawable.change_icon,
-        text = "Заменить место",
+        text = stringResource(id = R.string.replace_place),
         onClick = onClick
     )
 }

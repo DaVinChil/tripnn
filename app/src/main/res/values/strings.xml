@@ -166,4 +166,9 @@
     <string name="delete_current_route_right_button_text">Continue</string>
 
     <string name="moonlight">Moonlight</string>
+
+    <string name="add_to_favourite">Add to favourite</string>
+    <string name="remove_from_favourite">Remove from favourite</string>
+    <string name="remove_from_route">Remove from route</string>
+    <string name="replace_place">Replace place</string>
 </resources>
