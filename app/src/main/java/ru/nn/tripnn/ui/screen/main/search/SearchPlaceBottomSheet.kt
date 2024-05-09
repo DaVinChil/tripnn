@@ -63,43 +63,6 @@ import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
-val LEISURE_TYPES = listOf(
-    R.string.zoos,
-    R.string.river_trips,
-    R.string.anti_cafe,
-    R.string.attractions,
-    R.string.karaoke,
-    R.string.table_games,
-    R.string.water_parks,
-    R.string.circuses,
-    R.string.quests,
-    R.string.cinemas
-)
-
-val CULTURE_TYPES = listOf(
-    R.string.museums,
-    R.string.exhibitions,
-    R.string.parks,
-    R.string.theaters
-)
-
-val EAT_TYPES = listOf(
-    R.string.home_cook,
-    R.string.sushi_bars,
-    R.string.pizzerias,
-    R.string.fast_food,
-    R.string.canteens,
-    R.string.coffee_shops,
-    R.string.bars,
-    R.string.pastry_shops,
-    R.string.shot_glasses,
-    R.string.burgers,
-    R.string.pyshechnye,
-    R.string.khinkalnye,
-    R.string.shawarma,
-    R.string.dumplings,
-)
-
 val MIN_RATINGS = listOf(3f, 3.5f, 4f, 4.5f)
 val PRICES = listOf("₽", "₽₽", "₽₽₽", "₽₽₽₽")
 val DISTANCES = listOf(1, 2, 5, 10)

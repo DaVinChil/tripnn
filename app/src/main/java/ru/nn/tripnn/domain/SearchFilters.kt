@@ -1,19 +1,13 @@
 package ru.nn.tripnn.domain
 
-import java.time.LocalTime
+import ru.nn.tripnn.ui.screen.main.search.Type
 
 data class SearchFilters(
     val word: String? = null,
-    val types: List<Int>? = null,
-    val catalog: Int? = null,
+    val types: List<Type>? = null,
     val previousPlaceId: String? = null,
-    val userLocation: String? = null,
     val minRating: Float? = null,
-    val minPrice: Int? = null,
-    val maxPrice: Int? = null,
-    val workStartTime: LocalTime? = null,
-    val workEndTime: LocalTime? = null,
+    val price: Int = -1,
     val maxDistance: Int? = null,
-    val sortByDistance: Boolean = false,
-    val sortByRating: Boolean = true
+    val sortBy: String = "relevance"
 )

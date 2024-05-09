@@ -59,7 +59,6 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
-import java.time.LocalTime
 
 @Composable
 fun SearchPlaceBuilderScreen(
@@ -83,12 +82,8 @@ fun SearchPlaceBuilderScreen(
             }
         }
     }
-    val pickedPrices = remember(chosenCategory) {
-        mutableStateListOf<Boolean>().apply {
-            repeat(4) {
-                add(false)
-            }
-        }
+    var pickedPrice by remember(chosenCategory) {
+        mutableIntStateOf(-1)
     }
     var pickedMinRating by remember(chosenCategory) {
         mutableIntStateOf(-1)
@@ -126,7 +121,12 @@ fun SearchPlaceBuilderScreen(
 
             FilterByWord(text = searchInput, onChange = { searchInput = it })
 
-            PriceChoice(picked = pickedPrices, onPick = { pickedPrices[it] = !pickedPrices[it] })
+            if (chosenCategory == EAT) {
+                PriceChoice(
+                    picked = pickedPrice,
+                    onPick = { pickedPrice = if (pickedPrice == it) 0 else it }
+                )
+            }
 
             RatingChoice(picked = pickedMinRating, onPick = { pickedMinRating = it })
 
@@ -157,24 +157,15 @@ fun SearchPlaceBuilderScreen(
                     onSearch(
                         SearchFilters(
                             word = searchInput,
-                            catalog = chosenCategory,
-                            types = mutableListOf<Int>().apply {
+                            types = mutableListOf<Type>().apply {
                                 pickedTypes.forEachIndexed { index, isPicked ->
                                     if (isPicked) add(currentCategoryTypes[index])
                                 }
                             },
-                            minPrice = pickedPrices.indexOf(true).let {
-                                if (it == -1) null else it
-                            },
-                            maxPrice = pickedPrices.lastIndexOf(true).let {
-                                if (it == -1) null else it
-                            },
+                            price = pickedPrice,
                             minRating = MIN_RATINGS.getOrNull(pickedMinRating),
                             previousPlaceId = previousPlaceId,
-                            maxDistance = DISTANCES.getOrNull(pickedDistance),
-                            userLocation = "",
-                            workEndTime = LocalTime.now(),
-                            workStartTime = LocalTime.now()
+                            maxDistance = DISTANCES.getOrNull(pickedDistance)
                         )
                     )
                     toResultScreen()
@@ -258,7 +249,7 @@ fun FilterByWord(text: String, onChange: (String) -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
+fun PriceChoice(picked: Int, onPick: (Int) -> Unit) {
     Column {
         MontsText(
             text = stringResource(id = R.string.avg_receipt),
@@ -274,7 +265,7 @@ fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(color = if (picked[i]) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
+                        .background(color = if (picked == i) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
                         .clickable(
                             indication = null,
                             interactionSource = remember {
@@ -287,7 +278,7 @@ fun PriceChoice(picked: List<Boolean>, onPick: (Int) -> Unit) {
                     MontsText(
                         text = price,
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (picked[i]) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
+                        color = if (picked == i) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
                     )
                 }
             }
@@ -396,7 +387,7 @@ fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TypeChoice(
-    types: List<Int>,
+    types: List<Type>,
     pickedTypes: List<Boolean>,
     onPick: (Int) -> Unit,
     onPickAll: () -> Unit
@@ -446,7 +437,7 @@ fun TypeChoice(
                         .padding(horizontal = 22.dp, vertical = 11.dp)
                 ) {
                     MontsText(
-                        text = stringResource(id = type),
+                        text = stringResource(id = type.resId),
                         style = MaterialTheme.typography.labelMedium,
                         color = if (pickedTypes[i]) TripNnTheme.colorScheme.onPrimary else TripNnTheme.colorScheme.textColor
                     )
