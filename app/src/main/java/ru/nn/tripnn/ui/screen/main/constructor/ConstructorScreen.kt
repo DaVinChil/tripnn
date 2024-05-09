@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -165,6 +164,11 @@ fun RouteColumn(
     var showCardInfo by remember { mutableStateOf(false) }
     var pickedPlace by remember { mutableStateOf(PLACE_1) }
     val density = LocalDensity.current
+    val orderIds = remember {
+        mutableListOf<Int>().apply {
+            currentRoute?.places?.forEachIndexed { i, _ -> add(i) }
+        }
+    }
 
     LazyColumn(
         state = lazyState,
@@ -178,12 +182,15 @@ fun RouteColumn(
     ) {
         itemsIndexed(
             items = currentRoute?.places ?: listOf(),
-            key = { index, place -> "$index|${place.id}" }
+            key = { index, place -> orderIds.getOrElse(index) { "$index|${place.id}"} }
         ) { index, place ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromRouteCardOption(
-                        onClick = { removePlaceFromRoute(index) }
+                        onClick = {
+                            removePlaceFromRoute(index)
+                            orderIds.removeAt(index)
+                        }
                     )
                 }
 
@@ -218,7 +225,6 @@ fun RouteColumn(
                         pickedPlace = place
                         showCardInfo = true
                     },
-                    shadowColor = Color.Black.copy(alpha = 0.2f),
                     option1 = option
                 )
             }
@@ -228,7 +234,10 @@ fun RouteColumn(
         item {
             AddPlaceButton(
                 previousPlace = currentRoute?.places?.lastOrNull(),
-                addPlace = addPlace,
+                addPlace = {
+                    orderIds.add((orderIds.lastOrNull() ?: 0) + 1)
+                    addPlace(it)
+                },
                 toPhotos = toPhotos
             )
         }
@@ -256,7 +265,7 @@ fun AddPlaceButton(
 
     Row(
         modifier = Modifier
-            .shadow(color = Color.Black.copy(alpha = 0.3f), blurRadius = 8.dp, borderRadius = 8.dp)
+            .shadow(blurRadius = 8.dp, borderRadius = 8.dp)
             .fillMaxWidth()
             .height(45.dp)
             .clip(RoundedCornerShape(8.dp))
