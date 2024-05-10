@@ -3,6 +3,7 @@ package ru.nn.tripnn.domain
 import java.util.Date
 
 data class Route (
+    val localId: Int = 0,
     val id: String? = null,
     val name: String,
     val desc: String? = null,
