@@ -21,6 +21,9 @@ interface FavouriteRoutesDao {
     @Query("delete from favourite_routes where id = :id")
     fun deleteRouteById(id: Int)
 
+    @Query("delete from favourite_routes where routeId = :routeId")
+    fun deleteRouteByRouteId(routeId: String)
+
     @Query("delete from favourite_routes")
     fun deleteAllFavouriteRoutes()
 }

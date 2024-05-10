@@ -113,6 +113,8 @@ class FavouritesRepositoryImpl(
         withContext(ioDispatcher) {
             if (route.localId != 0) {
                 favouriteRoutesDao.deleteRouteById(route.localId)
+            } else if (route.id != null) {
+                favouriteRoutesDao.deleteRouteByRouteId(route.id)
             }
         }
     }
