@@ -80,7 +80,7 @@ fun AccountScreen(
     onLeaveAccount: () -> Unit,
     onAvatarChange: (Uri) -> Unit
 ) {
-    if (userInfoData.isError || (!userInfoData.isLoading && userInfoData.value == null)) {
+    if (userInfoData.isError || (!userInfoData.isLoading && userInfoData.state == null)) {
         InternetProblemScreen()
         return
     }
@@ -121,7 +121,7 @@ fun AccountScreen(
                 LoadingUserInfoBlock()
             } else {
                 UserInfoBlock(
-                    userInfoData = userInfoData.value ?: UserInfoData(name = "", email = "", avatar = null),
+                    userInfoData = userInfoData.state ?: UserInfoData(name = "", email = "", avatar = null),
                     onAvatarChange = onAvatarChange,
                     onUserNameChange = onUserNameChange
                 )
@@ -392,7 +392,7 @@ fun AccountScreenPreview() {
             AccountScreen(
                 onBackClick = {},
                 userInfoData = ResourceState(
-                    value = UserInfoData(
+                    state = UserInfoData(
                         name = "Sasha",
                         email = "hz.com@gmail.com",
                         avatar = null

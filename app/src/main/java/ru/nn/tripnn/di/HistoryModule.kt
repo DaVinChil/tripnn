@@ -8,23 +8,30 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
-import ru.nn.tripnn.data.local.history.HistoryRepository
-import ru.nn.tripnn.data.local.history.HistoryRepositoryImpl
-import ru.nn.tripnn.data.local.history.place.PlacesHistoryDao
-import ru.nn.tripnn.data.local.history.place.PlacesHistoryDatabase
-import ru.nn.tripnn.data.local.history.route.RoutesHistoryDao
-import ru.nn.tripnn.data.local.history.route.RoutesHistoryDatabase
-import ru.nn.tripnn.data.remote.place.PlaceRepository
+import ru.nn.tripnn.data.database.place.history.PlacesHistoryDao
+import ru.nn.tripnn.data.database.place.history.PlacesHistoryDatabase
+import ru.nn.tripnn.data.database.route.history.RoutesHistoryDao
+import ru.nn.tripnn.data.database.route.history.RoutesHistoryDatabase
+import ru.nn.tripnn.data.database.route.localroute.LocalRouteDao
+import ru.nn.tripnn.data.datasource.history.HistoryDataSource
+import ru.nn.tripnn.data.datasource.history.HistoryDataSourceImpl
+import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
+import ru.nn.tripnn.data.repository.aggregator.RouteDataAggregator
+import ru.nn.tripnn.data.repository.history.HistoryRepository
+import ru.nn.tripnn.data.repository.history.HistoryRepositoryImpl
 import javax.inject.Singleton
 
-@Module(includes = [RepositoryModule::class])
+@Module
 @InstallIn(SingletonComponent::class)
 object HistoryModule {
+
+    // Place
 
     @Provides
     @Singleton
     fun placesHistoryDatabase(@ApplicationContext appContext: Context) =
         Room.databaseBuilder(appContext, PlacesHistoryDatabase::class.java, "places_history")
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides
@@ -32,10 +39,13 @@ object HistoryModule {
     fun placesHistoryDao(placesHistoryDatabase: PlacesHistoryDatabase) =
         placesHistoryDatabase.placesHistoryDao()
 
+    // Route
+
     @Provides
     @Singleton
     fun routesHistoryDatabase(@ApplicationContext appContext: Context) =
         Room.databaseBuilder(appContext, RoutesHistoryDatabase::class.java, "routes_history")
+            .fallbackToDestructiveMigration()
             .build()
 
     @Provides
@@ -43,17 +53,24 @@ object HistoryModule {
     fun routesHistoryDao(routesHistoryDatabase: RoutesHistoryDatabase) =
         routesHistoryDatabase.routesHistoryDao()
 
+    // Data Source
+
+    @Provides
+    @Singleton
+    fun historyDataSource(
+        placesHistoryDao: PlacesHistoryDao,
+        routesHistoryDao: RoutesHistoryDao,
+        localRouteDao: LocalRouteDao,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): HistoryDataSource = HistoryDataSourceImpl(placesHistoryDao, routesHistoryDao, localRouteDao, ioDispatcher)
+
+    // Repository
+
     @Provides
     @Singleton
     fun historyRepository(
-        routesHistoryDao: RoutesHistoryDao,
-        placesHistoryDao: PlacesHistoryDao,
-        @Fake placeRepository: PlaceRepository,
-        @IoDispatcher ioDispatcher: CoroutineDispatcher
-    ): HistoryRepository = HistoryRepositoryImpl(
-        routesHistoryDao,
-        placesHistoryDao,
-        placeRepository,
-        ioDispatcher
-    )
+        historyDataSource: HistoryDataSource,
+        placeDataAggregator: PlaceDataAggregator,
+        routeDataAggregator: RouteDataAggregator
+    ): HistoryRepository = HistoryRepositoryImpl(historyDataSource, routeDataAggregator, placeDataAggregator)
 }

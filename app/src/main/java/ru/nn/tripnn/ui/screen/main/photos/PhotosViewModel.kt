@@ -1,55 +1,27 @@
 package ru.nn.tripnn.ui.screen.main.photos
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.data.remote.place.PlaceRepository
-import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.ui.screen.ResourceState
-import javax.inject.Inject
+import kotlinx.coroutines.flow.map
+import ru.nn.tripnn.data.repository.searchplace.SearchPlaceService
+import ru.nn.tripnn.ui.util.toResourceStateFlow
 
-@HiltViewModel
-class PhotosViewModel @Inject constructor(
-    @Fake val placeRepository: PlaceRepository
+@HiltViewModel(assistedFactory = PhotosViewModel.Factory::class)
+class PhotosViewModel @AssistedInject constructor(
+    private val searchPlaceService: SearchPlaceService,
+    @Assisted placeId: String
 ) : ViewModel() {
 
-    var photos by mutableStateOf(ResourceState<List<String>>())
-        private set
+    val photos = searchPlaceService.findById(placeId)
+        .map { Result.success(it.getOrThrow().photos) }
+        .toResourceStateFlow(viewModelScope)
 
-    fun init(placeId: String) {
-        loadPhotos(placeId)
-    }
-
-    private fun loadPhotos(placeId: String) {
-        viewModelScope.launch {
-            photos = photos.copy(
-                isLoading = true,
-                value = null,
-                error = null,
-                isError = false
-            )
-
-            when (val result = placeRepository.findById(placeId)) {
-                is RemoteResource.Success -> {
-                    photos = photos.copy(
-                        value = result.data?.photos,
-                        isLoading = false
-                    )
-                }
-
-                is RemoteResource.Error -> {
-                    photos = photos.copy(
-                        isError = true,
-                        error = result.message,
-                        isLoading = false
-                    )
-                }
-            }
-        }
+    @AssistedFactory
+    interface Factory {
+        fun create(placeId: String): PhotosViewModel
     }
 }

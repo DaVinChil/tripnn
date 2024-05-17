@@ -40,7 +40,7 @@ fun RouteCard(
     BaseCard(
         modifier = modifier,
         imageUrl = route.imageUrl,
-        name = route.name,
+        name = route.title,
         type = stringResource(id = R.string.route),
         onCardClick = onCardClick,
         shadowColor = shadowColor

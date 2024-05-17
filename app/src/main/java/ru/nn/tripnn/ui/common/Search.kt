@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -26,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -80,7 +80,8 @@ fun Search(modifier: Modifier = Modifier, onSearch: (String) -> Unit) {
                 fontWeight = FontWeight.Medium,
                 fontFamily = montserratFamily,
                 textAlign = TextAlign.Start
-            )
+            ),
+            cursorBrush = SolidColor(TripNnTheme.colorScheme.textColor)
         ) { innerTextField ->
             TextFieldDefaults.DecorationBox(
                 value = searchValue,

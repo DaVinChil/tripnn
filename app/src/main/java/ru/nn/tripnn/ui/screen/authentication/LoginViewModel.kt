@@ -7,9 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.data.local.token.TokenRepository
-import ru.nn.tripnn.data.remote.auth.AuthenticationService
+import ru.nn.tripnn.data.repository.auth.AuthenticationService
+import ru.nn.tripnn.data.repository.auth.TokenRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.LoginData
 import ru.nn.tripnn.ui.screen.ResourceState
@@ -22,7 +21,7 @@ class LoginViewModel @Inject constructor(
     private val tokenRepository: TokenRepository
 ) : ViewModel() {
 
-    var authenticated by mutableStateOf(ResourceState(value = false))
+    var authenticated by mutableStateOf(ResourceState(state = false))
         private set
     var emailState by mutableStateOf(ResourceState<Unit>())
         private set
@@ -36,42 +35,26 @@ class LoginViewModel @Inject constructor(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            authenticated = authenticated.copy(isLoading = true)
+            authenticated = ResourceState.loading()
 
             if (!validateEmail(email) or !validatePassword(password)) {
-                authenticated = authenticated.copy(
-                    value = false,
-                    isError = true,
-                    isLoading = false,
-                    error = "failed validate password or email"
+                authenticated = authenticated.toError(
+                    IllegalStateException("failed validate password or email")
                 )
-
                 return@launch
             }
 
-            when (
-                val result = authenticationService.login(
-                    LoginData(password = password, email = email)
-                )
-            ) {
-                is RemoteResource.Success -> {
-                    tokenRepository.saveToken(result.data!!)
-                    authenticated = authenticated.copy(
-                        isError = false,
-                        isLoading = false,
-                        error = null,
-                        value = true
-                    )
+            val result = authenticationService.login(LoginData(password = password, email = email))
+
+            when {
+                 result.isSuccess -> {
+                    tokenRepository.saveToken(result.getOrNull()!!)
+                    authenticated = authenticated.toSuccess(true)
                     onSuccess()
                 }
 
-                is RemoteResource.Error -> {
-                    authenticated = authenticated.copy(
-                        isError = true,
-                        isLoading = false,
-                        error = result.message,
-                        value = false
-                    )
+                result.isFailure -> {
+                    authenticated = authenticated.toError(result.exceptionOrNull())
                 }
             }
         }
@@ -79,22 +62,22 @@ class LoginViewModel @Inject constructor(
 
     private fun validateEmail(email: String): Boolean {
         if (email.isBlank()) {
-            emailState = emailState.copy(isError = true, error = "Email can not be empty")
+            emailState = emailState.toError(IllegalStateException("Email can not be empty"))
             return false
         }
 
-        emailState = emailState.copy(isError = false, error = null)
+        dismissEmailError()
 
         return true
     }
 
     private fun validatePassword(password: String): Boolean {
         if (password.isBlank()) {
-            passwordState = passwordState.copy(isError = true, error = "Password can not be empty")
+            passwordState = passwordState.toError(IllegalStateException("Password can not be empty"))
             return false
         }
 
-        passwordState = passwordState.copy(isError = false, error = null)
+        dismissPasswordError()
 
         return true
     }
@@ -110,10 +93,10 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun dismissPasswordError() {
-        passwordState = passwordState.copy(isError = false, error = null)
+        passwordState = passwordState.toSuccess()
     }
 
     private fun dismissEmailError() {
-        emailState = emailState.copy(isError = false, error = null)
+        emailState = emailState.toSuccess()
     }
 }

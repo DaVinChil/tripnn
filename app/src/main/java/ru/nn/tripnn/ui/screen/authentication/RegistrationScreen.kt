@@ -52,9 +52,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -146,7 +146,7 @@ fun RegistrationScreen(
                     confirmPassword
                 )
             },
-            isLoading = authenticated.isLoading || authenticated.value == true
+            isLoading = authenticated.isLoading || authenticated.state == true
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -391,7 +391,7 @@ fun RegistrationScreenPreview() {
                 { _, _, _, _, _ -> },
                 {},
                 {},
-                ResourceState(value = false),
+                ResourceState(state = false),
                 ResourceState<Unit>(),
                 ResourceState<Unit>(),
                 ResourceState<Unit>()

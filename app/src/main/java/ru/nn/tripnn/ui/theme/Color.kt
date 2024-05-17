@@ -4,7 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
-import ru.nn.tripnn.data.local.usersettings.Theme
+import ru.nn.tripnn.data.database.usersettings.Theme
 
 val LocalTripNnScheme = compositionLocalOf { LightColorScheme }
 

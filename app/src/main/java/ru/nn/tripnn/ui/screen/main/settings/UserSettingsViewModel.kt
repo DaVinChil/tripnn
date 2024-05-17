@@ -1,78 +1,48 @@
 package ru.nn.tripnn.ui.screen.main.settings
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.nn.tripnn.data.RemoteResource
-import ru.nn.tripnn.data.local.usersettings.Currency
-import ru.nn.tripnn.data.local.usersettings.Language
-import ru.nn.tripnn.data.local.usersettings.Theme
-import ru.nn.tripnn.data.local.usersettings.UserSettings
-import ru.nn.tripnn.data.local.usersettings.UserSettingsRepository
+import ru.nn.tripnn.data.database.usersettings.Currency
+import ru.nn.tripnn.data.database.usersettings.Language
+import ru.nn.tripnn.data.database.usersettings.Theme
+import ru.nn.tripnn.data.database.usersettings.UserSettings
+import ru.nn.tripnn.data.repository.usersettings.UserSettingsRepository
+import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.ui.util.toResourceStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class UserSettingsViewModel @Inject constructor(
     private val userSettingsRepository: UserSettingsRepository
 ) : ViewModel() {
-    var isLoading by mutableStateOf(false)
-        private set
-    var message: String? = null
-        private set
 
-    var userSettingsState: UserSettings by mutableStateOf(
-        UserSettings(
-            theme = Theme.SYSTEM,
-            currency = Currency.RUB,
-            language = Language.RUSSIAN
-        )
-    )
-        private set
-
-    init {
-        loadPreferences()
-    }
-
-    private fun loadPreferences() {
-        viewModelScope.launch {
-            isLoading = true
-            when (val result = userSettingsRepository.getUserSettings()) {
-                is RemoteResource.Success -> {
-                    userSettingsState = result.data ?: userSettingsState
-                }
-
-                is RemoteResource.Error -> {
-                    message = result.message
-                }
+    val userSettings = userSettingsRepository.getUserSettings()
+        .map { settings ->
+            settings.also {
+                if (it.getOrNull() == null)
+                    Result.success(UserSettings())
             }
-            isLoading = false
+        }
+        .toResourceStateFlow(viewModelScope, ResourceState(UserSettings()))
+
+    fun changeTheme(theme: Theme) {
+        viewModelScope.launch {
+            userSettingsRepository.setTheme(theme = theme)
         }
     }
 
-    fun changeTheme(theme: Theme) {
-        changeUserSettings(theme = theme)
-    }
-
     fun changeLanguage(language: Language) {
-        changeUserSettings(language = language)
+        viewModelScope.launch {
+            userSettingsRepository.setLanguage(language = language)
+        }
     }
 
     fun changeCurrency(currency: Currency) {
-        changeUserSettings(currency = currency)
-    }
-
-    private fun changeUserSettings(
-        theme: Theme = userSettingsState.theme,
-        language: Language = userSettingsState.language,
-        currency: Currency = userSettingsState.currency
-    ) {
-        userSettingsState = userSettingsState.copy(theme = theme, language = language, currency = currency)
         viewModelScope.launch {
-            userSettingsRepository.saveUserSettings(userSettingsState)
+            userSettingsRepository.setCurrency(currency)
         }
     }
 }

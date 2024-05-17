@@ -1,14 +1,15 @@
 package ru.nn.tripnn.ui.screen.navigation
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
-import ru.nn.tripnn.data.local.usersettings.getIsoLang
 import ru.nn.tripnn.ui.common.fullSlideInHorizontal
 import ru.nn.tripnn.ui.common.fullSlideInVertical
 import ru.nn.tripnn.ui.common.fullSlideOutHorizontal
@@ -32,6 +33,7 @@ import ru.nn.tripnn.ui.screen.main.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
 import ru.nn.tripnn.ui.screen.main.takingroute.TakingTheRouteScreen
 import ru.nn.tripnn.ui.util.changeLocales
+import ru.nn.tripnn.ui.util.getIsoLang
 
 enum class AppRoutes(
     val route: String
@@ -91,13 +93,9 @@ fun NavGraphBuilder.home(
     ) {
         val homeViewModel = hiltViewModel<HomeViewModel>()
 
-        LaunchedEffect(Unit) {
-            homeViewModel.init()
-        }
-
         HomeScreen(
-            currentRoute = homeViewModel.currentRoute,
-            recommendedRoutes = homeViewModel.recommendedRoutes,
+            currentRoute = homeViewModel.currentRoute.collectAsStateWithLifecycle().value,
+            recommendedRoutes = homeViewModel.recommendedRoutes.collectAsStateWithLifecycle().value,
             onAccountClick = { navigateTo(AppRoutes.ACCOUNT.route) },
             onHistoryClick = { navigateTo(AppRoutes.HISTORY.route) },
             onFavouriteClick = { navigateTo(AppRoutes.FAVOURITE.route) },
@@ -137,7 +135,7 @@ fun NavGraphBuilder.userSettings(
     ) {
         val userSettingsViewModel = hiltViewModel<UserSettingsViewModel>()
 
-        val preferences = userSettingsViewModel.userSettingsState
+        val preferences by userSettingsViewModel.userSettings.collectAsStateWithLifecycle()
         val context = LocalContext.current
 
         SettingsScreen(
@@ -148,9 +146,9 @@ fun NavGraphBuilder.userSettings(
                 changeLocales(context, getIsoLang(it))
             },
             onCurrencyChange = userSettingsViewModel::changeCurrency,
-            currentTheme = preferences.theme,
-            currentLanguage = preferences.language,
-            currentCurrency = preferences.currency
+            currentTheme = preferences.state?.theme!!,
+            currentLanguage = preferences.state?.language!!,
+            currentCurrency = preferences.state?.currency!!
         )
     }
 }
@@ -198,15 +196,10 @@ fun NavGraphBuilder.favourites(
     ) {
         val favouriteViewModel = hiltViewModel<FavouriteViewModel>()
 
-        LaunchedEffect(true) {
-            favouriteViewModel.init()
-        }
-
         FavouriteScreen(
-            filterPlaces = favouriteViewModel::filterPlaces,
-            filterRoutes = favouriteViewModel::filterRoutes,
-            favouritePlaces = favouriteViewModel.favouritePlaces,
-            favouriteRoutes = favouriteViewModel.favouriteRoutes,
+            filterByWord = favouriteViewModel::filterByWord,
+            favouritePlaces = favouriteViewModel.favouritePlaces.collectAsStateWithLifecycle().value,
+            favouriteRoutes = favouriteViewModel.favouriteRoutes.collectAsStateWithLifecycle().value,
             removePlaceFromFavourite = favouriteViewModel::removePlaceFromFavourite,
             removeRouteFromFavourite = favouriteViewModel::removeRouteFromFavourite,
             addPlaceToFavourite = favouriteViewModel::addPlaceToFavourite,
@@ -217,7 +210,7 @@ fun NavGraphBuilder.favourites(
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
             toPhotos = navigateToPhotos,
-            alreadyHasRoute = favouriteViewModel.hasCurrentRoute
+            alreadyHasRoute = favouriteViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.state ?: false
         )
     }
 }
@@ -234,21 +227,16 @@ fun NavGraphBuilder.recommendations(
     ) {
         val recommendationsViewModel = hiltViewModel<RecommendationsViewModel>()
 
-        LaunchedEffect(false) {
-            recommendationsViewModel.init()
-        }
-
         RecommendationsScreen(
             onBack = onBack,
-            filterRoutes = recommendationsViewModel::filterRoutes,
-            routes = recommendationsViewModel.recommendedRoutes,
+            filterRoutes = recommendationsViewModel::filterByWord,
+            routes = recommendationsViewModel.recommendedRoutes.collectAsStateWithLifecycle().value,
             removeRouteFromFavourite = recommendationsViewModel::removeRouteFromFavourite,
             addRouteToFavourite = recommendationsViewModel::addRouteToFavourite,
             removePlaceFromFavourite = recommendationsViewModel::removePlaceFromFavourite,
             addPlaceToFavourite = recommendationsViewModel::addPlaceToFavourite,
-            isEmpty = recommendationsViewModel.isEmpty,
             toPhotos = navigateToPhotos,
-            alreadyHasRoute = recommendationsViewModel.hasCurrentRoute,
+            alreadyHasRoute = recommendationsViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.state ?: false,
             onTakeTheRoute = {
                 recommendationsViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
@@ -269,15 +257,10 @@ fun NavGraphBuilder.history(
     ) {
         val historyViewModel = hiltViewModel<HistoryViewModel>()
 
-        LaunchedEffect(true) {
-            historyViewModel.init()
-        }
-
         HistoryScreen(
-            filterPlaces = historyViewModel::filterPlaces,
-            filterRoutes = historyViewModel::filterRoutes,
-            places = historyViewModel.visitedPlaces,
-            routes = historyViewModel.takenRoutes,
+            filterByWord = historyViewModel::filterByWord,
+            places = historyViewModel.visitedPlaces.collectAsStateWithLifecycle().value,
+            routes = historyViewModel.takenRoutes.collectAsStateWithLifecycle().value,
             removePlaceFromFavourite = historyViewModel::removePlaceFromFavourite,
             removeRouteFromFavourite = historyViewModel::removeRouteFromFavourite,
             addPlaceToFavourite = historyViewModel::addPlaceToFavourite,
@@ -288,7 +271,7 @@ fun NavGraphBuilder.history(
                 historyViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
-            alreadyHasRoute = historyViewModel.hasCurrentRoute,
+            alreadyHasRoute = historyViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.state ?: false,
             clearRoutesHistory = historyViewModel::clearRoutesHistory,
             clearPlacesHistory = historyViewModel::clearPlacesHistory,
             removeRouteFromHistory = historyViewModel::removeRouteFromFavourite,
@@ -308,13 +291,9 @@ fun NavGraphBuilder.constructor(
     ) {
         val constructorViewModel = hiltViewModel<ConstructorViewModel>()
 
-        LaunchedEffect(Unit) {
-            constructorViewModel.init()
-        }
-
         ConstructorScreen(
             onBack = onBack,
-            currentRoute = constructorViewModel.currentRouteState,
+            currentRoute = constructorViewModel.currentRouteState.collectAsStateWithLifecycle().value,
             addPlace = constructorViewModel::addPlace,
             removePlaceFromRoute = constructorViewModel::removePlace,
             takeRoute = {
@@ -323,7 +302,7 @@ fun NavGraphBuilder.constructor(
             toPhotos = navigateToPhotos,
             removePlaceFromFavourite = constructorViewModel::removePlaceFromFavourite,
             addPlaceToFavourite = constructorViewModel::addPlaceToFavourite,
-            deleteCurrentRoute = constructorViewModel::deleteCurrentRoute
+            clearCurrentRoute = constructorViewModel::clearCurrentRoute
         )
     }
 }
@@ -338,14 +317,12 @@ fun NavGraphBuilder.photos(onBack: () -> Unit) {
         enterTransition = fullSlideInVertical(),
         exitTransition = fullSlideOutVertical()
     ) { backStackEntry ->
-        val photosViewModel = hiltViewModel<PhotosViewModel>()
-
-        LaunchedEffect(Unit) {
-            photosViewModel.init(backStackEntry.arguments?.getString("placeId") ?: "")
+        val photosViewModel = hiltViewModel { factory: PhotosViewModel.Factory ->
+            factory.create(backStackEntry.arguments?.getString("placeId") ?: "")
         }
 
         PhotosScreen(
-            photos = photosViewModel.photos,
+            photos = photosViewModel.photos.collectAsStateWithLifecycle().value,
             initialPhoto = backStackEntry.arguments?.getInt("initial") ?: 0,
             onClose = onBack
         )

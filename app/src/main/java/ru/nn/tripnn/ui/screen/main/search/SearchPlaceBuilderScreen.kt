@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -212,7 +213,8 @@ fun FilterByWord(text: String, onChange: (String) -> Unit) {
                     fontWeight = FontWeight.Normal,
                     fontFamily = montserratFamily,
                     textAlign = TextAlign.Start
-                )
+                ),
+                cursorBrush = SolidColor(TripNnTheme.colorScheme.textColor)
             ) { innerTextField ->
                 TextFieldDefaults.DecorationBox(
                     value = text,

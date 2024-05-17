@@ -44,11 +44,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InternetProblemScreen
@@ -81,7 +82,7 @@ fun SearchPlaceBottomSheet(
     toPhotos: (String, Int) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val placesViewModel = hiltViewModel<AllPlacesViewModel>()
+    val placesViewModel = hiltViewModel<SearchViewModel>()
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -114,7 +115,7 @@ fun SearchPlaceBottomSheet(
             ) {
                 SearchResultScreen(
                     sort = placesViewModel::sort,
-                    result = placesViewModel.searchResult,
+                    result = placesViewModel.searchResult.collectAsStateWithLifecycle().value,
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
                     popBack = navController::popBackStack,
@@ -129,8 +130,8 @@ fun SearchPlaceBottomSheet(
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
     result: ResourceState<List<Place>>,
-    removeFromFavourite: (String) -> Unit,
-    addToFavourite: (String) -> Unit,
+    removeFromFavourite: (Place) -> Unit,
+    addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
     toPhotos: (String, Int) -> Unit
 ) {
@@ -151,8 +152,8 @@ fun SearchResultScreen(
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
     result: ResourceState<List<Place>>,
-    removeFromFavourite: (String) -> Unit,
-    addToFavourite: (String) -> Unit,
+    removeFromFavourite: (Place) -> Unit,
+    addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
     toPhotos: (String, Int) -> Unit,
     onChoose: ((Place) -> Unit)?,
@@ -229,22 +230,23 @@ fun SearchResultScreen(
                 Box(modifier = Modifier.fillMaxHeight(5f / 6f)) {
                     LoadingCircleScreen()
                 }
-            } else if (result.value.isNullOrEmpty()) {
+            } else if (result.state.isNullOrEmpty()) {
                 SearchEmptyResult(popBack)
             } else {
                 LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
                     itemsIndexed(
-                        items = result.value,
-                        key = { _, place -> place.id }) { index, place ->
+                        items = result.state,
+                        key = { _, place -> place.id }
+                    ) { index, place ->
                         val option: @Composable () -> Unit = if (place.favourite) {
                             @Composable {
                                 RemoveFromFavouriteGoldCardOption(
-                                    onClick = { removeFromFavourite(place.id) }
+                                    onClick = { removeFromFavourite(place) }
                                 )
                             }
                         } else {
                             @Composable {
-                                AddToFavouriteCardOption(onClick = { addToFavourite(place.id) })
+                                AddToFavouriteCardOption(onClick = { addToFavourite(place) })
                             }
                         }
 
@@ -291,7 +293,7 @@ fun SearchResultScreen(
                 PrimaryButton(
                     text = stringResource(id = R.string.add_place),
                     paddingValues = PaddingValues(horizontal = 58.dp, vertical = 15.dp),
-                    onClick = { if (chosenPlace != -1 && result.value != null) onChoose(result.value[chosenPlace]) }
+                    onClick = { if (chosenPlace != -1 && result.state != null) onChoose(result.state[chosenPlace]) }
                 )
             }
         }
@@ -301,8 +303,8 @@ fun SearchResultScreen(
                 onDismissRequest = { showCardInfo = false },
                 sheetState = sheetState,
                 place = pickedPlace,
-                removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
-                addToFavourite = { addToFavourite(pickedPlace.id) },
+                removeFromFavourite = { removeFromFavourite(pickedPlace) },
+                addToFavourite = { addToFavourite(pickedPlace) },
                 toPhotos = toPhotos
             )
         }

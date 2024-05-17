@@ -39,7 +39,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.ROUTE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTE_1
+import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.card.PlaceCard
@@ -53,8 +54,8 @@ fun RouteInfoBottomSheetContent(
     route: Route,
     removeRouteFromFavourite: (Route) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
-    removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
     alreadyHasRoute: Boolean
@@ -81,7 +82,7 @@ fun RouteInfoBottomSheetContent(
                 verticalAlignment = Alignment.Top
             ) {
                 MontsText(
-                    text = route.name,
+                    text = route.title,
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.fillMaxWidth(4f / 6f)
                 )
@@ -144,14 +145,14 @@ fun RouteInfoBottomSheetContent(
             ) {
                 itemsIndexed(
                     items = route.places,
-                    key = { _, place -> place.id }) { index, place ->
+                    key = { index, place -> "$index|${place.id}" }) { index, place ->
                     val option: @Composable () -> Unit = if (place.favourite) {
                         @Composable {
                             RemoveFromFavouriteGoldCardOption(
-                                onClick = { removePlaceFromFavourite(place.id) })
+                                onClick = { removePlaceFromFavourite(place) })
                         }
                     } else {
-                        @Composable { AddToFavouriteCardOption(onClick = { addPlaceToFavourite(place.id) }) }
+                        @Composable { AddToFavouriteCardOption(onClick = { addPlaceToFavourite(place) }) }
                     }
                     PlaceCard(
                         modifier = Modifier.fillMaxWidth(),
@@ -191,8 +192,8 @@ fun RouteInfoBottomSheetContent(
             place = route.places[pickedPlace],
             sheetState = sheetState,
             onDismissRequest = { showCardInfo = false },
-            removeFromFavourite = { removePlaceFromFavourite(route.places[pickedPlace].id) },
-            addToFavourite = { addPlaceToFavourite(route.places[pickedPlace].id) },
+            removeFromFavourite = { removePlaceFromFavourite(route.places[pickedPlace]) },
+            addToFavourite = { addPlaceToFavourite(route.places[pickedPlace]) },
             toPhotos = toPhotos
         )
     }

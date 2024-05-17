@@ -15,7 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ru.nn.tripnn.data.stub_data.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
@@ -26,9 +26,9 @@ import ru.nn.tripnn.ui.screen.ResourceState
 fun PlacesColumn(
     onEmpty: @Composable () -> Unit,
     places: ResourceState<List<Place>>,
-    removeFromFavourite: (String) -> Unit,
-    addToFavourite: (String) -> Unit,
-    option2: @Composable ((String) -> Unit)? = null,
+    removeFromFavourite: (Place) -> Unit,
+    addToFavourite: (Place) -> Unit,
+    option2: @Composable ((Place) -> Unit)? = null,
     toPhotos: (String, Int) -> Unit
 ) {
     if (places.isError) {
@@ -41,7 +41,7 @@ fun PlacesColumn(
         return
     }
 
-    if (places.value.isNullOrEmpty()) {
+    if (places.state.isNullOrEmpty()) {
         onEmpty()
         return
     }
@@ -56,11 +56,11 @@ fun PlacesColumn(
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = places.value, key = Place::id) { place ->
+        items(items = places.state, key = Place::id) { place ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteGoldCardOption(
-                        onClick = { removeFromFavourite(place.id) })
+                        onClick = { removeFromFavourite(place) })
                 }
             PlaceCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -71,7 +71,7 @@ fun PlacesColumn(
                 },
                 option1 = option,
                 option2 = if (option2 != null) {
-                    @Composable { option2(place.id) }
+                    @Composable { option2(place) }
                 } else {
                     null
                 }
@@ -84,8 +84,8 @@ fun PlacesColumn(
             place = pickedPlace,
             onDismissRequest = { showCardInfo = false },
             sheetState = sheetState,
-            removeFromFavourite = { removeFromFavourite(pickedPlace.id) },
-            addToFavourite = { addToFavourite(pickedPlace.id) },
+            removeFromFavourite = { removeFromFavourite(pickedPlace) },
+            addToFavourite = { addToFavourite(pickedPlace) },
             toPhotos = toPhotos
         )
     }

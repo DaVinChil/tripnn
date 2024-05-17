@@ -28,13 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -46,7 +44,7 @@ fun PhotosScreen(
     initialPhoto: Int,
     onClose: () -> Unit
 ) {
-    if (photos.value == null) {
+    if (photos.state == null) {
         return
     }
 
@@ -72,7 +70,7 @@ fun PhotosScreen(
             .swipeable(
                 enabled = swipeEnabled,
                 onLeftSwipe = {
-                    curPhoto = minOf(photos.value.size - 1, curPhoto + 1)
+                    curPhoto = minOf(photos.state.size - 1, curPhoto + 1)
                 },
                 onRightSwipe = {
                     curPhoto = maxOf(curPhoto - 1, 0)
@@ -83,10 +81,10 @@ fun PhotosScreen(
             isVisible = isTopAppBarVisible,
             onClose = onClose,
             count = curPhoto + 1,
-            outOf = photos.value.size
+            outOf = photos.state.size
         )
         AsyncImage(
-            model = photos.value[curPhoto],
+            model = photos.state[curPhoto],
             contentDescription = stringResource(id = R.string.image),
             modifier = Modifier
                 .fillMaxWidth()

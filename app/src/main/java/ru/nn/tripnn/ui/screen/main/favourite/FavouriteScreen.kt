@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,8 +34,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.data.stub_data.ROUTES
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTES
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.CatalogNavigation
@@ -53,13 +54,12 @@ const val ROUTES_INDEX = 1
 @Composable
 fun FavouriteScreen(
     onBack: () -> Unit,
-    filterPlaces: (String) -> Unit,
-    filterRoutes: (String) -> Unit,
+    filterByWord: (String) -> Unit,
     favouritePlaces: ResourceState<List<Place>>,
     favouriteRoutes: ResourceState<List<Route>>,
-    removePlaceFromFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
@@ -100,11 +100,6 @@ fun FavouriteScreen(
                 stringResource(id = R.string.routes)
             ),
             onCatalogChange = {
-                if (it == 0) {
-                    filterPlaces(word)
-                } else {
-                    filterRoutes(word)
-                }
                 navController.navigate(CATALOGS[it]) {
                     launchSingleTop = true
                     popUpTo(CATALOGS[it]) {
@@ -122,11 +117,7 @@ fun FavouriteScreen(
         Search(
             onSearch = {
                 word = it
-                if (chosen == 0) {
-                    filterPlaces(word)
-                } else {
-                    filterRoutes(word)
-                }
+                filterByWord(word)
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -188,10 +179,11 @@ fun FavouriteEmptyResult() {
                     style = MaterialTheme.typography.labelLarge
                 )
                 Icon(
-                    painter = painterResource(id = R.drawable.unselected_bookmark),
+                    painter = painterResource(id = R.drawable.gold_bookmark),
                     contentDescription = stringResource(
                         id = R.string.favourite
-                    )
+                    ),
+                    tint = Color.Unspecified
                 )
             }
 
@@ -216,10 +208,9 @@ fun FavouriteScreenPreview() {
     TripNNTheme {
         FavouriteScreen(
             onBack = { /*TODO*/ },
-            filterPlaces = { /*TODO*/ },
-            filterRoutes = { /*TODO*/ },
-            favouritePlaces = ResourceState(value = listOf(PLACE_1)),
-            favouriteRoutes = ResourceState(value = ROUTES),
+            filterByWord = { /*TODO*/ },
+            favouritePlaces = ResourceState(state = listOf(PLACE_1)),
+            favouriteRoutes = ResourceState(state = ROUTES),
             removePlaceFromFavourite = { /*TODO*/ },
             removeRouteFromFavourite = { /*TODO*/ },
             addPlaceToFavourite = { /*TODO*/ },

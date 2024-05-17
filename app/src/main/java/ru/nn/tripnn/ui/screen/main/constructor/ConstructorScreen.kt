@@ -48,7 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.InternetProblemScreen
@@ -68,14 +68,14 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 @Composable
 fun ConstructorScreen(
     onBack: () -> Unit,
-    currentRoute: ResourceState<CurrentRoute>,
+    currentRoute: ResourceState<CurrentRoute?>,
     addPlace: (Place) -> Unit,
     removePlaceFromRoute: (Int) -> Unit,
     takeRoute: () -> Unit,
     toPhotos: (String, Int) -> Unit,
-    removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
-    deleteCurrentRoute: () -> Unit
+    removePlaceFromFavourite: (Place) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
+    clearCurrentRoute: () -> Unit
 ) {
     var showDeleteCurrentRouteDialog by remember { mutableStateOf(false) }
 
@@ -99,7 +99,7 @@ fun ConstructorScreen(
                     )
                 }
 
-                if (currentRoute.onNullFailCheck { places.isNotEmpty() }) {
+                if (currentRoute.state?.places?.isNotEmpty() == true) {
                     IconButton(onClick = { showDeleteCurrentRouteDialog = true }) {
                         Icon(
                             painter = painterResource(id = R.drawable.trashcan_small),
@@ -127,7 +127,7 @@ fun ConstructorScreen(
                         .fillMaxWidth()
                 ) {
                     RouteColumn(
-                        currentRoute = currentRoute.value,
+                        currentRoute = currentRoute.state,
                         removePlaceFromRoute = removePlaceFromRoute,
                         removePlaceFromFavourite = removePlaceFromFavourite,
                         addPlaceToFavourite = addPlaceToFavourite,
@@ -139,7 +139,7 @@ fun ConstructorScreen(
         }
 
         val isEnabled = currentRoute.isSuccessAndNotNull() &&
-                currentRoute.onNullFailCheck { places.isNotEmpty() }
+                currentRoute.state?.places?.isNotEmpty() == true
         AnimatedVisibility(
             visible = isEnabled,
             enter = slideInVertically { it } + fadeIn(),
@@ -171,7 +171,7 @@ fun ConstructorScreen(
                 title = stringResource(id = R.string.delete_current_route_title),
                 text = stringResource(id = R.string.delete_current_route_text),
                 rightButtonText = stringResource(id = R.string.delete_current_route_right_button_text),
-                onSubmit = deleteCurrentRoute,
+                onSubmit = clearCurrentRoute,
                 onClose = { showDeleteCurrentRouteDialog = false }
             )
         }
@@ -183,8 +183,8 @@ fun ConstructorScreen(
 fun RouteColumn(
     currentRoute: CurrentRoute?,
     removePlaceFromRoute: (Int) -> Unit,
-    removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     toPhotos: (String, Int) -> Unit,
     addPlace: (Place) -> Unit
 ) {
@@ -277,8 +277,8 @@ fun RouteColumn(
             onDismissRequest = { showCardInfo = false },
             sheetState = sheetState,
             place = pickedPlace,
-            removeFromFavourite = { removePlaceFromFavourite(pickedPlace.id) },
-            addToFavourite = { addPlaceToFavourite(pickedPlace.id) },
+            removeFromFavourite = { removePlaceFromFavourite(pickedPlace) },
+            addToFavourite = { addPlaceToFavourite(pickedPlace) },
             toPhotos = toPhotos
         )
     }
@@ -344,7 +344,7 @@ fun ConstructorPreview() {
             toPhotos = { _, _ -> },
             removePlaceFromFavourite = {},
             addPlaceToFavourite = {},
-            deleteCurrentRoute = {}
+            clearCurrentRoute = {}
         )
     }
 }

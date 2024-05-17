@@ -34,8 +34,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_1
-import ru.nn.tripnn.data.stub_data.ROUTES
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTES
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.CatalogNavigation
@@ -55,17 +55,16 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
-    filterPlaces: (String) -> Unit,
-    filterRoutes: (String) -> Unit,
+    filterByWord: (String) -> Unit,
     places: ResourceState<List<Place>>,
     routes: ResourceState<List<Route>>,
-    removePlaceFromFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
-    removePlaceFromHistory: (String) -> Unit,
+    removePlaceFromHistory: (Place) -> Unit,
     removeRouteFromHistory: (Route) -> Unit,
     clearRoutesHistory: () -> Unit,
     clearPlacesHistory: () -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
@@ -98,8 +97,8 @@ fun HistoryScreen(
                 )
             }
 
-            if ((chosen == PLACES_INDEX && places.onNullFailCheck { isNotEmpty() } && places.isSuccessAndNotNull())
-                || (chosen == ROUTES_INDEX && routes.onNullFailCheck { isNotEmpty() } && routes.isSuccessAndNotNull())
+            if ((chosen == PLACES_INDEX && !places.state.isNullOrEmpty() && places.isSuccessAndNotNull())
+                || (chosen == ROUTES_INDEX && !routes.state.isNullOrEmpty() && routes.isSuccessAndNotNull())
             ) {
                 IconButton(onClick = { showClearHistoryDialog = true }) {
                     Icon(
@@ -125,11 +124,7 @@ fun HistoryScreen(
                 stringResource(id = R.string.routes)
             ),
             onCatalogChange = {
-                if (it == 0) {
-                    filterPlaces(word)
-                } else {
-                    filterRoutes(word)
-                }
+                filterByWord(word)
                 navController.navigate(CATALOGS[it]) {
                     launchSingleTop = true
                     popUpTo(CATALOGS[it]) {
@@ -147,11 +142,7 @@ fun HistoryScreen(
         Search(
             onSearch = {
                 word = it
-                if (chosen == 0) {
-                    filterPlaces(word)
-                } else {
-                    filterRoutes(word)
-                }
+                filterByWord(word)
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -230,9 +221,8 @@ fun HistoryEmptyResult() {
 fun HistoryScreenPreview() {
     TripNNTheme {
         HistoryScreen(
-            onBack = {  },
-            filterPlaces = {},
-            filterRoutes = {},
+            onBack = { },
+            filterByWord = {},
             places = ResourceState(listOf(PLACE_1)),
             routes = ResourceState(ROUTES),
             removePlaceFromFavourite = {},

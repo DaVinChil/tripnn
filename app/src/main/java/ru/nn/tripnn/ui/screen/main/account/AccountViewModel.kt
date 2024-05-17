@@ -8,10 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import ru.nn.tripnn.data.repository.userinfo.UserInfoRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.UserInfoData
-import ru.nn.tripnn.data.remote.userinfo.UserInfoRepository
-import ru.nn.tripnn.data.RemoteResource
 import ru.nn.tripnn.ui.screen.ResourceState
 import javax.inject.Inject
 
@@ -34,21 +33,10 @@ class AccountViewModel @Inject constructor(
                 error = null
             )
 
-            when(val result = userInfoRepository.getUserInfo()) {
-                is RemoteResource.Success -> {
-                    userInfoData = userInfoData.copy(
-                        isLoading = false,
-                        error = null,
-                        value = result.data
-                    )
-                }
-                is RemoteResource.Error -> {
-                    userInfoData = userInfoData.copy(
-                        isLoading = false,
-                        error = result.message,
-                        value = null
-                    )
-                }
+            val result = userInfoRepository.getUserInfo()
+            when {
+                result.isSuccess -> userInfoData = userInfoData.toSuccess(result.getOrNull())
+                result.isFailure -> userInfoData = userInfoData.toError(result.exceptionOrNull())
             }
         }
     }

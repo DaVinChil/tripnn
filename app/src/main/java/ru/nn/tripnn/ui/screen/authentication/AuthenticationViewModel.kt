@@ -1,16 +1,15 @@
 package ru.nn.tripnn.ui.screen.authentication
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.nn.tripnn.data.repository.auth.AuthenticationService
+import ru.nn.tripnn.data.repository.auth.TokenRepository
 import ru.nn.tripnn.di.Fake
-import ru.nn.tripnn.data.remote.auth.AuthenticationService
-import ru.nn.tripnn.data.local.token.TokenRepository
-import ru.nn.tripnn.data.RemoteResource
+import ru.nn.tripnn.ui.util.toResourceStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,36 +17,21 @@ class AuthenticationViewModel @Inject constructor(
     @Fake private val authenticationService: AuthenticationService,
     private val tokenRepository: TokenRepository
 ) : ViewModel() {
+    val isAuthenticated = tokenRepository.getToken().map { token ->
+        val tokenValue = token.getOrThrow() ?: return@map Result.success(false)
 
-    var isLoading by mutableStateOf(false)
-        private set
-    var isAuthenticated by mutableStateOf(false)
-        private set
-
-    init {
-        authenticate()
-    }
-
-    fun authenticate() {
-        isLoading = true
-        viewModelScope.launch {
-            val token = tokenRepository.getToken()
-            if (token == null) {
-                isAuthenticated = false
-                isLoading = false
-                return@launch
-            }
-
-            isAuthenticated = authenticationService.authenticate(token) is RemoteResource.Success
-            isLoading = false
+        val auth = authenticationService.authenticate(tokenValue)
+        if (auth.isSuccess) {
+            return@map Result.success(true)
         }
-    }
+
+        Result.failure(auth.exceptionOrNull() ?: Exception())
+    }.toResourceStateFlow(viewModelScope)
+
 
     fun logout() {
         viewModelScope.launch {
-            isAuthenticated = false
-
-            val token = tokenRepository.getToken() ?: return@launch
+            val token = tokenRepository.getToken().first().getOrNull() ?: return@launch
 
             tokenRepository.deleteToken()
             authenticationService.logout(token)

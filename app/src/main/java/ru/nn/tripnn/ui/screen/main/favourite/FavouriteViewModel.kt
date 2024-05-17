@@ -1,131 +1,83 @@
 package ru.nn.tripnn.ui.screen.main.favourite
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import okhttp3.internal.immutableListOf
-import ru.nn.tripnn.data.local.currentroute.CurrentRouteRepository
-import ru.nn.tripnn.data.remote.place.PlaceRepository
-import ru.nn.tripnn.data.remote.route.RouteRepository
-import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.data.repository.currentroute.CurrentRouteRepository
+import ru.nn.tripnn.data.repository.favourite.FavouritesRepository
+import ru.nn.tripnn.data.toResultFlow
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
-import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.util.convertRouteToCurrentRoute
-import ru.nn.tripnn.ui.util.resourceStateFromRequest
+import ru.nn.tripnn.ui.util.toResourceStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class FavouriteViewModel @Inject constructor(
-    @Fake private val placeRepository: PlaceRepository,
-    @Fake private val routeRepository: RouteRepository,
+    private val favouritesRepository: FavouritesRepository,
     private val currentRouteRepository: CurrentRouteRepository
 ) : ViewModel() {
+    private val wordFilter = MutableStateFlow("")
 
-    var favouritePlaces by mutableStateOf(ResourceState<List<Place>>())
-    private var savedFavouritePlaces = immutableListOf<Place>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val favouritePlaces = wordFilter
+        .flatMapLatest { favouritesRepository.getFavouritePlacesByWord(it) }
+        .toResourceStateFlow(viewModelScope)
 
-    var favouriteRoutes by mutableStateOf(ResourceState<List<Route>>())
-    private var savedFavouriteRoutes = immutableListOf<Route>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val favouriteRoutes = wordFilter
+        .flatMapLatest { favouritesRepository.getFavouriteRoutesByWord(it) }
+        .toResourceStateFlow(viewModelScope)
 
-    var hasCurrentRoute by mutableStateOf(false)
-        private set
+    val hasCurrentRoute = currentRouteRepository.getCurrentRoute()
+        .map { it.getOrThrow() != null }
+        .toResultFlow()
+        .toResourceStateFlow(viewModelScope)
 
-    fun init() {
-        loadFavouritePlaces()
-        loadFavouriteRoutes()
-        checkExistsCurrentRoute()
-    }
 
-    private fun loadFavouritePlaces() {
+    fun removePlaceFromFavourite(place: Place) {
         viewModelScope.launch {
-            if (savedFavouritePlaces.isNotEmpty()) {
-                favouritePlaces = favouritePlaces.copy(value = savedFavouritePlaces)
-            }
-
-            resourceStateFromRequest(placeRepository::getFavourite).collectLatest {
-                favouritePlaces = it
-                savedFavouritePlaces = it.value ?: listOf()
-            }
+            favouritesRepository.removePlaceFromFavourite(place)
         }
     }
 
-    private fun loadFavouriteRoutes() {
+    fun addPlaceToFavourite(place: Place) {
         viewModelScope.launch {
-            if (savedFavouriteRoutes.isNotEmpty()) {
-                favouriteRoutes = favouriteRoutes.copy(value = savedFavouriteRoutes)
-            }
-
-            resourceStateFromRequest(routeRepository::getFavourite).collectLatest {
-                favouriteRoutes = it
-                savedFavouriteRoutes = it.value ?: listOf()
-            }
-        }
-    }
-
-    private fun checkExistsCurrentRoute() {
-        viewModelScope.launch {
-            resourceStateFromRequest(currentRouteRepository::getCurrentRoute).collectLatest {
-                hasCurrentRoute = it.value != null
-            }
-        }
-    }
-
-    fun removePlaceFromFavourite(id: String) {
-        viewModelScope.launch {
-            placeRepository.removeFromFavourite(id)
-        }
-    }
-
-    fun addPlaceToFavourite(id: String) {
-        viewModelScope.launch {
-            placeRepository.addToFavourite(id)
+            favouritesRepository.addPlaceToFavourite(place)
         }
     }
 
     fun removeRouteFromFavourite(route: Route) {
         viewModelScope.launch {
-            if (route.id == null) return@launch
-            routeRepository.removeFromFavourite(route.id)
+            favouritesRepository.removeRouteFromFavourite(route)
         }
     }
 
     fun addRouteToFavourite(route: Route) {
         viewModelScope.launch {
-            if (route.id == null) return@launch
-            routeRepository.addToFavourite(route.id)
+            favouritesRepository.addRouteToFavourite(route)
         }
     }
 
-    fun filterRoutes(word: String) {
-        val filtered = filterByWord(word, savedFavouriteRoutes, Route::name)
-        favouriteRoutes = favouriteRoutes.copy(value = filtered)
-    }
-
-    fun filterPlaces(word: String) {
-        val filtered = filterByWord(word, savedFavouritePlaces, Place::name)
-        favouritePlaces = favouritePlaces.copy(value = filtered)
+    fun filterByWord(word: String) {
+        viewModelScope.launch {
+            wordFilter.emit(word)
+        }
     }
 
     fun setCurrentRoute(route: Route) {
         viewModelScope.launch {
-            currentRouteRepository.saveCurrentRoute(convertRouteToCurrentRoute(route))
+            currentRouteRepository.takeTheRoute(route)
         }
     }
 
-    private fun <T> filterByWord(word: String, list: List<T>, getName: T.() -> String): List<T> {
-        val filtered = mutableListOf<T>()
-        list.forEach {
-            if (word.isBlank() || it.getName().contains(word, ignoreCase = true)) {
-                filtered.add(it)
-            }
+    override fun onCleared() {
+        viewModelScope.launch {
+            wordFilter.emit("")
         }
-
-        return filtered
     }
 }

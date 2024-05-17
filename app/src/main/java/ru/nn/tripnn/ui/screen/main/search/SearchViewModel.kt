@@ -1,69 +1,63 @@
 package ru.nn.tripnn.ui.screen.main.search
 
 import androidx.annotation.StringRes
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import okhttp3.internal.immutableListOf
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.remote.place.PlaceRepository
-import ru.nn.tripnn.di.Fake
+import ru.nn.tripnn.data.repository.favourite.FavouritesRepository
+import ru.nn.tripnn.data.repository.searchplace.SearchPlaceService
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.SearchFilters
-import ru.nn.tripnn.ui.screen.ResourceState
-import ru.nn.tripnn.ui.util.resourceStateFromRequest
+import ru.nn.tripnn.ui.util.toResourceStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class AllPlacesViewModel @Inject constructor(
-    @Fake private val placeRepository: PlaceRepository
+class SearchViewModel @Inject constructor(
+    private val searchPlaceService: SearchPlaceService,
+    private val favouritesRepository: FavouritesRepository
 ) : ViewModel() {
+    private var searchFilters = MutableStateFlow(SearchFilters())
 
-    var searchResult by mutableStateOf(ResourceState<List<Place>>())
-        private set
-    private var savedSearchResult: List<Place> by mutableStateOf(immutableListOf())
+    @OptIn(ExperimentalCoroutinesApi::class)
+    var searchResult = searchFilters.flatMapLatest { searchPlaceService.find(it) }
+        .toResourceStateFlow(viewModelScope)
 
-    private var searchFilters: SearchFilters = SearchFilters()
-
-    fun search(searchFilters: SearchFilters) {
+    fun search(newSearchFilters: SearchFilters) {
         viewModelScope.launch {
-            this@AllPlacesViewModel.searchFilters = searchFilters
-            resourceStateFromRequest { placeRepository.find(searchFilters) }.collectLatest {
-                searchResult = it
-                savedSearchResult = searchResult.value ?: listOf()
-            }
+            searchFilters.emit(newSearchFilters)
         }
     }
 
     fun sort(sortState: SortState) {
         viewModelScope.launch {
-            searchFilters = if (sortState.closer) {
-                searchFilters.copy(sortBy = "distance")
+            val value = searchFilters.value
+
+            val newFilters = if (sortState.closer) {
+                value.copy(word = sortState.word, sortBy = "distance")
+            } else if (sortState.byRating) {
+                value.copy(word = sortState.word, sortBy = "relevance")
             } else {
-                searchFilters.copy(sortBy = "relevance")
+                value.copy(word = sortState.word)
             }
 
-            resourceStateFromRequest { placeRepository.find(searchFilters) }.collectLatest {
-                searchResult = it
-                savedSearchResult = searchResult.value ?: listOf()
-            }
+            searchFilters.emit(newFilters)
         }
     }
 
-    fun removeFromFavourite(id: String) {
+    fun removeFromFavourite(place: Place) {
         viewModelScope.launch {
-            placeRepository.removeFromFavourite(id)
+            favouritesRepository.removePlaceFromFavourite(place)
         }
     }
 
-    fun addToFavourite(id: String) {
+    fun addToFavourite(place: Place) {
         viewModelScope.launch {
-            placeRepository.addToFavourite(id)
+            favouritesRepository.addPlaceToFavourite(place)
         }
     }
 }

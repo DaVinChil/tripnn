@@ -33,9 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.local.usersettings.Currency
-import ru.nn.tripnn.data.local.usersettings.Language
-import ru.nn.tripnn.data.local.usersettings.Theme
+import ru.nn.tripnn.data.database.usersettings.Currency
+import ru.nn.tripnn.data.database.usersettings.Language
+import ru.nn.tripnn.data.database.usersettings.Theme
 import ru.nn.tripnn.ui.common.BottomSheetDialog
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow

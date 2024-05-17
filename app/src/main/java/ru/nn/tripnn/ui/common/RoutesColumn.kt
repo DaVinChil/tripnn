@@ -17,7 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ru.nn.tripnn.data.stub_data.ROUTE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTE_1
+import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.card.RouteCard
@@ -31,8 +32,8 @@ fun RoutesColumn(
     onEmpty: @Composable () -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
-    removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
     alreadyHasRoute: Boolean,
@@ -48,7 +49,7 @@ fun RoutesColumn(
         return
     }
 
-    if (routes.value.isNullOrEmpty()) {
+    if (routes.state.isNullOrEmpty()) {
         onEmpty()
         return
     }
@@ -63,7 +64,7 @@ fun RoutesColumn(
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = routes.value, key = { it.id ?: it.hashCode() }) { route ->
+        items(items = routes.state, key = { it.remoteId ?: it.hashCode() }) { route ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteGoldCardOption(

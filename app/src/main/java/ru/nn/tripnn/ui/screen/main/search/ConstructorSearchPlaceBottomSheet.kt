@@ -25,12 +25,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.PLACE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.card.PlaceCard
@@ -47,7 +48,7 @@ fun ConstructorSearchBottomSheet(
     onChoose: (Place) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val placesViewModel = hiltViewModel<AllPlacesViewModel>()
+    val placesViewModel = hiltViewModel<SearchViewModel>()
     val coroutine = rememberCoroutineScope()
 
     ModalBottomSheet(
@@ -82,10 +83,10 @@ fun ConstructorSearchBottomSheet(
             ) {
                 ConstructorSearchResultScreen(
                     sort = placesViewModel::sort,
-                    result = placesViewModel.searchResult,
+                    result = placesViewModel.searchResult.collectAsStateWithLifecycle().value,
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
-                    popBack = navController::popBackStack,
+                    popBack = { navController.popBackStack() },
                     toPhotos = toPhotos
                 ) {
                     coroutine.launch {
@@ -102,8 +103,8 @@ fun ConstructorSearchBottomSheet(
 fun ConstructorSearchResultScreen(
     sort: (SortState) -> Unit,
     result: ResourceState<List<Place>>,
-    removeFromFavourite: (String) -> Unit,
-    addToFavourite: (String) -> Unit,
+    removeFromFavourite: (Place) -> Unit,
+    addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
     toPhotos: (String, Int) -> Unit,
     onChoose: (Place) -> Unit

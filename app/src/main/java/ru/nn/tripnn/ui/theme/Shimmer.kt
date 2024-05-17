@@ -8,7 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import com.valentinilk.shimmer.defaultShimmerTheme
-import ru.nn.tripnn.data.local.usersettings.Theme
+import ru.nn.tripnn.data.database.usersettings.Theme
 
 val LocalShimmer = compositionLocalOf { lightShimmer }
 

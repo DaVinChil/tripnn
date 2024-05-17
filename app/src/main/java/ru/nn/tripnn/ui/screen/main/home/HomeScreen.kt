@@ -56,9 +56,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.ROUTES
-import ru.nn.tripnn.data.stub_data.ROUTE_1
+import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTES
+import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTE_1
 import ru.nn.tripnn.domain.CurrentRoute
+import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InfiniteCarousel
@@ -78,7 +79,7 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 @Composable
 fun HomeScreen(
     recommendedRoutes: ResourceState<List<Route>>,
-    currentRoute: ResourceState<CurrentRoute>,
+    currentRoute: ResourceState<CurrentRoute?>,
     onAccountClick: () -> Unit,
     onHistoryClick: () -> Unit,
     onFavouriteClick: () -> Unit,
@@ -89,8 +90,8 @@ fun HomeScreen(
     onTakeTheRoute: (Route) -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
-    removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     toPhotos: (String, Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -114,11 +115,7 @@ fun HomeScreen(
             onCurrentRouteClick = onCurrentRouteClick,
             onAllRoutesClick = onAllRoutesClick,
             onNewRouteClick = onNewRouteClick,
-            onMenuClick = {
-                scope.launch {
-                    drawerState.open()
-                }
-            },
+            onMenuClick = { scope.launch { drawerState.open() } },
             onTakeTheRoute = onTakeTheRoute,
             removeRouteFromFavourite = removeRouteFromFavourite,
             addRouteToFavourite = addRouteToFavourite,
@@ -133,7 +130,7 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     recommendedRoutes: ResourceState<List<Route>>,
-    currentRoute: ResourceState<CurrentRoute>,
+    currentRoute: ResourceState<CurrentRoute?>,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
     onCurrentRouteClick: () -> Unit,
@@ -141,8 +138,8 @@ fun HomeContent(
     onTakeTheRoute: (Route) -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
-    removePlaceFromFavourite: (String) -> Unit,
-    addPlaceToFavourite: (String) -> Unit,
+    removePlaceFromFavourite: (Place) -> Unit,
+    addPlaceToFavourite: (Place) -> Unit,
     toPhotos: (String, Int) -> Unit
 ) {
     var showSearch by rememberSaveable { mutableStateOf(false) }
@@ -198,7 +195,7 @@ fun HomeContent(
                     LoadingRecommendedRoutes()
                 } else {
                     RecommendedRoutes(
-                        routes = recommendedRoutes.value ?: listOf(),
+                        routes = recommendedRoutes.state ?: listOf(),
                         onRouteClick = {
                             pickedRoute = it
                             showRouteInfo = true
@@ -220,9 +217,9 @@ fun HomeContent(
             ) {
                 NewRouteButton(
                     modifier = Modifier.align(Alignment.Center),
-                    hasDraft = currentRoute.value?.buildInProgress == true,
+                    hasDraft = currentRoute.state?.buildInProgress == true,
                     onClick = {
-                        if (currentRoute.value?.buildInProgress == false) {
+                        if (currentRoute.state?.buildInProgress == false) {
                             showDeleteCurrentRouteDialog = true
                         } else {
                             onNewRouteClick()
@@ -231,13 +228,13 @@ fun HomeContent(
                 )
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = currentRoute.value != null && !currentRoute.value.buildInProgress,
+                    visible = currentRoute.state != null && !currentRoute.state.buildInProgress,
                     enter = slideInVertically { it } + fadeIn(),
                     exit = slideOutVertically { it } + fadeOut(),
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     CurrentRouteBar(
-                        route = currentRoute.value,
+                        route = currentRoute.state,
                         onClick = onCurrentRouteClick
                     )
                 }
@@ -248,7 +245,7 @@ fun HomeContent(
             SearchPlaceBottomSheet(onDismissRequest = { showSearch = false }, toPhotos = toPhotos)
         }
 
-        if (showRouteInfo && recommendedRoutes.value != null) {
+        if (showRouteInfo && recommendedRoutes.state != null) {
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { showRouteInfo = false },
@@ -258,14 +255,14 @@ fun HomeContent(
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
-                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.value[pickedRoute]) },
-                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.value[pickedRoute]) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.state[pickedRoute]) },
+                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.state[pickedRoute]) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    route = recommendedRoutes.value[pickedRoute],
+                    route = recommendedRoutes.state[pickedRoute],
                     onTakeTheRoute = onTakeTheRoute,
                     toPhotos = toPhotos,
-                    alreadyHasRoute = currentRoute.value != null
+                    alreadyHasRoute = currentRoute.state != null
                 )
             }
         }
@@ -379,7 +376,7 @@ fun RecommendedRoutes(routes: List<Route>, onRouteClick: (Int) -> Unit) {
         pageSpacing = 11.dp,
         pageSize = PageSize.Fixed(CARD_WIDTH),
         contentPadding = PaddingValues(horizontal = screenWidth / 2 - CARD_WIDTH / 2),
-        key = { routes[it].id ?: routes[it].hashCode() },
+        key = { routes[it].remoteId!! },
         count = routes.size
     ) {
         RouteCard(

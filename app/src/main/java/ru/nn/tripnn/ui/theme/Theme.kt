@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.valentinilk.shimmer.ShimmerTheme
-import ru.nn.tripnn.data.local.usersettings.Theme
+import ru.nn.tripnn.data.database.usersettings.Theme
 
 object TripNnTheme {
     val colorScheme: TripNnColorScheme

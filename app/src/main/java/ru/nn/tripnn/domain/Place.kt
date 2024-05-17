@@ -13,6 +13,7 @@ data class Place(
     val reviews: Int = 0,
     val doubleGisLink: String = "",
     val favourite: Boolean = false,
+    val visited: Boolean = false,
     val lonLatLocation: String? = null,
     val timeToGo: Int? = null
 )

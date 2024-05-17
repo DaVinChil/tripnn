@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.stub_data.CURRENT_ROUTE
+import ru.nn.tripnn.data.datasource.stubdata.ui.CURRENT_ROUTE
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
@@ -37,7 +37,7 @@ fun CurrentRouteBar(
     route: CurrentRoute?,
     onClick: () -> Unit
 ) {
-    val percent = if (route != null && route.places.isNotEmpty() && route.currentPlaceIndex != null) {
+    val percent = if (route != null && route.places.isNotEmpty()) {
         route.currentPlaceIndex * 100 / route.places.size
     } else {
         0
