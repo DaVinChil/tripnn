@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -35,8 +36,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -47,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -146,12 +151,14 @@ fun HomeContent(
     var showRouteInfo by rememberSaveable { mutableStateOf(false) }
     var pickedRoute by rememberSaveable { mutableIntStateOf(0) }
     var showDeleteCurrentRouteDialog by rememberSaveable { mutableStateOf(false) }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(onMenuClick = onMenuClick)
+            HomeTopAppBar(scrollBehavior = scrollBehavior, onMenuClick = onMenuClick)
         },
         containerColor = TripNnTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0)
@@ -279,18 +286,26 @@ fun HomeContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(onMenuClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+fun HomeTopAppBar(scrollBehavior: TopAppBarScrollBehavior, onMenuClick: () -> Unit) {
+    CenterAlignedTopAppBar(
         modifier = Modifier
-            .fillMaxWidth()
             .background(TripNnTheme.colorScheme.secondaryBackground)
-            .statusBarsPadding()
-            .padding(16.dp)
-    ) {
-        Box(modifier = Modifier.weight(1f)) {
+            .padding(horizontal = 16.dp),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = TripNnTheme.colorScheme.secondaryBackground,
+            titleContentColor = TripNnTheme.colorScheme.tertiary
+        ),
+        title = {
+            Icon(
+                modifier = Modifier,
+                painter = painterResource(id = R.drawable.tripnn_logo),
+                contentDescription = stringResource(id = R.string.logo_txt),
+                tint = TripNnTheme.colorScheme.textColor
+            )
+        },
+        navigationIcon = {
             Icon(
                 modifier = Modifier
                     .rippleClickable(onClick = onMenuClick),
@@ -298,15 +313,9 @@ fun TopAppBar(onMenuClick: () -> Unit) {
                 contentDescription = stringResource(id = R.string.menu_txt),
                 tint = TripNnTheme.colorScheme.tertiary
             )
-        }
-        Icon(
-            modifier = Modifier,
-            painter = painterResource(id = R.drawable.tripnn_logo),
-            contentDescription = stringResource(id = R.string.logo_txt),
-            tint = TripNnTheme.colorScheme.textColor
-        )
-        Spacer(modifier = Modifier.weight(1f))
-    }
+        },
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @Composable
@@ -323,7 +332,7 @@ fun Menu(
             .fillMaxWidth(0.8f)
             .background(TripNnTheme.colorScheme.bottomSheetBackground)
             .statusBarsPadding()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 9.dp)
     ) {
         Column {
             IconButton(

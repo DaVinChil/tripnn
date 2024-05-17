@@ -17,10 +17,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +28,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -65,6 +68,7 @@ import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConstructorScreen(
     onBack: () -> Unit,
@@ -78,104 +82,133 @@ fun ConstructorScreen(
     clearCurrentRoute: () -> Unit
 ) {
     var showDeleteCurrentRouteDialog by remember { mutableStateOf(false) }
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(TripNnTheme.colorScheme.background)
-            .padding(start = 10.dp, end = 10.dp, top = 10.dp)
-            .statusBarsPadding()
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.back_arrow),
-                        contentDescription = stringResource(id = R.string.back_txt),
-                        tint = TripNnTheme.colorScheme.tertiary
-                    )
-                }
-
-                if (currentRoute.state?.places?.isNotEmpty() == true) {
-                    IconButton(onClick = { showDeleteCurrentRouteDialog = true }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.trashcan_small),
-                            contentDescription = stringResource(id = R.string.delete),
-                            tint = TripNnTheme.colorScheme.tertiary
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            ConstructorTopAppBar(
+                scrollBehavior = scrollBehavior,
+                onBack = onBack,
+                onClearRoute = { showDeleteCurrentRouteDialog = true },
+                showClearRouteAction = currentRoute.state?.places?.isNotEmpty() == true
+            )
+        },
+        containerColor = TripNnTheme.colorScheme.background
+    ) { paddings ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddings)
+                .padding(start = 10.dp, end = 10.dp, top = 10.dp)
+        ) {
+            Column {
+                if (currentRoute.isLoading) {
+                    LoadingCircleScreen()
+                } else if (currentRoute.isError) {
+                    InternetProblemScreen()
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        RouteColumn(
+                            currentRoute = currentRoute.state,
+                            removePlaceFromRoute = removePlaceFromRoute,
+                            removePlaceFromFavourite = removePlaceFromFavourite,
+                            addPlaceToFavourite = addPlaceToFavourite,
+                            toPhotos = toPhotos,
+                            addPlace = addPlace
                         )
                     }
                 }
             }
 
+            val isEnabled = currentRoute.isSuccessAndNotNull() &&
+                    currentRoute.state?.places?.isNotEmpty() == true
+            AnimatedVisibility(
+                visible = isEnabled,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 20.dp)
+            ) {
+                PrimaryButton(
+                    text = stringResource(R.string.take_the_route),
+                    onClick = takeRoute,
+                    enabled = isEnabled,
+                    containerColor = if (isEnabled) {
+                        TripNnTheme.colorScheme.primary
+                    } else {
+                        TripNnTheme.colorScheme.minor
+                    },
+                    textColor = if (isEnabled) {
+                        TripNnTheme.colorScheme.onPrimary
+                    } else {
+                        TripNnTheme.colorScheme.onMinor
+                    }
+                )
+            }
+
+            if (showDeleteCurrentRouteDialog) {
+                TwoButtonBottomSheetDialog(
+                    title = stringResource(id = R.string.delete_current_route_title),
+                    text = stringResource(id = R.string.delete_current_route_text),
+                    rightButtonText = stringResource(id = R.string.delete_current_route_right_button_text),
+                    onSubmit = clearCurrentRoute,
+                    onClose = { showDeleteCurrentRouteDialog = false }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ConstructorTopAppBar(
+    modifier: Modifier = Modifier,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onBack: () -> Unit,
+    onClearRoute: () -> Unit,
+    showClearRouteAction: Boolean
+) {
+    MediumTopAppBar(
+        modifier = modifier
+            .background(TripNnTheme.colorScheme.background),
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = TripNnTheme.colorScheme.background,
+            scrolledContainerColor = TripNnTheme.colorScheme.background,
+            titleContentColor = TripNnTheme.colorScheme.textColor
+        ),
+        title = {
             MontsText(
                 text = stringResource(id = R.string.build_route),
                 style = MaterialTheme.typography.titleMedium
             )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            if (currentRoute.isLoading) {
-                LoadingCircleScreen()
-            } else if (currentRoute.isError) {
-                InternetProblemScreen()
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    RouteColumn(
-                        currentRoute = currentRoute.state,
-                        removePlaceFromRoute = removePlaceFromRoute,
-                        removePlaceFromFavourite = removePlaceFromFavourite,
-                        addPlaceToFavourite = addPlaceToFavourite,
-                        toPhotos = toPhotos,
-                        addPlace = addPlace
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    painter = painterResource(id = R.drawable.back_arrow),
+                    contentDescription = stringResource(id = R.string.back_txt),
+                    tint = TripNnTheme.colorScheme.tertiary
+                )
+            }
+        },
+        actions = {
+            if (showClearRouteAction) {
+                IconButton(onClick = onClearRoute) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.trashcan_small),
+                        contentDescription = stringResource(id = R.string.delete),
+                        tint = TripNnTheme.colorScheme.tertiary
                     )
                 }
             }
-        }
-
-        val isEnabled = currentRoute.isSuccessAndNotNull() &&
-                currentRoute.state?.places?.isNotEmpty() == true
-        AnimatedVisibility(
-            visible = isEnabled,
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut(),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 20.dp)
-        ) {
-            PrimaryButton(
-                text = stringResource(R.string.take_the_route),
-                onClick = takeRoute,
-                enabled = isEnabled,
-                containerColor = if (isEnabled) {
-                    TripNnTheme.colorScheme.primary
-                } else {
-                    TripNnTheme.colorScheme.minor
-                },
-                textColor = if (isEnabled) {
-                    TripNnTheme.colorScheme.onPrimary
-                } else {
-                    TripNnTheme.colorScheme.onMinor
-                }
-            )
-        }
-
-        if (showDeleteCurrentRouteDialog) {
-            TwoButtonBottomSheetDialog(
-                title = stringResource(id = R.string.delete_current_route_title),
-                text = stringResource(id = R.string.delete_current_route_text),
-                rightButtonText = stringResource(id = R.string.delete_current_route_right_button_text),
-                onSubmit = clearCurrentRoute,
-                onClose = { showDeleteCurrentRouteDialog = false }
-            )
-        }
-    }
+        },
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -232,7 +265,7 @@ fun RouteColumn(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         MontsText(
-                            text = (place.timeToGo ?: 0).toString()
+                            text = (currentRoute?.timeToWalk?.get(index - 1) ?: 0).toString()
                                     + " " + stringResource(id = R.string.minute_short),
                             style = MaterialTheme.typography.labelSmall
                         )

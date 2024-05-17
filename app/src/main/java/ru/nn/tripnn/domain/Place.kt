@@ -17,8 +17,7 @@ data class Place(
     val doubleGisLink: String = "",
     val favourite: Boolean = false,
     val visited: Boolean = false,
-    val lonLatLocation: String? = null,
-    val timeToGo: Int? = null
+    val lonLatLocation: String? = null
 ) {
     fun isClosed(): Boolean {
         if (workTime == null || workTime == "24/7") return true

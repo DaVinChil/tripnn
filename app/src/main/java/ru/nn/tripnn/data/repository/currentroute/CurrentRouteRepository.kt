@@ -2,7 +2,6 @@ package ru.nn.tripnn.data.repository.currentroute
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -21,23 +20,43 @@ class CurrentRouteRepository(
     private val routeBuilderService: RouteBuilderService
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getCurrentRoute(): Flow<Result<CurrentRoute?>> {
+    fun getCurrentRoute(createIfAbsent: Boolean = false): Flow<Result<CurrentRoute?>> {
         return currentRouteDataSource.getCurrentRoute().flatMapLatest { currentRoute ->
-            val currentRouteEntity = currentRoute.getOrThrow()
-                ?: return@flatMapLatest flowOf(Result.success(null))
+            val currentRouteEntity = if (createIfAbsent) {
+                throwOrCreateNewRoute(currentRoute)
+            } else currentRoute.getOrThrow() ?: return@flatMapLatest flowOf(null)
 
-            placeDataAggregator.placesFromIds(currentRouteEntity.places).map {
-                val places = it.getOrThrow()
-                val timeToWalk = mutableListOf<Int>()
-                for (i in 1 until places.size) {
-                    timeToWalk.add(
-                        routeBuilderService.timeToWalk(places[i - 1], places[i]).getOrThrow()
-                    )
-                }
-                currentRouteEntity.toCurrentRoute(places = places, timeToWalk = timeToWalk)
-            }.toResultFlow()
-        }.catch { e -> Result.failure<CurrentRoute?>(e) }
+            currentRouteFlowFrom(currentRouteEntity)
+        }.toResultFlow()
     }
+
+    private suspend fun currentRouteFlowFrom(currentRouteEntity: CurrentRouteEntity): Flow<CurrentRoute> {
+        return placeDataAggregator.placesFromIds(currentRouteEntity.places).map {
+            val places = it.getOrThrow()
+            val timeToWalk = calcTimeToWalk(places)
+
+            currentRouteEntity.toCurrentRoute(places = places, timeToWalk = timeToWalk)
+        }
+    }
+
+    private suspend fun throwOrCreateNewRoute(result: Result<CurrentRouteEntity?>): CurrentRouteEntity {
+        return result.getOrThrow() ?: CurrentRouteEntity().also { createNewRoute() }
+    }
+
+    private suspend fun calcTimeToWalk(places: List<Place>): List<Int> {
+        val timeToWalk = mutableListOf<Int>()
+
+        for (i in 1 until places.size) {
+            timeToWalk.add(
+                routeBuilderService.timeToWalk(places[i - 1], places[i]).getOrThrow()
+            )
+        }
+
+        return timeToWalk
+    }
+
+    private suspend fun createNewRoute(): Result<Unit> =
+        currentRouteDataSource.createNewCurrentRoute()
 
     suspend fun addPlaceToRoute(id: String): Result<Unit> =
         currentRouteDataSource.addPlaceToRoute(id)

@@ -53,7 +53,7 @@ fun TwoButtonBottomSheetDialog(
         onDismissRequest = onClose,
         sheetState = sheetState,
         dragHandle = null,
-        containerColor = TripNnTheme.colorScheme.background,
+        containerColor = TripNnTheme.colorScheme.bottomSheetBackground,
         windowInsets = WindowInsets(0)
     ) {
         Column(
@@ -105,10 +105,8 @@ fun TwoButtonBottomSheetDialog(
             ) {
                 PrimaryButton(
                     text = leftButtonText,
-                    modifier = Modifier
-                        .height(55.dp)
-                        .width(140.dp),
-                    containerColor = TripNnTheme.colorScheme.secondary,
+                    modifier = Modifier.height(55.dp).width(140.dp),
+                    containerColor = TripNnTheme.colorScheme.cardBackground,
                     textColor = TripNnTheme.colorScheme.textColor,
                     onClick = {
                         onLeftButton()

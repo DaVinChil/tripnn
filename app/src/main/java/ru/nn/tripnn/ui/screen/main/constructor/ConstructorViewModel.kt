@@ -16,7 +16,7 @@ class ConstructorViewModel @Inject constructor(
     private val favouritesRepository: FavouritesRepository
 ) : ViewModel() {
 
-    val currentRouteState = currentRouteRepository.getCurrentRoute()
+    val currentRouteState = currentRouteRepository.getCurrentRoute(createIfAbsent = true)
         .toResourceStateFlow(viewModelScope)
 
     fun clearCurrentRoute() {
