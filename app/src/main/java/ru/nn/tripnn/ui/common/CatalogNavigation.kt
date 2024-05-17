@@ -2,7 +2,6 @@ package ru.nn.tripnn.ui.common
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -66,7 +65,7 @@ fun CatalogNavigation(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clickable(
+                        .rippleClickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
                             onClick = { if (chosen != i) onCatalogChange(i) }

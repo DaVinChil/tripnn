@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import kotlin.math.roundToInt
@@ -122,7 +122,7 @@ fun CardOption(
         modifier = Modifier
             .height(CARD_HEIGHT)
             .fillMaxWidth(1f / 4f)
-            .clickable(
+            .rippleClickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick

@@ -1,7 +1,6 @@
 package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +26,7 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.CURRENT_ROUTE
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -47,7 +47,7 @@ fun CurrentRouteBar(
         modifier = modifier
             .fillMaxWidth()
             .height(60.dp)
-            .clickable(
+            .rippleClickable(
                 onClick = onClick,
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() })

@@ -1,7 +1,6 @@
 package ru.nn.tripnn.ui.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,7 +53,7 @@ fun Search(modifier: Modifier = Modifier, onSearch: (String) -> Unit) {
             .clip(RoundedCornerShape(15.dp))
             .then(modifier)
             .background(TripNnTheme.colorScheme.fieldBackground)
-            .clickable { focusRequester.requestFocus() }
+            .rippleClickable { focusRequester.requestFocus() }
     ) {
         var searchValue by remember { mutableStateOf("") }
         BasicTextField(

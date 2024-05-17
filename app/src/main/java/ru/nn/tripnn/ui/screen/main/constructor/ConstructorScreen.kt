@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +58,7 @@ import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromRouteCardOption
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
@@ -299,7 +299,7 @@ fun AddPlaceButton(
             .height(45.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(TripNnTheme.colorScheme.primary)
-            .clickable {
+            .rippleClickable {
                 showPlaceSearch = true
             }
             .padding(horizontal = 10.dp),

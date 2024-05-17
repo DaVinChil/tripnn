@@ -1,7 +1,6 @@
 package ru.nn.tripnn.ui.screen.authentication
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -92,7 +92,7 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
-                        modifier = Modifier.clickable(onClick = { rememberMe = !rememberMe }),
+                        modifier = Modifier.rippleClickable(onClick = { rememberMe = !rememberMe }),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
@@ -110,7 +110,7 @@ fun LoginScreen(
                     }
 
                     MontsText(
-                        modifier = Modifier.clickable(onClick = onForgotClick),
+                        modifier = Modifier.rippleClickable(onClick = onForgotClick),
                         text = stringResource(id = R.string.forgot_password),
                         style = MaterialTheme.typography.labelMedium,
                     )
@@ -149,7 +149,7 @@ fun DontHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
         MontsText(
             text = stringResource(id = R.string.create),
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.clickable(onClick = onSignInClick)
+            modifier = Modifier.rippleClickable(onClick = onSignInClick)
         )
     }
 }

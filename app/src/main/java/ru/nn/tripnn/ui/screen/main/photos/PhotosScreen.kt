@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -34,6 +33,7 @@ import coil.compose.AsyncImage
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import kotlin.math.abs
@@ -118,7 +118,7 @@ fun PhotosTopAppBar(
                 MontsText(
                     text = stringResource(id = R.string.close),
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.clickable(
+                    modifier = Modifier.rippleClickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() },
                         onClick = onClose

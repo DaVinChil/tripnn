@@ -1,7 +1,6 @@
 package ru.nn.tripnn.ui.screen.main.search
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +56,7 @@ import ru.nn.tripnn.domain.SearchFilters
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -268,7 +268,7 @@ fun PriceChoice(picked: Int, onPick: (Int) -> Unit) {
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(color = if (picked == i) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
-                        .clickable(
+                        .rippleClickable(
                             indication = null,
                             interactionSource = remember {
                                 MutableInteractionSource()
@@ -307,7 +307,7 @@ fun RatingChoice(picked: Int, onPick: (Int) -> Unit) {
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(color = if (picked == i) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
-                        .clickable(
+                        .rippleClickable(
                             indication = null,
                             interactionSource = remember {
                                 MutableInteractionSource()
@@ -365,7 +365,7 @@ fun DistanceChoice(picked: Int, onPick: (Int) -> Unit) {
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(color = if (picked == i) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
-                        .clickable(
+                        .rippleClickable(
                             indication = null,
                             interactionSource = remember {
                                 MutableInteractionSource()
@@ -409,7 +409,7 @@ fun TypeChoice(
             MontsText(
                 text = stringResource(id = R.string.choose_all),
                 style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.clickable(
+                modifier = Modifier.rippleClickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
                     onClick = onPickAll
@@ -429,7 +429,7 @@ fun TypeChoice(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(color = if (pickedTypes[i]) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.minor)
-                        .clickable(
+                        .rippleClickable(
                             indication = null,
                             interactionSource = remember {
                                 MutableInteractionSource()

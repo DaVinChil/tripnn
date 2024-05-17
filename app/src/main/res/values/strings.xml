@@ -179,4 +179,6 @@
 
     <string name="clear_history_title">Clear history</string>
     <string name="clear_history_text">Are you sure you want to clear history of this category? There would be no way to restore it</string>
+    <string name="closed">Closed</string>
+    <string name="already_visited">Already visited</string>
 </resources>

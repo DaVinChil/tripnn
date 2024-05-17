@@ -47,7 +47,8 @@ fun TripNNTheme(
 
     CompositionLocalProvider(
         LocalTripNnScheme provides colorScheme,
-        LocalShimmer provides shimmer
+        LocalShimmer provides shimmer,
+        LocalIndication provides rememberIndication(color = colorScheme.tertiary)
     ) {
         MaterialTheme(
             typography = Typography,

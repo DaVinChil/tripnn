@@ -6,7 +6,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,6 +69,7 @@ import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.common.card.CARD_WIDTH
 import ru.nn.tripnn.ui.common.card.LoadingCard
 import ru.nn.tripnn.ui.common.card.RouteCard
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
@@ -182,7 +182,7 @@ fun HomeContent(
                         style = MaterialTheme.typography.displayMedium
                     )
                     MontsText(
-                        modifier = Modifier.clickable(onClick = onAllRoutesClick),
+                        modifier = Modifier.rippleClickable(onClick = onAllRoutesClick),
                         text = stringResource(id = R.string.all_txt),
                         style = MaterialTheme.typography.displayMedium,
                         color = TripNnTheme.colorScheme.primary
@@ -293,7 +293,7 @@ fun TopAppBar(onMenuClick: () -> Unit) {
         Box(modifier = Modifier.weight(1f)) {
             Icon(
                 modifier = Modifier
-                    .clickable(onClick = onMenuClick),
+                    .rippleClickable(onClick = onMenuClick),
                 painter = painterResource(id = R.drawable.burger_menu),
                 contentDescription = stringResource(id = R.string.menu_txt),
                 tint = TripNnTheme.colorScheme.tertiary
@@ -353,7 +353,7 @@ fun Menu(
 fun MenuOption(text: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .rippleClickable(onClick = onClick)
             .height(80.dp)
             .fillMaxWidth(),
         contentAlignment = Alignment.CenterStart
@@ -416,7 +416,7 @@ fun AllPlacesButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
             .clip(RoundedCornerShape(6.dp))
             .fillMaxWidth()
             .height(50.dp)
-            .clickable(onClick = onClick)
+            .rippleClickable(onClick = onClick)
             .background(TripNnTheme.colorScheme.cardBackground)
             .padding(vertical = 10.dp, horizontal = 20.dp),
         contentAlignment = Alignment.Center

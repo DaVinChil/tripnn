@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +58,7 @@ import ru.nn.tripnn.domain.UserInfoData
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -133,7 +133,7 @@ fun AccountScreen(
                 MontsText(
                     text = stringResource(id = R.string.change_email),
                     fontSize = 16.sp,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.rippleClickable {
                         showDialog = true
                         dialogType = DialogType.CHANGE_EMAIL
                     }
@@ -141,7 +141,7 @@ fun AccountScreen(
                 MontsText(
                     text = stringResource(id = R.string.change_password),
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.rippleClickable {
                         showDialog = true
                         dialogType = DialogType.CHANGE_PASSWORD
                     }
@@ -149,7 +149,7 @@ fun AccountScreen(
                 MontsText(
                     text = stringResource(id = R.string.clear_history),
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.rippleClickable {
                         showDialog = true
                         dialogType = DialogType.CLEAR_HISTORY
                     }
@@ -157,7 +157,7 @@ fun AccountScreen(
                 MontsText(
                     text = stringResource(id = R.string.delete_account),
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.rippleClickable {
                         showDialog = true
                         dialogType = DialogType.DELETE_ACCOUNT
                     }
@@ -166,7 +166,7 @@ fun AccountScreen(
                     text = stringResource(id = R.string.exit),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.Red,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.rippleClickable {
                         showDialog = true
                         dialogType = DialogType.EXIT_DIALOG
                     }
@@ -255,7 +255,7 @@ fun UserInfoBlock(
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(100))
                 .size(AVATAR_SIZE)
-                .clickable {
+                .rippleClickable {
                     launcher.launch("image/*")
                 }
         ) {
@@ -314,7 +314,7 @@ fun UserInfoBlock(
             Icon(
                 painter = painterResource(id = R.drawable.edit_icon),
                 contentDescription = stringResource(id = R.string.edit_name_txt),
-                modifier = Modifier.clickable { focusRequester.requestFocus() },
+                modifier = Modifier.rippleClickable { focusRequester.requestFocus() },
                 tint = TripNnTheme.colorScheme.tertiary
             )
         }

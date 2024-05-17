@@ -37,6 +37,7 @@ fun RoutesColumn(
     onTakeTheRoute: (Route) -> Unit,
     toPhotos: (String, Int) -> Unit,
     alreadyHasRoute: Boolean,
+    hideIndication: Boolean = false,
     option2: @Composable ((Route) -> Unit)? = null
 ) {
     if (routes.isError) {
@@ -77,6 +78,7 @@ fun RoutesColumn(
                     showRouteInfo = true
                 },
                 modifier = Modifier.fillMaxWidth(),
+                hideIndication = hideIndication,
                 option1 = option,
                 option2 = if (option2 != null) {
                     @Composable { option2(route)}

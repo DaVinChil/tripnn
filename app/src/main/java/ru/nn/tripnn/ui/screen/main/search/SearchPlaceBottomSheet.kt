@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,6 +60,7 @@ import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -196,7 +196,7 @@ fun SearchResultScreen(
                     text = stringResource(id = R.string.closer),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (sortState.closer) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.onMinor,
-                    modifier = Modifier.clickable(
+                    modifier = Modifier.rippleClickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     ) {
@@ -209,7 +209,7 @@ fun SearchResultScreen(
                     text = stringResource(id = R.string.by_rating),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (sortState.byRating) TripNnTheme.colorScheme.primary else TripNnTheme.colorScheme.onMinor,
-                    modifier = Modifier.clickable(
+                    modifier = Modifier.rippleClickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     ) {

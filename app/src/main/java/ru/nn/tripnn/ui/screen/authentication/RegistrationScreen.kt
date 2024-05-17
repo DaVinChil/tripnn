@@ -5,7 +5,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
@@ -170,7 +170,7 @@ fun AlreadyHaveAccount(modifier: Modifier, onSignInClick: () -> Unit) {
         MontsText(
             text = stringResource(id = R.string.login),
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.clickable(onClick = onSignInClick)
+            modifier = Modifier.rippleClickable(onClick = onSignInClick)
         )
     }
 }

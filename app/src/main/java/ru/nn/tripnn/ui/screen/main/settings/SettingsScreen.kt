@@ -1,7 +1,6 @@
 package ru.nn.tripnn.ui.screen.main.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +37,7 @@ import ru.nn.tripnn.data.database.usersettings.Language
 import ru.nn.tripnn.data.database.usersettings.Theme
 import ru.nn.tripnn.ui.common.BottomSheetDialog
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -189,7 +189,7 @@ fun Option(
         modifier = modifier
             .fillMaxWidth()
             .height(70.dp)
-            .clickable(onClick = onClick),
+            .rippleClickable(onClick = onClick),
         verticalArrangement = Arrangement.Center
     ) {
         MontsText(
@@ -251,7 +251,7 @@ fun <T> SettingsBottomSheetDialog(
                         .fillMaxWidth()
                         .height(65.dp)
                         .background(background)
-                        .clickable(onClick = { onChoose(options[i]) })
+                        .rippleClickable(onClick = { onChoose(options[i]) })
                         .padding(start = 20.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {

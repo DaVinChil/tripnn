@@ -4,8 +4,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -85,26 +85,39 @@ fun PlaceInfoBottomSheet(
     ) {
         Box {
             Column(modifier = Modifier.fillMaxWidth()) {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-                    itemsIndexed(items = place.photos, key = { _, url -> url }) { index, url ->
-                        AsyncImage(
-                            model = url,
-                            contentDescription = stringResource(id = R.string.image),
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(TripNnTheme.colorScheme.onMinor)
-                                .width(220.dp)
-                                .height(160.dp)
-                                .clickable {
-                                    toPhotos(place.id, index)
-                                },
-                            contentScale = ContentScale.Crop
-                        )
+                if (place.photos.isNotEmpty()) {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(15.dp)
+                    ) {
+                        itemsIndexed(items = place.photos, key = { _, url -> url }) { index, url ->
+                            AsyncImage(
+                                model = url,
+                                contentDescription = stringResource(id = R.string.image),
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(TripNnTheme.colorScheme.onMinor)
+                                    .width(220.dp)
+                                    .height(160.dp)
+                                    .rippleClickable {
+                                        toPhotos(place.id, index)
+                                    },
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.image_placeholder_primary),
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .width(220.dp)
+                            .height(160.dp)
+                    )
                 }
+
 
                 Spacer(modifier = Modifier.height(5.dp))
 
@@ -135,7 +148,7 @@ fun PlaceInfoBottomSheet(
                         Icon(
                             modifier = Modifier
                                 .size(20.dp)
-                                .clickable(
+                                .rippleClickable(
                                     indication = null,
                                     interactionSource = remember { MutableInteractionSource() },
                                     onClick = {
@@ -253,7 +266,7 @@ fun CopyIcon(data: String, onClick: () -> Unit) {
         painter = painterResource(id = R.drawable.copy_icon),
         contentDescription = stringResource(id = R.string.copy),
         tint = TripNnTheme.colorScheme.onMinor,
-        modifier = Modifier.clickable(
+        modifier = Modifier.rippleClickable(
             indication = rememberRipple(radius = 1.dp, color = Color.White),
             interactionSource = remember { MutableInteractionSource() },
             onClick = {
@@ -325,7 +338,7 @@ fun TwoGisButton(modifier: Modifier = Modifier, doubleGisLink: String) {
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable { uriHandler.openUri(doubleGisLink) }
+        modifier = modifier.rippleClickable { uriHandler.openUri(doubleGisLink) }
     ) {
         MontsText(
             text = "2GIS",

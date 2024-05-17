@@ -17,6 +17,7 @@ fun RouteCard(
     route: Route,
     onCardClick: () -> Unit,
     shadowColor: Color = TripNnTheme.colorScheme.shadow,
+    hideIndication: Boolean = false,
     option1: @Composable () -> Unit,
     option2: @Composable (() -> Unit)? = null
 ) {
@@ -25,7 +26,8 @@ fun RouteCard(
             modifier = modifier,
             route = route,
             onCardClick = onCardClick,
-            shadowColor = shadowColor
+            shadowColor = shadowColor,
+            hideIndication = hideIndication
         )
     }
 }
@@ -35,7 +37,8 @@ fun RouteCard(
     modifier: Modifier = Modifier,
     route: Route,
     onCardClick: () -> Unit,
-    shadowColor: Color = TripNnTheme.colorScheme.shadow
+    shadowColor: Color = TripNnTheme.colorScheme.shadow,
+    hideIndication: Boolean = false
 ) {
     BaseCard(
         modifier = modifier,
@@ -43,7 +46,9 @@ fun RouteCard(
         name = route.title,
         type = stringResource(id = R.string.route),
         onCardClick = onCardClick,
-        shadowColor = shadowColor
+        shadowColor = shadowColor,
+        visited = route.wasTakenAt != null,
+        hideIndication = hideIndication
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             if (route.rating != null) {

@@ -181,4 +181,6 @@
 
     <string name="clear_history_title">Очистить историю</string>
     <string name="clear_history_text">Вы действительно хотите очистить историю данной категории? Восстановить ее будет не возможно.</string>
+    <string name="closed">Закрто</string>
+    <string name="already_visited">Уже посещено</string>
 </resources>

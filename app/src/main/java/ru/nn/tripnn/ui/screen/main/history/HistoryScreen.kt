@@ -157,6 +157,7 @@ fun HistoryScreen(
                     addToFavourite = addPlaceToFavourite,
                     onEmpty = { HistoryEmptyResult() },
                     toPhotos = toPhotos,
+                    hideIndication = true,
                     option2 = { RemoveFromHistoryOption { removePlaceFromHistory(it) } }
                 )
             }
@@ -171,6 +172,7 @@ fun HistoryScreen(
                     onEmpty = { HistoryEmptyResult() },
                     toPhotos = toPhotos,
                     alreadyHasRoute = alreadyHasRoute,
+                    hideIndication = true,
                     option2 = { RemoveFromHistoryOption { removeRouteFromHistory(it) } }
                 )
             }

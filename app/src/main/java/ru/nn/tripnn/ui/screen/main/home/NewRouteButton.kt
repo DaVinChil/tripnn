@@ -2,7 +2,6 @@ package ru.nn.tripnn.ui.screen.main.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
 import ru.nn.tripnn.ui.common.MontsText
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -55,7 +55,7 @@ fun NewRouteButton(
             .scale(scale)
             .height(height)
             .width(230.dp)
-            .clickable(
+            .rippleClickable(
                 onClick = onClick,
                 indication = null,
                 interactionSource = buttonInteractionSource

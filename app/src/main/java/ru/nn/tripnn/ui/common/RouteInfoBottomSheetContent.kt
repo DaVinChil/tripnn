@@ -1,7 +1,6 @@
 package ru.nn.tripnn.ui.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -104,7 +103,7 @@ fun RouteInfoBottomSheetContent(
                     Icon(
                         modifier = Modifier
                             .size(20.dp)
-                            .clickable(
+                            .rippleClickable(
                                 indication = null,
                                 interactionSource = remember {
                                     MutableInteractionSource()

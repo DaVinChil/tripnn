@@ -15,7 +15,6 @@ import ru.nn.tripnn.data.toResultFlow
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
 import ru.nn.tripnn.ui.util.toResourceStateFlow
-import ru.nn.tripnn.ui.util.withRetry
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,16 +27,13 @@ class HistoryViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val visitedPlaces = wordFilter
-        .flatMapLatest {
-            historyRepository.getVisitedPlacesByWord(it)
-        }
+        .flatMapLatest { historyRepository.getVisitedPlacesByWord(it) }
         .toResourceStateFlow(viewModelScope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val takenRoutes = wordFilter
-        .flatMapLatest {
-            historyRepository.getTakenRoutesByWord(it).withRetry()
-        }.toResourceStateFlow(viewModelScope)
+        .flatMapLatest { historyRepository.getTakenRoutesByWord(it) }
+        .toResourceStateFlow(viewModelScope)
 
     val hasCurrentRoute = currentRouteRepository.getCurrentRoute().map { it.getOrNull() != null }
         .toResultFlow()

@@ -3,7 +3,6 @@ package ru.nn.tripnn.ui.screen.main.search
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,7 @@ import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.card.PlaceCard
+import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -155,7 +155,7 @@ fun CardWithRadioButton(
                 stringResource(id = androidx.compose.ui.R.string.not_selected)
             },
             modifier = Modifier
-                .clickable(
+                .rippleClickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
                     onClick = { onChoose(index) }
