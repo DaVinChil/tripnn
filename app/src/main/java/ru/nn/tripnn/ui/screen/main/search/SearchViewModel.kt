@@ -1,6 +1,7 @@
 package ru.nn.tripnn.ui.screen.main.search
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,8 @@ import ru.nn.tripnn.data.repository.favourite.FavouritesRepository
 import ru.nn.tripnn.data.repository.searchplace.SearchPlaceService
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.SearchFilters
-import ru.nn.tripnn.ui.util.toResourceStateFlow
+import ru.nn.tripnn.domain.Sort
+import ru.nn.tripnn.domain.state.ResFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,8 +26,11 @@ class SearchViewModel @Inject constructor(
     private var searchFilters = MutableStateFlow(SearchFilters())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    var searchResult = searchFilters.flatMapLatest { searchPlaceService.find(it) }
-        .toResourceStateFlow(viewModelScope)
+    private var _searchResult = ResFlow(scope = viewModelScope) {
+        searchFilters.flatMapLatest(searchPlaceService::find)
+    }
+
+    val searchResult @Composable get() = _searchResult.state
 
     fun search(newSearchFilters: SearchFilters) {
         viewModelScope.launch {
@@ -38,9 +43,9 @@ class SearchViewModel @Inject constructor(
             val value = searchFilters.value
 
             val newFilters = if (sortState.closer) {
-                value.copy(word = sortState.word, sortBy = "distance")
+                value.copy(word = sortState.word, sortBy = Sort.DISTANCE)
             } else if (sortState.byRating) {
-                value.copy(word = sortState.word, sortBy = "relevance")
+                value.copy(word = sortState.word, sortBy = Sort.RELEVANCE)
             } else {
                 value.copy(word = sortState.word)
             }

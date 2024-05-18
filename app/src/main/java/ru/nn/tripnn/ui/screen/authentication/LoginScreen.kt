@@ -29,10 +29,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -42,9 +42,9 @@ fun LoginScreen(
     onForgotClick: () -> Unit,
     onRegisterClick: () -> Unit,
     authenticate: (rememberMe: Boolean, email: String, password: String) -> Unit,
-    authenticated: ResourceState<Boolean>,
-    emailState: ResourceState<*>,
-    passwordState: ResourceState<*>,
+    authenticated: ResState<Boolean>,
+    emailState: ResState<*>,
+    passwordState: ResState<*>,
     dismissError: (DismissAuthError) -> Unit
 ) {
     var rememberMe by remember { mutableStateOf(false) }
@@ -70,7 +70,7 @@ fun LoginScreen(
                     onValueChanged = { email = it },
                     placeholder = stringResource(id = R.string.enter_email),
                     dismissError = { dismissError(DismissAuthError.EmailError) },
-                    isError = emailState.isError
+                    isError = emailState is ResState.Error
                 )
 
                 Spacer(modifier = Modifier.height(SPACE_BETWEEN_INPUT))
@@ -81,7 +81,7 @@ fun LoginScreen(
                     onValueChanged = { pass = it },
                     placeholder = stringResource(id = R.string.enter_password),
                     dismissError = { dismissError(DismissAuthError.PasswordError) },
-                    isError = passwordState.isError
+                    isError = passwordState is ResState.Error
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -123,7 +123,7 @@ fun LoginScreen(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = stringResource(id = R.string.login),
                 onClick = { authenticate(rememberMe, email, pass) },
-                isLoading = authenticated.isLoading
+                isLoading = authenticated.isLoading()
             )
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -178,11 +178,11 @@ fun LogInScreenPreview() {
             LoginScreen(
                 onForgotClick = { },
                 authenticate = {_, _, _ -> },
-                authenticated = ResourceState(state = false),
+                authenticated = ResState.Success(false),
                 onRegisterClick = {},
                 dismissError = {},
-                emailState = ResourceState<Unit>(),
-                passwordState = ResourceState<Unit>()
+                emailState = ResState.Success(Unit),
+                passwordState = ResState.Success(Unit)
             )
         }
     }

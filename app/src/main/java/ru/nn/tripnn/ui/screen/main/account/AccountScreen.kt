@@ -55,11 +55,11 @@ import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import ru.nn.tripnn.R
 import ru.nn.tripnn.domain.UserInfoData
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 import ru.nn.tripnn.ui.theme.montserratFamily
@@ -72,7 +72,7 @@ val AVATAR_SIZE = 170.dp
 
 @Composable
 fun AccountScreen(
-    userInfoData: ResourceState<UserInfoData>,
+    userInfoData: ResState<UserInfoData>,
     onBackClick: () -> Unit,
     onUserNameChange: (String) -> Unit,
     onClearHistory: () -> Unit,
@@ -80,7 +80,7 @@ fun AccountScreen(
     onLeaveAccount: () -> Unit,
     onAvatarChange: (Uri) -> Unit
 ) {
-    if (userInfoData.isError || (!userInfoData.isLoading && userInfoData.state == null)) {
+    if (userInfoData.isError()) {
         InternetProblemScreen()
         return
     }
@@ -117,11 +117,11 @@ fun AccountScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            if (userInfoData.isLoading) {
+            if (userInfoData !is ResState.Success) {
                 LoadingUserInfoBlock()
             } else {
                 UserInfoBlock(
-                    userInfoData = userInfoData.state ?: UserInfoData(name = "", email = "", avatar = null),
+                    userInfoData = userInfoData.value,
                     onAvatarChange = onAvatarChange,
                     onUserNameChange = onUserNameChange
                 )
@@ -391,8 +391,8 @@ fun AccountScreenPreview() {
         Surface {
             AccountScreen(
                 onBackClick = {},
-                userInfoData = ResourceState(
-                    state = UserInfoData(
+                userInfoData = ResState.Success(
+                    UserInfoData(
                         name = "Sasha",
                         email = "hz.com@gmail.com",
                         avatar = null

@@ -31,6 +31,6 @@ data class Place(
         val secondTime = LocalTime.parse(rawSecondTime, format)
         val now = LocalTime.now()
 
-        return now.isAfter(firstTime) && now.isBefore(secondTime)
+        return now.isBefore(firstTime) || now.isAfter(secondTime)
     }
 }

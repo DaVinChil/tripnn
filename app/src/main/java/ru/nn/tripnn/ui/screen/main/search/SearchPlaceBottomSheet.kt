@@ -50,6 +50,7 @@ import androidx.navigation.compose.rememberNavController
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.LoadingCircleScreen
@@ -61,7 +62,6 @@ import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 val MIN_RATINGS = listOf(3f, 3.5f, 4f, 4.5f)
@@ -129,7 +129,7 @@ fun SearchPlaceBottomSheet(
 @Composable
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
-    result: ResourceState<List<Place>>,
+    result: ResState<List<Place>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
@@ -137,7 +137,7 @@ fun SearchResultScreen(
 ) {
     SearchResultScreen(
         sort = sort,
-        result = result,
+        resultPlaces = result,
         removeFromFavourite = removeFromFavourite,
         addToFavourite = addToFavourite,
         popBack = popBack,
@@ -151,7 +151,7 @@ fun SearchResultScreen(
 @Composable
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
-    result: ResourceState<List<Place>>,
+    resultPlaces: ResState<List<Place>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
@@ -159,7 +159,7 @@ fun SearchResultScreen(
     onChoose: ((Place) -> Unit)?,
     buttonText: String?
 ) {
-    if (result.isError) {
+    if (resultPlaces.isError()) {
         InternetProblemScreen()
         return
     }
@@ -226,16 +226,16 @@ fun SearchResultScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (result.isLoading) {
+            if (resultPlaces.isLoading()) {
                 Box(modifier = Modifier.fillMaxHeight(5f / 6f)) {
                     LoadingCircleScreen()
                 }
-            } else if (result.state.isNullOrEmpty()) {
+            } else if (resultPlaces.getOrNull().isNullOrEmpty()) {
                 SearchEmptyResult(popBack)
-            } else {
+            } else if (resultPlaces is ResState.Success){
                 LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
                     itemsIndexed(
-                        items = result.state,
+                        items = resultPlaces.value,
                         key = { _, place -> place.id }
                     ) { index, place ->
                         val option: @Composable () -> Unit = if (place.favourite) {
@@ -280,7 +280,7 @@ fun SearchResultScreen(
             }
         }
 
-        if (buttonText != null && onChoose != null) {
+        if (buttonText != null && onChoose != null && resultPlaces is ResState.Success) {
             AnimatedVisibility(
                 visible = chosenPlace != -1,
                 modifier = Modifier
@@ -293,7 +293,7 @@ fun SearchResultScreen(
                 PrimaryButton(
                     text = stringResource(id = R.string.add_place),
                     paddingValues = PaddingValues(horizontal = 58.dp, vertical = 15.dp),
-                    onClick = { if (chosenPlace != -1 && result.state != null) onChoose(result.state[chosenPlace]) }
+                    onClick = { if (chosenPlace != -1) onChoose(resultPlaces.value[chosenPlace]) }
                 )
             }
         }

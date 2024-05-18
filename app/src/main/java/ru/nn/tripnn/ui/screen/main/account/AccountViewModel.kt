@@ -1,17 +1,16 @@
 package ru.nn.tripnn.ui.screen.main.account
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import ru.nn.tripnn.data.repository.userinfo.UserInfoRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.UserInfoData
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.state.ResFlow
 import javax.inject.Inject
 
 
@@ -19,25 +18,13 @@ import javax.inject.Inject
 class AccountViewModel @Inject constructor(
     @Fake private val userInfoRepository: UserInfoRepository
 ) : ViewModel() {
-    var userInfoData by mutableStateOf(ResourceState<UserInfoData>())
-        private set
+    private val _userInfoData = ResFlow(scope = viewModelScope, supplier = ::requestUserInfo)
 
-    fun init() {
-        loadUserState()
-    }
+    val userInfoData @Composable get() = _userInfoData.state
 
-    private fun loadUserState() {
-        viewModelScope.launch {
-            userInfoData = userInfoData.copy(
-                isLoading = true,
-                error = null
-            )
-
-            val result = userInfoRepository.getUserInfo()
-            when {
-                result.isSuccess -> userInfoData = userInfoData.toSuccess(result.getOrNull())
-                result.isFailure -> userInfoData = userInfoData.toError(result.exceptionOrNull())
-            }
+    private fun requestUserInfo(): Flow<Result<UserInfoData>> {
+        return flow {
+            emit(userInfoRepository.getUserInfo())
         }
     }
 

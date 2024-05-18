@@ -53,6 +53,7 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.LoadingCircleScreen
 import ru.nn.tripnn.ui.common.MontsText
@@ -63,7 +64,6 @@ import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromRouteCardOption
 import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.search.ConstructorSearchBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -72,7 +72,7 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 @Composable
 fun ConstructorScreen(
     onBack: () -> Unit,
-    currentRoute: ResourceState<CurrentRoute?>,
+    currentRoute: ResState<CurrentRoute?>,
     addPlace: (Place) -> Unit,
     removePlaceFromRoute: (Int) -> Unit,
     takeRoute: () -> Unit,
@@ -91,7 +91,7 @@ fun ConstructorScreen(
                 scrollBehavior = scrollBehavior,
                 onBack = onBack,
                 onClearRoute = { showDeleteCurrentRouteDialog = true },
-                showClearRouteAction = currentRoute.state?.places?.isNotEmpty() == true
+                showClearRouteAction = currentRoute.getOrNull()?.places?.isNotEmpty() == true
             )
         },
         containerColor = TripNnTheme.colorScheme.background
@@ -103,9 +103,9 @@ fun ConstructorScreen(
                 .padding(start = 10.dp, end = 10.dp, top = 10.dp)
         ) {
             Column {
-                if (currentRoute.isLoading) {
+                if (currentRoute.isLoading()) {
                     LoadingCircleScreen()
-                } else if (currentRoute.isError) {
+                } else if (currentRoute.isError()) {
                     InternetProblemScreen()
                 } else {
                     Column(
@@ -113,7 +113,7 @@ fun ConstructorScreen(
                             .fillMaxWidth()
                     ) {
                         RouteColumn(
-                            currentRoute = currentRoute.state,
+                            currentRoute = currentRoute.getOrNull(),
                             removePlaceFromRoute = removePlaceFromRoute,
                             removePlaceFromFavourite = removePlaceFromFavourite,
                             addPlaceToFavourite = addPlaceToFavourite,
@@ -124,8 +124,7 @@ fun ConstructorScreen(
                 }
             }
 
-            val isEnabled = currentRoute.isSuccessAndNotNull() &&
-                    currentRoute.state?.places?.isNotEmpty() == true
+            val isEnabled = currentRoute.getOrNull()?.places?.isNotEmpty() == true
             AnimatedVisibility(
                 visible = isEnabled,
                 enter = slideInVertically { it } + fadeIn(),
@@ -370,7 +369,7 @@ fun ConstructorPreview() {
     TripNNTheme {
         ConstructorScreen(
             onBack = { /*TODO*/ },
-            currentRoute = ResourceState(CurrentRoute()),
+            currentRoute = ResState.Success(CurrentRoute()),
             addPlace = {},
             removePlaceFromRoute = {},
             takeRoute = { /*TODO*/ },

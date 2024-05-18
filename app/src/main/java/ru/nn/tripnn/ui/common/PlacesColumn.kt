@@ -17,32 +17,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
-import ru.nn.tripnn.ui.screen.ResourceState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlacesColumn(
     onEmpty: @Composable () -> Unit,
-    places: ResourceState<List<Place>>,
+    places: ResState<List<Place>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     hideIndication: Boolean = false,
     option2: @Composable ((Place) -> Unit)? = null,
     toPhotos: (String, Int) -> Unit
 ) {
-    if (places.isError) {
-        InternetProblemScreen()
-        return
-    }
-
-    if (places.isLoading) {
+    if (places.isLoading()) {
         LoadingCircleScreen()
         return
     }
 
-    if (places.state.isNullOrEmpty()) {
+    if (places !is ResState.Success) {
+        InternetProblemScreen()
+        return
+    }
+
+    if (places.getOrNull().isNullOrEmpty()) {
         onEmpty()
         return
     }
@@ -57,7 +57,7 @@ fun PlacesColumn(
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = places.state, key = Place::id) { place ->
+        items(items = places.value, key = Place::id) { place ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteGoldCardOption(

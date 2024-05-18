@@ -40,6 +40,7 @@ import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InternetProblemScreen
 import ru.nn.tripnn.ui.common.LoadingCircleScreen
@@ -49,7 +50,6 @@ import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.card.RouteCard
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,7 +57,7 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 fun RecommendationsScreen(
     onBack: () -> Unit,
     filterRoutes: (String) -> Unit,
-    routes: ResourceState<List<Route>>,
+    routes: ResState<List<Route>>,
     removeRouteFromFavourite: (Route) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
     removePlaceFromFavourite: (Place) -> Unit,
@@ -66,16 +66,16 @@ fun RecommendationsScreen(
     onTakeTheRoute: (Route) -> Unit,
     alreadyHasRoute: Boolean
 ) {
-    if (routes.isError) {
+    if (routes.isError()) {
         InternetProblemScreen()
         return
     }
 
     val isEmpty by remember {
-        derivedStateOf { routes.isSuccessAndNotNull() && routes.state?.isEmpty() ?: true }
+        derivedStateOf { routes.getOrNull()?.isEmpty() ?: true }
     }
 
-    if (isEmpty && !routes.isLoading) {
+    if (isEmpty && !routes.isLoading()) {
         NoRecommendedRoutes(onBack)
         return
     }
@@ -110,7 +110,7 @@ fun RecommendationsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        if (routes.isLoading) {
+        if (routes.isLoading()) {
             LoadingCircleScreen()
             return
         }
@@ -125,15 +125,15 @@ fun RecommendationsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        if (routes.state.isNullOrEmpty()) {
+        if (routes.getOrNull().isNullOrEmpty()) {
             NothingFoundByRequest()
-        } else {
+        } else if (routes is ResState.Success){
             LazyColumn(
                 state = lazyState,
                 contentPadding = PaddingValues(vertical = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                items(items = routes.state, key = { it.remoteId ?: it.hashCode() }) { route ->
+                items(items = routes.value, key = { it.remoteId ?: it.hashCode() }) { route ->
                     val option: @Composable () -> Unit = if (route.favourite) {
                         @Composable {
                             RemoveFromFavouriteGoldCardOption(

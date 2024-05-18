@@ -38,6 +38,7 @@ import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTES
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlacesColumn
@@ -45,7 +46,6 @@ import ru.nn.tripnn.ui.common.RoutesColumn
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.common.TwoButtonBottomSheetDialog
 import ru.nn.tripnn.ui.common.card.RemoveFromHistoryOption
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.favourite.CATALOGS
 import ru.nn.tripnn.ui.screen.main.favourite.PLACES_INDEX
 import ru.nn.tripnn.ui.screen.main.favourite.ROUTES_INDEX
@@ -56,8 +56,8 @@ import ru.nn.tripnn.ui.theme.TripNnTheme
 fun HistoryScreen(
     onBack: () -> Unit,
     filterByWord: (String) -> Unit,
-    places: ResourceState<List<Place>>,
-    routes: ResourceState<List<Route>>,
+    places: ResState<List<Place>>,
+    routes: ResState<List<Route>>,
     removePlaceFromFavourite: (Place) -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
     removePlaceFromHistory: (Place) -> Unit,
@@ -97,8 +97,8 @@ fun HistoryScreen(
                 )
             }
 
-            if ((chosen == PLACES_INDEX && !places.state.isNullOrEmpty() && places.isSuccessAndNotNull())
-                || (chosen == ROUTES_INDEX && !routes.state.isNullOrEmpty() && routes.isSuccessAndNotNull())
+            if ((chosen == PLACES_INDEX && places.getOrNull()?.isNotEmpty() != true)
+                || (chosen == ROUTES_INDEX && routes.getOrNull()?.isNotEmpty() != true)
             ) {
                 IconButton(onClick = { showClearHistoryDialog = true }) {
                     Icon(
@@ -225,8 +225,8 @@ fun HistoryScreenPreview() {
         HistoryScreen(
             onBack = { },
             filterByWord = {},
-            places = ResourceState(listOf(PLACE_1)),
-            routes = ResourceState(ROUTES),
+            places = ResState.Success(listOf(PLACE_1)),
+            routes = ResState.Success(ROUTES),
             removePlaceFromFavourite = {},
             removeRouteFromFavourite = {},
             addPlaceToFavourite = {},

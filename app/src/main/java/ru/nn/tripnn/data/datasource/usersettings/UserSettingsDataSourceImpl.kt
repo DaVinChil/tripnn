@@ -15,13 +15,15 @@ class UserSettingsDataSourceImpl(
     private val userSettingsDao: UserSettingsDao,
     ioDispatcher: CoroutineDispatcher
 ) : UserSettingsDataSource, AbstractDataSource(ioDispatcher) {
-    override fun getUserSettings(): Flow<Result<UserSettings?>> {
+    override fun getUserSettings(): Flow<Result<UserSettings>> {
         return userSettingsDao.getUserSettings()
             .map { settings ->
                 if (settings == null) {
                     createUserSettings()
+                    UserSettings()
+                } else {
+                    settings
                 }
-                settings
             }.toResultFlow()
     }
 

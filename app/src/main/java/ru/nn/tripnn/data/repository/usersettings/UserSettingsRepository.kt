@@ -7,7 +7,7 @@ import ru.nn.tripnn.data.database.usersettings.Theme
 import ru.nn.tripnn.data.database.usersettings.UserSettings
 
 interface UserSettingsRepository {
-    fun getUserSettings(): Flow<Result<UserSettings?>>
+    fun getUserSettings(): Flow<Result<UserSettings>>
     suspend fun setTheme(theme: Theme): Result<Unit>
     suspend fun setLanguage(language: Language): Result<Unit>
     suspend fun setCurrency(currency: Currency): Result<Unit>

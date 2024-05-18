@@ -32,19 +32,19 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import kotlin.math.abs
 
 @Composable
 fun PhotosScreen(
-    photos: ResourceState<List<String>>,
+    photos: ResState<List<String>>,
     initialPhoto: Int,
     onClose: () -> Unit
 ) {
-    if (photos.state == null) {
+    if (photos !is ResState.Success) {
         return
     }
 
@@ -70,7 +70,7 @@ fun PhotosScreen(
             .swipeable(
                 enabled = swipeEnabled,
                 onLeftSwipe = {
-                    curPhoto = minOf(photos.state.size - 1, curPhoto + 1)
+                    curPhoto = minOf(photos.value.size - 1, curPhoto + 1)
                 },
                 onRightSwipe = {
                     curPhoto = maxOf(curPhoto - 1, 0)
@@ -81,10 +81,10 @@ fun PhotosScreen(
             isVisible = isTopAppBarVisible,
             onClose = onClose,
             count = curPhoto + 1,
-            outOf = photos.state.size
+            outOf = photos.value.size
         )
         AsyncImage(
-            model = photos.state[curPhoto],
+            model = photos.value[curPhoto],
             contentDescription = stringResource(id = R.string.image),
             modifier = Modifier
                 .fillMaxWidth()
@@ -179,7 +179,7 @@ fun Modifier.swipeable(enabled: Boolean = true, onLeftSwipe: () -> Unit, onRight
 @Composable
 fun PhotosPreview() {
     TripNNTheme {
-        PhotosScreen(photos = ResourceState(PLACE_1.photos), initialPhoto = 0) {
+        PhotosScreen(photos = ResState.Success(PLACE_1.photos), initialPhoto = 0) {
 
         }
     }

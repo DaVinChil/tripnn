@@ -1,6 +1,5 @@
 package ru.nn.tripnn.ui.screen.navigation
 
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -146,9 +145,9 @@ fun NavGraphBuilder.userSettings(
                 changeLocales(context, getIsoLang(it))
             },
             onCurrencyChange = userSettingsViewModel::changeCurrency,
-            currentTheme = preferences.state?.theme!!,
-            currentLanguage = preferences.state?.language!!,
-            currentCurrency = preferences.state?.currency!!
+            currentTheme = preferences.getOrNull()?.theme!!,
+            currentLanguage = preferences.getOrNull()?.language!!,
+            currentCurrency = preferences.getOrNull()?.currency!!
         )
     }
 }
@@ -165,13 +164,9 @@ fun NavGraphBuilder.account(
         val accountViewModel = hiltViewModel<AccountViewModel>()
         val authenticationViewModel = hiltViewModel<AuthenticationViewModel>()
 
-        LaunchedEffect(false) {
-            accountViewModel.init()
-        }
-
         AccountScreen(
             onBackClick = onBack,
-            userInfoData = accountViewModel.userInfoData,
+            userInfoData = accountViewModel.userInfoData.value,
             onUserNameChange = accountViewModel::changeUserName,
             onClearHistory = accountViewModel::clearHistory,
             onDeleteAccount = accountViewModel::deleteAccount,
@@ -210,7 +205,7 @@ fun NavGraphBuilder.favourites(
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
             toPhotos = navigateToPhotos,
-            alreadyHasRoute = favouriteViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.state ?: false
+            alreadyHasRoute = favouriteViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull() ?: false
         )
     }
 }
@@ -236,7 +231,7 @@ fun NavGraphBuilder.recommendations(
             removePlaceFromFavourite = recommendationsViewModel::removePlaceFromFavourite,
             addPlaceToFavourite = recommendationsViewModel::addPlaceToFavourite,
             toPhotos = navigateToPhotos,
-            alreadyHasRoute = recommendationsViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.state ?: false,
+            alreadyHasRoute = recommendationsViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull() ?: false,
             onTakeTheRoute = {
                 recommendationsViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
@@ -271,7 +266,7 @@ fun NavGraphBuilder.history(
                 historyViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
-            alreadyHasRoute = historyViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.state ?: false,
+            alreadyHasRoute = historyViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull() ?: false,
             clearRoutesHistory = historyViewModel::clearRoutesHistory,
             clearPlacesHistory = historyViewModel::clearPlacesHistory,
             removeRouteFromHistory = historyViewModel::removeRouteFromFavourite,

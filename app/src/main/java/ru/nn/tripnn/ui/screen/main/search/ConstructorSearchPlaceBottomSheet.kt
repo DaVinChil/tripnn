@@ -32,10 +32,10 @@ import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -102,7 +102,7 @@ fun ConstructorSearchBottomSheet(
 @Composable
 fun ConstructorSearchResultScreen(
     sort: (SortState) -> Unit,
-    result: ResourceState<List<Place>>,
+    result: ResState<List<Place>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
@@ -111,7 +111,7 @@ fun ConstructorSearchResultScreen(
 ) {
     SearchResultScreen(
         sort = sort,
-        result = result,
+        resultPlaces = result,
         removeFromFavourite = removeFromFavourite,
         addToFavourite = addToFavourite,
         popBack = popBack,
@@ -176,7 +176,7 @@ fun ConstructorSearchPreview() {
         Box(modifier = Modifier.background(TripNnTheme.colorScheme.background)) {
             ConstructorSearchResultScreen(
                 sort = {},
-                result = ResourceState(listOf(PLACE_1)),
+                result = ResState.Success(listOf(PLACE_1)),
                 removeFromFavourite = {},
                 addToFavourite = {},
                 popBack = { /*TODO*/ },

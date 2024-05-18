@@ -164,7 +164,7 @@ fun SearchPlaceBuilderScreen(
                                 }
                             },
                             price = pickedPrice,
-                            minRating = MIN_RATINGS.getOrNull(pickedMinRating),
+                            minRating = MIN_RATINGS.getOrNull(pickedMinRating) ?: 0f,
                             previousPlaceId = previousPlaceId,
                             maxDistance = DISTANCES.getOrNull(pickedDistance)
                         )

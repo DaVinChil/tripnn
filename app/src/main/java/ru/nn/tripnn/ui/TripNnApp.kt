@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.screen.authentication.AuthenticationViewModel
 import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
 import ru.nn.tripnn.ui.screen.main.splash.HeartSplashScreen
@@ -27,7 +27,7 @@ fun TripNnApp() {
     val userSettings by userSettingsViewModel.userSettings.collectAsStateWithLifecycle()
     val isAuthenticated by authViewModel.isAuthenticated.collectAsStateWithLifecycle()
 
-    TripNNTheme(theme = userSettings.state?.theme!!) {
+    TripNNTheme(theme = userSettings.getOrNull()?.theme!!) {
         var splashScreenFinished by rememberSaveable { mutableStateOf(false) }
         if (!splashScreenFinished) {
             HeartSplashScreen { splashScreenFinished = true }
@@ -38,9 +38,9 @@ fun TripNnApp() {
 }
 
 @Composable
-fun TripNnAppNavigation(isAuthenticated: ResourceState<Boolean>) {
+fun TripNnAppNavigation(isAuthenticated: ResState<Boolean>) {
     val tripNnNavController = rememberTripNnNavController()
-    val startDestination = if (isAuthenticated.isSuccessAndNotNull()) {
+    val startDestination = if (isAuthenticated.getOrNull() == true) {
         AppRoutes.MAIN_GRAPH_ROUTE
     } else {
         AuthRoutes.AUTH_GRAPH_ROUTE

@@ -51,10 +51,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ru.nn.tripnn.R
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
@@ -73,10 +73,10 @@ fun RegistrationScreen(
     ) -> Unit,
     onSignInClick: () -> Unit,
     dismissError: (DismissAuthError) -> Unit,
-    authenticated: ResourceState<Boolean>,
-    emailState: ResourceState<*>,
-    userNameState: ResourceState<*>,
-    passwordState: ResourceState<*>
+    authenticated: ResState<Boolean>,
+    emailState: ResState<*>,
+    userNameState: ResState<*>,
+    passwordState: ResState<*>
 ) {
     Column(
         modifier = Modifier
@@ -101,7 +101,7 @@ fun RegistrationScreen(
                 onValueChanged = { email = it },
                 placeholder = stringResource(id = R.string.enter_email),
                 dismissError = { dismissError(DismissAuthError.EmailError) },
-                isError = emailState.isError
+                isError = emailState.isError()
             )
 
             InputBlock(
@@ -110,7 +110,7 @@ fun RegistrationScreen(
                 onValueChanged = { username = it },
                 placeholder = stringResource(id = R.string.user_name),
                 dismissError = { dismissError(DismissAuthError.UserNameError) },
-                isError = userNameState.isError
+                isError = userNameState.isError()
             )
 
             PasswordInputBlock(
@@ -119,7 +119,7 @@ fun RegistrationScreen(
                 onValueChanged = { password = it },
                 placeholder = stringResource(id = R.string.enter_password),
                 dismissError = { dismissError(DismissAuthError.PasswordError) },
-                isError = passwordState.isError
+                isError = passwordState.isError()
             )
 
             PasswordInputBlock(
@@ -128,7 +128,7 @@ fun RegistrationScreen(
                 onValueChanged = { confirmPassword = it },
                 placeholder = stringResource(id = R.string.confirm_password),
                 dismissError = { dismissError(DismissAuthError.PasswordError) },
-                isError = passwordState.isError
+                isError = passwordState.isError()
             )
         }
 
@@ -146,7 +146,7 @@ fun RegistrationScreen(
                     confirmPassword
                 )
             },
-            isLoading = authenticated.isLoading || authenticated.state == true
+            isLoading = authenticated.isLoading()
         )
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -391,10 +391,10 @@ fun RegistrationScreenPreview() {
                 { _, _, _, _, _ -> },
                 {},
                 {},
-                ResourceState(state = false),
-                ResourceState<Unit>(),
-                ResourceState<Unit>(),
-                ResourceState<Unit>()
+                ResState.Success(false),
+                ResState.Success(Unit),
+                ResState.Success(Unit),
+                ResState.Success(Unit)
             )
         }
     }

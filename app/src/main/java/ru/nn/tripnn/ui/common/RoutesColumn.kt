@@ -20,15 +20,15 @@ import androidx.compose.ui.unit.dp
 import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.card.RouteCard
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutesColumn(
-    routes: ResourceState<List<Route>>,
+    routes: ResState<List<Route>>,
     onEmpty: @Composable () -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
     addRouteToFavourite: (Route) -> Unit,
@@ -40,17 +40,18 @@ fun RoutesColumn(
     hideIndication: Boolean = false,
     option2: @Composable ((Route) -> Unit)? = null
 ) {
-    if (routes.isError) {
-        InternetProblemScreen()
-        return
-    }
 
-    if (routes.isLoading) {
+    if (routes.isLoading()) {
         LoadingCircleScreen()
         return
     }
 
-    if (routes.state.isNullOrEmpty()) {
+    if (routes !is ResState.Success) {
+        InternetProblemScreen()
+        return
+    }
+
+    if (routes.getOrNull().isNullOrEmpty()) {
         onEmpty()
         return
     }
@@ -65,7 +66,7 @@ fun RoutesColumn(
         contentPadding = PaddingValues(vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        items(items = routes.state, key = { it.remoteId ?: it.hashCode() }) { route ->
+        items(items = routes.value, key = { it.remoteId ?: it.localId!! }) { route ->
             val option: @Composable () -> Unit =
                 @Composable {
                     RemoveFromFavouriteGoldCardOption(

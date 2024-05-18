@@ -65,6 +65,7 @@ import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTE_1
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InfiniteCarousel
 import ru.nn.tripnn.ui.common.InternetProblemScreen
@@ -76,15 +77,14 @@ import ru.nn.tripnn.ui.common.card.LoadingCard
 import ru.nn.tripnn.ui.common.card.RouteCard
 import ru.nn.tripnn.ui.common.rippleClickable
 import ru.nn.tripnn.ui.common.shadow
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.screen.main.search.SearchPlaceBottomSheet
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @Composable
 fun HomeScreen(
-    recommendedRoutes: ResourceState<List<Route>>,
-    currentRoute: ResourceState<CurrentRoute?>,
+    recommendedRoutes: ResState<List<Route>>,
+    currentRoute: ResState<CurrentRoute?>,
     onAccountClick: () -> Unit,
     onHistoryClick: () -> Unit,
     onFavouriteClick: () -> Unit,
@@ -134,8 +134,8 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
-    recommendedRoutes: ResourceState<List<Route>>,
-    currentRoute: ResourceState<CurrentRoute?>,
+    recommendedRoutes: ResState<List<Route>>,
+    currentRoute: ResState<CurrentRoute?>,
     onAllRoutesClick: () -> Unit,
     onNewRouteClick: () -> Unit,
     onCurrentRouteClick: () -> Unit,
@@ -164,7 +164,7 @@ fun HomeContent(
         contentWindowInsets = WindowInsets(0)
     ) { paddings ->
 
-        if (recommendedRoutes.isError || currentRoute.isError) {
+        if (recommendedRoutes.isError() || currentRoute.isError()) {
             InternetProblemScreen()
             return@Scaffold
         }
@@ -198,11 +198,11 @@ fun HomeContent(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                if (recommendedRoutes.isLoading) {
+                if (recommendedRoutes.isLoading()) {
                     LoadingRecommendedRoutes()
                 } else {
                     RecommendedRoutes(
-                        routes = recommendedRoutes.state ?: listOf(),
+                        routes = recommendedRoutes.getOrNull() ?: listOf(),
                         onRouteClick = {
                             pickedRoute = it
                             showRouteInfo = true
@@ -224,9 +224,9 @@ fun HomeContent(
             ) {
                 NewRouteButton(
                     modifier = Modifier.align(Alignment.Center),
-                    hasDraft = currentRoute.state?.buildInProgress == true,
+                    hasDraft = currentRoute.getOrNull()?.buildInProgress == true,
                     onClick = {
-                        if (currentRoute.state?.buildInProgress == false) {
+                        if (currentRoute.getOrNull()?.buildInProgress == false) {
                             showDeleteCurrentRouteDialog = true
                         } else {
                             onNewRouteClick()
@@ -235,13 +235,13 @@ fun HomeContent(
                 )
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = currentRoute.state != null && !currentRoute.state.buildInProgress,
+                    visible = currentRoute.getOrNull()?.buildInProgress == false,
                     enter = slideInVertically { it } + fadeIn(),
                     exit = slideOutVertically { it } + fadeOut(),
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     CurrentRouteBar(
-                        route = currentRoute.state,
+                        route = currentRoute.getOrNull(),
                         onClick = onCurrentRouteClick
                     )
                 }
@@ -252,7 +252,7 @@ fun HomeContent(
             SearchPlaceBottomSheet(onDismissRequest = { showSearch = false }, toPhotos = toPhotos)
         }
 
-        if (showRouteInfo && recommendedRoutes.state != null) {
+        if (showRouteInfo && recommendedRoutes is ResState.Success) {
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { showRouteInfo = false },
@@ -262,14 +262,14 @@ fun HomeContent(
                 windowInsets = WindowInsets(0)
             ) {
                 RouteInfoBottomSheetContent(
-                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.state[pickedRoute]) },
-                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.state[pickedRoute]) },
+                    removeRouteFromFavourite = { removeRouteFromFavourite(recommendedRoutes.value[pickedRoute]) },
+                    addRouteToFavourite = { addRouteToFavourite(recommendedRoutes.value[pickedRoute]) },
                     removePlaceFromFavourite = removePlaceFromFavourite,
                     addPlaceToFavourite = addPlaceToFavourite,
-                    route = recommendedRoutes.state[pickedRoute],
+                    route = recommendedRoutes.value[pickedRoute],
                     onTakeTheRoute = onTakeTheRoute,
                     toPhotos = toPhotos,
-                    alreadyHasRoute = currentRoute.state != null
+                    alreadyHasRoute = currentRoute.getOrNull() != null
                 )
             }
         }
@@ -456,13 +456,13 @@ fun HomeScreenPreview() {
         ) {
             Box {
                 HomeScreen(
-                    currentRoute = ResourceState(
+                    currentRoute = ResState.Success(
                         CurrentRoute(
                             places = ROUTE_1.places,
                             currentPlaceIndex = 2
                         )
                     ),
-                    recommendedRoutes = ResourceState(ROUTES),
+                    recommendedRoutes = ResState.Success(ROUTES),
                     onAllRoutesClick = {},
                     onCurrentRouteClick = {},
                     onNewRouteClick = {},

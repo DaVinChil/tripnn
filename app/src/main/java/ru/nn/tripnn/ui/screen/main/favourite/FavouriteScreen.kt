@@ -38,12 +38,12 @@ import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.data.datasource.stubdata.ui.ROUTES
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.CatalogNavigation
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.PlacesColumn
 import ru.nn.tripnn.ui.common.RoutesColumn
 import ru.nn.tripnn.ui.common.Search
-import ru.nn.tripnn.ui.screen.ResourceState
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
@@ -55,8 +55,8 @@ const val ROUTES_INDEX = 1
 fun FavouriteScreen(
     onBack: () -> Unit,
     filterByWord: (String) -> Unit,
-    favouritePlaces: ResourceState<List<Place>>,
-    favouriteRoutes: ResourceState<List<Route>>,
+    favouritePlaces: ResState<List<Place>>,
+    favouriteRoutes: ResState<List<Route>>,
     removePlaceFromFavourite: (Place) -> Unit,
     removeRouteFromFavourite: (Route) -> Unit,
     addPlaceToFavourite: (Place) -> Unit,
@@ -209,8 +209,8 @@ fun FavouriteScreenPreview() {
         FavouriteScreen(
             onBack = { /*TODO*/ },
             filterByWord = { /*TODO*/ },
-            favouritePlaces = ResourceState(state = listOf(PLACE_1)),
-            favouriteRoutes = ResourceState(state = ROUTES),
+            favouritePlaces = ResState.Success(listOf(PLACE_1)),
+            favouriteRoutes = ResState.Success(ROUTES),
             removePlaceFromFavourite = { /*TODO*/ },
             removeRouteFromFavourite = { /*TODO*/ },
             addPlaceToFavourite = { /*TODO*/ },

@@ -12,7 +12,7 @@ class UserSettingsRepositoryImpl(
     private val userSettingsDataSource: UserSettingsDataSource
 ) : UserSettingsRepository {
 
-    override fun getUserSettings(): Flow<Result<UserSettings?>> {
+    override fun getUserSettings(): Flow<Result<UserSettings>> {
         return userSettingsDataSource.getUserSettings()
     }
 

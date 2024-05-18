@@ -11,7 +11,7 @@ import ru.nn.tripnn.data.repository.auth.AuthenticationService
 import ru.nn.tripnn.data.repository.auth.TokenRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.LoginData
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import javax.inject.Inject
 
@@ -21,11 +21,11 @@ class LoginViewModel @Inject constructor(
     private val tokenRepository: TokenRepository
 ) : ViewModel() {
 
-    var authenticated by mutableStateOf(ResourceState(state = false))
+    var authenticated: ResState<Boolean> by mutableStateOf(ResState.Success(false))
         private set
-    var emailState by mutableStateOf(ResourceState<Unit>())
+    var emailState: ResState<Unit> by mutableStateOf(ResState.Success(Unit))
         private set
-    var passwordState by mutableStateOf(ResourceState<Unit>())
+    var passwordState: ResState<Unit> by mutableStateOf(ResState.Success(Unit))
         private set
 
     fun authenticate(
@@ -35,10 +35,10 @@ class LoginViewModel @Inject constructor(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            authenticated = ResourceState.loading()
+            authenticated = ResState.loading()
 
             if (!validateEmail(email) or !validatePassword(password)) {
-                authenticated = authenticated.toError(
+                authenticated = ResState.Error(
                     IllegalStateException("failed validate password or email")
                 )
                 return@launch
@@ -49,12 +49,12 @@ class LoginViewModel @Inject constructor(
             when {
                  result.isSuccess -> {
                     tokenRepository.saveToken(result.getOrNull()!!)
-                    authenticated = authenticated.toSuccess(true)
+                    authenticated = ResState.Success(true)
                     onSuccess()
                 }
 
                 result.isFailure -> {
-                    authenticated = authenticated.toError(result.exceptionOrNull())
+                    authenticated = ResState.Error(result.exceptionOrNull())
                 }
             }
         }
@@ -62,7 +62,7 @@ class LoginViewModel @Inject constructor(
 
     private fun validateEmail(email: String): Boolean {
         if (email.isBlank()) {
-            emailState = emailState.toError(IllegalStateException("Email can not be empty"))
+            emailState = ResState.Error(IllegalStateException("Email can not be empty"))
             return false
         }
 
@@ -73,7 +73,7 @@ class LoginViewModel @Inject constructor(
 
     private fun validatePassword(password: String): Boolean {
         if (password.isBlank()) {
-            passwordState = passwordState.toError(IllegalStateException("Password can not be empty"))
+            passwordState = ResState.Error(IllegalStateException("Password can not be empty"))
             return false
         }
 
@@ -93,10 +93,10 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun dismissPasswordError() {
-        passwordState = passwordState.toSuccess()
+        passwordState = ResState.Success(Unit)
     }
 
     private fun dismissEmailError() {
-        emailState = emailState.toSuccess()
+        emailState = ResState.Success(Unit)
     }
 }

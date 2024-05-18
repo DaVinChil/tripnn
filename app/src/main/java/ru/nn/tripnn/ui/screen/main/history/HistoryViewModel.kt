@@ -1,20 +1,19 @@
 package ru.nn.tripnn.ui.screen.main.history
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.data.repository.currentroute.CurrentRouteRepository
 import ru.nn.tripnn.data.repository.favourite.FavouritesRepository
 import ru.nn.tripnn.data.repository.history.HistoryRepository
-import ru.nn.tripnn.data.toResultFlow
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
-import ru.nn.tripnn.ui.util.toResourceStateFlow
+import ru.nn.tripnn.domain.state.ResFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,18 +25,22 @@ class HistoryViewModel @Inject constructor(
     private val wordFilter = MutableStateFlow("")
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val visitedPlaces = wordFilter
-        .flatMapLatest { historyRepository.getVisitedPlacesByWord(it) }
-        .toResourceStateFlow(viewModelScope)
+    private val _visitedPlaces = ResFlow(scope = viewModelScope) {
+        wordFilter.flatMapLatest(historyRepository::getVisitedPlacesByWord)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val takenRoutes = wordFilter
-        .flatMapLatest { historyRepository.getTakenRoutesByWord(it) }
-        .toResourceStateFlow(viewModelScope)
+    private val _takenRoutes = ResFlow(scope = viewModelScope) {
+        wordFilter.flatMapLatest(historyRepository::getTakenRoutesByWord)
+    }
 
-    val hasCurrentRoute = currentRouteRepository.getCurrentRoute().map { it.getOrNull() != null }
-        .toResultFlow()
-        .toResourceStateFlow(viewModelScope)
+    private val _hasCurrentRoute = ResFlow(scope = viewModelScope) {
+        currentRouteRepository.currentRouteExists()
+    }
+
+    val visitedPlaces @Composable get() = _visitedPlaces.state
+    val takenRoutes @Composable get() = _takenRoutes.state
+    val hasCurrentRoute @Composable get() = _hasCurrentRoute.state
 
     fun clearRoutesHistory() {
         viewModelScope.launch {

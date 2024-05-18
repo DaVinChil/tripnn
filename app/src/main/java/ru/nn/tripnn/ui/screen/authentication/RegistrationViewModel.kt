@@ -11,7 +11,7 @@ import ru.nn.tripnn.data.repository.auth.AuthenticationService
 import ru.nn.tripnn.data.repository.auth.TokenRepository
 import ru.nn.tripnn.di.Fake
 import ru.nn.tripnn.domain.RegistrationData
-import ru.nn.tripnn.ui.screen.ResourceState
+import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.screen.authentication.event.DismissAuthError
 import javax.inject.Inject
 
@@ -21,13 +21,13 @@ class RegistrationViewModel @Inject constructor(
     private val tokenRepository: TokenRepository
 ) : ViewModel() {
 
-    var authenticated by mutableStateOf(ResourceState(state = false))
+    var authenticated: ResState<Boolean> by mutableStateOf(ResState.Success(false))
         private set
-    var emailState by mutableStateOf(ResourceState<Unit>())
+    var emailState: ResState<Unit> by mutableStateOf(ResState.Success(Unit))
         private set
-    var userNameState by mutableStateOf(ResourceState<Unit>())
+    var userNameState: ResState<Unit> by mutableStateOf(ResState.Success(Unit))
         private set
-    var passwordState by mutableStateOf(ResourceState<Unit>())
+    var passwordState: ResState<Unit> by mutableStateOf(ResState.Success(Unit))
         private set
 
     fun authenticate(
@@ -39,12 +39,12 @@ class RegistrationViewModel @Inject constructor(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            authenticated = authenticated.copy(isLoading = true)
+            authenticated = ResState.loading()
 
             if (!validateEmail(email) or !validatePassword(password, confirmPassword)
                 or !validateUserName(userName)
             ) {
-                authenticated = authenticated.toError()
+                authenticated = ResState.Error()
                 return@launch
             }
 
@@ -59,29 +59,29 @@ class RegistrationViewModel @Inject constructor(
             when {
                 result.isSuccess -> {
                     tokenRepository.saveToken(result.getOrNull()!!)
-                    authenticated = authenticated.toSuccess(true)
+                    authenticated = ResState.Success(true)
                     onSuccess()
                 }
 
-                result.isFailure -> authenticated = authenticated.toError(result.exceptionOrNull())
+                result.isFailure -> authenticated = ResState.Error(result.exceptionOrNull())
             }
         }
     }
 
     private fun validateEmail(email: String): Boolean {
         if (email.isBlank()) {
-            emailState = emailState.toError(IllegalStateException("Email can not be empty"))
+            emailState = ResState.Error(IllegalStateException("Email can not be empty"))
             return false
         }
 
-        emailState = emailState.copy(isError = false, error = null)
+        dismissEmailError()
 
         return true
     }
 
     private fun validateUserName(userName: String): Boolean {
         if (userName.isBlank()) {
-            userNameState = userNameState.toError(IllegalStateException("User name can not be empty"))
+            userNameState = ResState.Error(IllegalStateException("User name can not be empty"))
             return false
         }
 
@@ -92,10 +92,10 @@ class RegistrationViewModel @Inject constructor(
 
     private fun validatePassword(password: String, confirmPassword: String): Boolean {
         if (password.isBlank() && confirmPassword.isBlank()) {
-            passwordState = passwordState.toError(IllegalStateException("Password can not be empty"))
+            passwordState = ResState.Error(IllegalStateException("Password can not be empty"))
             return false
         } else if (password != confirmPassword) {
-            passwordState = passwordState.toError(IllegalStateException("Passwords do not match"))
+            passwordState = ResState.Error(IllegalStateException("Passwords do not match"))
             return false
         }
 
@@ -115,14 +115,14 @@ class RegistrationViewModel @Inject constructor(
     }
 
     private fun dismissPasswordError() {
-        passwordState = passwordState.toSuccess()
+        passwordState = ResState.Success(Unit)
     }
 
     private fun dismissEmailError() {
-        emailState = emailState.toSuccess()
+        emailState = ResState.Success(Unit)
     }
 
     private fun dismissUserNameError() {
-        userNameState = userNameState.toSuccess()
+        userNameState = ResState.Success(Unit)
     }
 }

@@ -58,6 +58,10 @@ class CurrentRouteRepository(
     private suspend fun createNewRoute(): Result<Unit> =
         currentRouteDataSource.createNewCurrentRoute()
 
+    fun currentRouteExists(): Flow<Result<Boolean>> {
+        return getCurrentRoute().map { it.getOrThrow() != null }.toResultFlow()
+    }
+
     suspend fun addPlaceToRoute(id: String): Result<Unit> =
         currentRouteDataSource.addPlaceToRoute(id)
 
