@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,6 +46,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import kotlinx.coroutines.flow.StateFlow
 import ru.nn.tripnn.R
 import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
@@ -59,6 +61,7 @@ import ru.nn.tripnn.ui.common.PlaceInfoBottomSheet
 import ru.nn.tripnn.ui.common.PrimaryButton
 import ru.nn.tripnn.ui.common.Search
 import ru.nn.tripnn.ui.common.card.AddToFavouriteCardOption
+import ru.nn.tripnn.ui.common.card.LoadingCard
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.common.rippleClickable
@@ -115,7 +118,7 @@ fun SearchPlaceBottomSheet(
             ) {
                 SearchResultScreen(
                     sort = placesViewModel::sort,
-                    result = placesViewModel.searchResult.collectAsStateWithLifecycle().value,
+                    result = placesViewModel.searchResult,
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
                     popBack = navController::popBackStack,
@@ -129,7 +132,7 @@ fun SearchPlaceBottomSheet(
 @Composable
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
-    result: ResState<List<Place>>,
+    result: LazyPagingItems<StateFlow<ResState<Place>>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
@@ -151,7 +154,7 @@ fun SearchResultScreen(
 @Composable
 fun SearchResultScreen(
     sort: (SortState) -> Unit,
-    resultPlaces: ResState<List<Place>>,
+    resultPlaces: LazyPagingItems<StateFlow<ResState<Place>>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
@@ -159,11 +162,6 @@ fun SearchResultScreen(
     onChoose: ((Place) -> Unit)?,
     buttonText: String?
 ) {
-    if (resultPlaces.isError()) {
-        InternetProblemScreen()
-        return
-    }
-
     var sortState by remember { mutableStateOf(SortState(closer = false, byRating = true)) }
     val lazyState = rememberLazyListState()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -178,6 +176,11 @@ fun SearchResultScreen(
                 .fillMaxHeight(5f / 6f)
                 .padding(horizontal = 10.dp)
         ) {
+            if (resultPlaces.loadState.hasError) {
+                InternetProblemScreen()
+                return
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -226,61 +229,71 @@ fun SearchResultScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (resultPlaces.isLoading()) {
+            if (resultPlaces.loadState.refresh == LoadState.Loading) {
                 Box(modifier = Modifier.fillMaxHeight(5f / 6f)) {
                     LoadingCircleScreen()
                 }
-            } else if (resultPlaces.getOrNull().isNullOrEmpty()) {
+            } else if (resultPlaces.itemCount == 0) {
                 SearchEmptyResult(popBack)
-            } else if (resultPlaces is ResState.Success){
+            } else {
                 LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
-                    itemsIndexed(
-                        items = resultPlaces.value,
-                        key = { _, place -> place.id }
-                    ) { index, place ->
-                        val option: @Composable () -> Unit = if (place.favourite) {
-                            @Composable {
-                                RemoveFromFavouriteGoldCardOption(
-                                    onClick = { removeFromFavourite(place) }
-                                )
-                            }
-                        } else {
-                            @Composable {
-                                AddToFavouriteCardOption(onClick = { addToFavourite(place) })
-                            }
-                        }
+                    items(
+                        count = resultPlaces.itemCount,
+                        key = { it }
+                    ) { index ->
+                        val placeState = resultPlaces[index]?.collectAsStateWithLifecycle()
 
-                        if (onChoose != null) {
-                            CardWithRadioButton(
-                                place = place,
-                                option = option,
-                                onCardClick = {
-                                    pickedPlace = place
-                                    showCardInfo = true
-                                },
-                                chosenPlace = chosenPlace,
-                                index = index,
-                                onChoose = {
-                                    chosenPlace = index
+                        if (placeState != null)  {
+                            val place by placeState
+
+                            if (place.isLoading()) {
+                                LoadingCard()
+                            } else if (place is ResState.Success) {
+                                val option: @Composable () -> Unit = if (place.getOrNull()?.favourite == true) {
+                                    @Composable {
+                                        RemoveFromFavouriteGoldCardOption(
+                                            onClick = { removeFromFavourite(place.getOrNull()!!) }
+                                        )
+                                    }
+                                } else {
+                                    @Composable {
+                                        AddToFavouriteCardOption(onClick = { addToFavourite(place.getOrNull()!!) })
+                                    }
                                 }
-                            )
-                        } else {
-                            PlaceCard(
-                                modifier = Modifier.fillMaxWidth(),
-                                place = place,
-                                onCardClick = {
-                                    pickedPlace = place
-                                    showCardInfo = true
-                                },
-                                option1 = option
-                            )
+
+                                if (onChoose != null) {
+                                    CardWithRadioButton(
+                                        place = place.getOrNull()!!,
+                                        option = option,
+                                        onCardClick = {
+                                            pickedPlace = place.getOrNull()!!
+                                            showCardInfo = true
+                                        },
+                                        chosenPlace = chosenPlace,
+                                        index = index,
+                                        onChoose = {
+                                            chosenPlace = index
+                                        }
+                                    )
+                                } else {
+                                    PlaceCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        place = place.getOrNull()!!,
+                                        onCardClick = {
+                                            pickedPlace = place.getOrNull()!!
+                                            showCardInfo = true
+                                        },
+                                        option1 = option
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (buttonText != null && onChoose != null && resultPlaces is ResState.Success) {
+        if (buttonText != null && onChoose != null && resultPlaces.itemCount != 0) {
             AnimatedVisibility(
                 visible = chosenPlace != -1,
                 modifier = Modifier
@@ -293,7 +306,7 @@ fun SearchResultScreen(
                 PrimaryButton(
                     text = stringResource(id = R.string.add_place),
                     paddingValues = PaddingValues(horizontal = 58.dp, vertical = 15.dp),
-                    onClick = { if (chosenPlace != -1) onChoose(resultPlaces.value[chosenPlace]) }
+                    onClick = { if (chosenPlace != -1) onChoose(resultPlaces[chosenPlace]?.value?.getOrNull()!!) }
                 )
             }
         }

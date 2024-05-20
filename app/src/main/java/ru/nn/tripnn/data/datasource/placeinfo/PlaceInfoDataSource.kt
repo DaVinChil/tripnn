@@ -6,5 +6,5 @@ import ru.nn.tripnn.domain.SearchFilters
 interface PlaceInfoDataSource {
     suspend fun findById(id: String): Result<PlaceDto>
     suspend fun findByIds(ids: List<String>): Result<List<PlaceDto>>
-    suspend fun find(searchState: SearchFilters): Result<List<PlaceDto>>
+    suspend fun find(searchState: SearchFilters, page: Int?, pageSize: Int): Result<List<PlaceDto>>
 }

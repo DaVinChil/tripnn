@@ -71,7 +71,7 @@ fun RecommendationsScreen(
         return
     }
 
-    val isEmpty by remember {
+    val isEmpty by remember(routes) {
         derivedStateOf { routes.getOrNull()?.isEmpty() ?: true }
     }
 
@@ -211,7 +211,9 @@ fun NoRecommendedRoutes(onBack: () -> Unit) {
             .fillMaxSize()
             .background(TripNnTheme.colorScheme.background)
             .padding(10.dp)
-            .systemBarsPadding()
+            .systemBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         IconButton(onClick = onBack, modifier = Modifier.offset(x = (-16).dp)) {
             Icon(

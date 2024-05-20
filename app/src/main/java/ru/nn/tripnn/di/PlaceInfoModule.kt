@@ -4,8 +4,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import ru.nn.tripnn.data.datasource.placeinfo.FakePlaceInfoDataSource
+import kotlinx.coroutines.CoroutineDispatcher
+import retrofit2.Retrofit
+import ru.nn.tripnn.data.api.PlaceInfoApi
 import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoDataSource
+import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoDataSourceImpl
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
 import ru.nn.tripnn.data.repository.searchplace.SearchPlaceService
 import ru.nn.tripnn.data.repository.searchplace.SearchPlaceServiceImpl
@@ -17,13 +20,21 @@ object PlaceInfoModule {
 
     @Provides
     @Singleton
-    @Fake
-    fun placeInfoDataSource(): PlaceInfoDataSource = FakePlaceInfoDataSource()
+    fun placeInfoApi(retrofit: Retrofit) = retrofit.create(PlaceInfoApi::class.java)
+
+    @Provides
+    @Singleton
+//    @Fake
+    fun placeInfoDataSource(
+        placeInfoApi: PlaceInfoApi,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ): PlaceInfoDataSource =
+        PlaceInfoDataSourceImpl(placeInfoApi, ioDispatcher)
 
     @Provides
     @Singleton
     fun searchPlaceService(
-        @Fake placeInfoDataSource: PlaceInfoDataSource,
+        placeInfoDataSource: PlaceInfoDataSource,
         placeDataAggregator: PlaceDataAggregator
     ): SearchPlaceService = SearchPlaceServiceImpl(placeInfoDataSource, placeDataAggregator)
 }

@@ -23,7 +23,7 @@ class CurrentRouteRepository(
     fun getCurrentRoute(createIfAbsent: Boolean = false): Flow<Result<CurrentRoute?>> {
         return currentRouteDataSource.getCurrentRoute().flatMapLatest { currentRoute ->
             val currentRouteEntity = if (createIfAbsent) {
-                throwOrCreateNewRoute(currentRoute)
+                getOrCreateNewRoute(currentRoute)
             } else currentRoute.getOrThrow() ?: return@flatMapLatest flowOf(null)
 
             currentRouteFlowFrom(currentRouteEntity)
@@ -39,7 +39,7 @@ class CurrentRouteRepository(
         }
     }
 
-    private suspend fun throwOrCreateNewRoute(result: Result<CurrentRouteEntity?>): CurrentRouteEntity {
+    private suspend fun getOrCreateNewRoute(result: Result<CurrentRouteEntity?>): CurrentRouteEntity {
         return result.getOrThrow() ?: CurrentRouteEntity().also { createNewRoute() }
     }
 

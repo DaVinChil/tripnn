@@ -3,7 +3,6 @@ package ru.nn.tripnn.data.datasource.currentroute
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteDao
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteEntity
 import ru.nn.tripnn.data.datasource.AbstractDataSource
@@ -14,7 +13,7 @@ class CurrentRouteDataSourceImpl(
     ioDispatcher: CoroutineDispatcher
 ) : CurrentRouteDataSource, AbstractDataSource(ioDispatcher) {
     override fun getCurrentRoute(): Flow<Result<CurrentRouteEntity?>> {
-        return currentRouteDao.getCurrentRoute().toResultFlow().map { it.also { println("new route -> ${it.getOrNull()}") } }
+        return currentRouteDao.getCurrentRoute().toResultFlow()
     }
 
     override suspend fun deleteCurrentRoute(): Result<Unit> = dispatchedRequest {

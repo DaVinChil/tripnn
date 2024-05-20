@@ -8,14 +8,17 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import retrofit2.Retrofit
+import ru.nn.tripnn.data.api.DistanceApi
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteDao
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteDatabase
 import ru.nn.tripnn.data.datasource.currentroute.CurrentRouteDataSource
 import ru.nn.tripnn.data.datasource.currentroute.CurrentRouteDataSourceImpl
+import ru.nn.tripnn.data.datasource.distance.DistanceDataSource
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
 import ru.nn.tripnn.data.repository.currentroute.CurrentRouteRepository
-import ru.nn.tripnn.data.repository.routebuilder.FakeRouteBuilderServiceImpl
 import ru.nn.tripnn.data.repository.routebuilder.RouteBuilderService
+import ru.nn.tripnn.data.repository.routebuilder.RouteBuilderServiceImpl
 import javax.inject.Singleton
 
 @Module
@@ -43,14 +46,27 @@ object CurrentRouteModule {
 
     @Provides
     @Singleton
-    @Fake
-    fun routeBuilderService(): RouteBuilderService = FakeRouteBuilderServiceImpl()
+    fun distanceApi(retrofit: Retrofit) = retrofit.create(DistanceApi::class.java)
+
+    @Provides
+    @Singleton
+    fun distanceDataSource(
+        distanceApi: DistanceApi,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher
+    ) = DistanceDataSource(distanceApi, ioDispatcher)
+
+    @Provides
+    @Singleton
+//    @Fake
+    fun routeBuilderService(distanceDataSource: DistanceDataSource): RouteBuilderService =
+        /*FakeRouteBuilderServiceImpl()*/ RouteBuilderServiceImpl(distanceDataSource)
 
     @Provides
     @Singleton
     fun currentRouteRepository(
         currentRouteDataSource: CurrentRouteDataSource,
         placeDataAggregator: PlaceDataAggregator,
-        @Fake routeBuilderService: RouteBuilderService
-    ): CurrentRouteRepository = CurrentRouteRepository(currentRouteDataSource, placeDataAggregator, routeBuilderService)
+        routeBuilderService: RouteBuilderService
+    ): CurrentRouteRepository =
+        CurrentRouteRepository(currentRouteDataSource, placeDataAggregator, routeBuilderService)
 }

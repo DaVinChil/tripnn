@@ -4,5 +4,4 @@ import ru.nn.tripnn.data.dto.RouteDto
 
 interface RemoteRouteDataSource {
     suspend fun findById(id: Long): Result<RouteDto>
-    suspend fun findByIds(ids: List<Long>): Result<List<RouteDto>>
 }

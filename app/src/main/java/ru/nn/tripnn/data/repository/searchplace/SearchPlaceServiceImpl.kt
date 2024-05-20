@@ -1,26 +1,42 @@
 package ru.nn.tripnn.data.repository.searchplace
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoDataSource
+import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoPagingSource
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.SearchFilters
+import ru.nn.tripnn.domain.state.ResState
+import ru.nn.tripnn.domain.state.toResStateFlow
 
 class SearchPlaceServiceImpl(
     private val placeInfoDataSource: PlaceInfoDataSource,
     private val placeDataAggregator: PlaceDataAggregator
-): SearchPlaceService {
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun find(searchState: SearchFilters): Flow<Result<List<Place>>> {
-        val placeDtosFlow = flow { emit(placeInfoDataSource.find(searchState)) }
+) : SearchPlaceService {
 
-        return placeDtosFlow
-            .flatMapLatest { placeDataAggregator.placesFromDtos(it.getOrThrow()) }
-            .catch { e -> Result.failure<List<Place>>(e) }
+    override fun find(
+        searchState: SearchFilters,
+        scope: CoroutineScope
+    ): Pager<Int, StateFlow<ResState<Place>>> {
+
+        flow {
+            emit(1)
+
+        }
+
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = {
+                PlaceInfoPagingSource(placeInfoDataSource, searchState) {
+                    placeDataAggregator.placeFromDto(it).toResStateFlow(scope)
+                }
+            }
+        )
     }
 
     override fun findById(placeId: String): Flow<Result<Place>> {

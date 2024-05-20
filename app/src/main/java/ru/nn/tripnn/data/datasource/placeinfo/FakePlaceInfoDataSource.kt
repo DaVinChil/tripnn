@@ -19,7 +19,7 @@ class FakePlaceInfoDataSource : PlaceInfoDataSource {
         ids.map { findById(it).getOrThrow() }
     }
 
-    override suspend fun find(searchState: SearchFilters): Result<List<PlaceDto>> {
+    override suspend fun find(searchState: SearchFilters, page: Int?, pageSize: Int): Result<List<PlaceDto>> {
         return Result.success(places)
     }
 }

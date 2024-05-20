@@ -20,7 +20,8 @@ val PLACE_1 = Place(
     phone = "+7-963-231-96-17",
     reviews = 199,
     doubleGisLink = "https://go.2gis.com/wrht0",
-    lonLatLocation = ""
+    lon = 0.0,
+    lat = 0.0
 )
 
 val PLACES = listOf(PLACE_1, PLACE_1, PLACE_1)

@@ -1,6 +1,8 @@
 package ru.nn.tripnn.ui.common
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +49,7 @@ import ru.nn.tripnn.ui.common.card.RemoveFromFavouriteGoldCardOption
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RouteInfoBottomSheetContent(
     route: Route,
@@ -73,7 +75,7 @@ fun RouteInfoBottomSheetContent(
             .fillMaxWidth()
             .fillMaxHeight(5f / 6f)
             .navigationBarsPadding()
-            .padding(start = 10.dp, end = 10.dp, bottom = 20.dp)
+            .padding(start = 10.dp, end = 10.dp)
     ) {
         Column {
             Row(
@@ -83,8 +85,10 @@ fun RouteInfoBottomSheetContent(
                 MontsText(
                     text = route.title,
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.fillMaxWidth(4f / 6f)
+                    maxLines = 1,
+                    modifier = Modifier.basicMarquee(),
                 )
+
                 Spacer(modifier = Modifier.width(5.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -163,17 +167,18 @@ fun RouteInfoBottomSheetContent(
             }
         }
 
-        PrimaryButton(
-            text = stringResource(id = R.string.take_the_route),
-            onClick = {
-                if (alreadyHasRoute) {
-                    showReplaceCurrentRouteDialog = true
-                } else {
-                    onTakeTheRoute(route)
+        Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp)) {
+            PrimaryButton(
+                text = stringResource(id = R.string.take_the_route),
+                onClick = {
+                    if (alreadyHasRoute) {
+                        showReplaceCurrentRouteDialog = true
+                    } else {
+                        onTakeTheRoute(route)
+                    }
                 }
-            },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+            )
+        }
     }
 
     if (showReplaceCurrentRouteDialog) {

@@ -26,6 +26,10 @@ class PlaceDataAggregatorImpl(
     override suspend fun placesFromIds(
         ids: List<String>
     ): Flow<Result<List<Place>>> {
+        if (ids.isEmpty()) {
+            return flowOf(Result.success(listOf()))
+        }
+
         val placesInfo = placeInfoDataSource.findByIds(ids)
 
         if (placesInfo.isFailure) {
@@ -53,7 +57,7 @@ class PlaceDataAggregatorImpl(
                 resultFlow = resultFlow.combine(placeFromDto(placeDtos[i])) { _, place ->
                     resultPlaces[i] = place.getOrThrow()
                     resultPlaces
-                }.catch { e -> throw e }
+                }
             }
         }
 

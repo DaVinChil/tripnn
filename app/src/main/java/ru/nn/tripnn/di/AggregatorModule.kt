@@ -24,7 +24,7 @@ object AggregatorModule {
     fun routeDataAggregator(
         placeDataAggregator: PlaceDataAggregator,
         localRouteDataSource: LocalRouteDataSource,
-        @Fake remoteRouteDataSource: RemoteRouteDataSource,
+        remoteRouteDataSource: RemoteRouteDataSource,
         favouritesDataSource: FavouritesDataSource,
         historyDataSource: HistoryDataSource
     ): RouteDataAggregator = RouteDataAggregatorImpl(
@@ -40,7 +40,7 @@ object AggregatorModule {
     fun placeDataAggregator(
         favouritesDataSource: FavouritesDataSource,
         historyDataSource: HistoryDataSource,
-        @Fake placeInfoDataSource: PlaceInfoDataSource
+        placeInfoDataSource: PlaceInfoDataSource
     ): PlaceDataAggregator =
         PlaceDataAggregatorImpl(favouritesDataSource, historyDataSource, placeInfoDataSource)
 }

@@ -55,7 +55,7 @@ class ConstructorViewModel @Inject constructor(
         }
     }
 
-    fun finishConstructing() {
+    fun takeCurrentRoute() {
         viewModelScope.launch {
             currentRouteRepository.takeCurrentRoute()
         }

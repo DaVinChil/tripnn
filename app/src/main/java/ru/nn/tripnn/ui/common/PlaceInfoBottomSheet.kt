@@ -4,8 +4,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +17,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -53,6 +55,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -64,7 +67,7 @@ import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PlaceInfoBottomSheet(
     onDismissRequest: () -> Unit,
@@ -85,7 +88,8 @@ fun PlaceInfoBottomSheet(
     ) {
         Box {
             Column(modifier = Modifier.fillMaxWidth()) {
-                if (place.photos.isNotEmpty()) {
+                var tryImage by remember { mutableStateOf(true) }
+                if (place.photos.isNotEmpty() && tryImage) {
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -102,7 +106,8 @@ fun PlaceInfoBottomSheet(
                                     .rippleClickable {
                                         toPhotos(place.id, index)
                                     },
-                                contentScale = ContentScale.Crop
+                                contentScale = ContentScale.Crop,
+                                onError = { tryImage = false }
                             )
                         }
                     }
@@ -138,13 +143,21 @@ fun PlaceInfoBottomSheet(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.padding(horizontal = 10.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
                     ) {
                         MontsText(
                             text = place.name,
-                            style = MaterialTheme.typography.titleMedium
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .fillMaxWidth(4 / 6f)
+                                .basicMarquee()
                         )
+
+                        Spacer(modifier = Modifier.width(15.dp))
+
                         Icon(
                             modifier = Modifier
                                 .size(20.dp)
@@ -177,15 +190,17 @@ fun PlaceInfoBottomSheet(
                             .padding(horizontal = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column(modifier = Modifier.fillMaxHeight()) {
+                        Column(modifier = Modifier.weight(1f)) {
                             if (place.type != null) {
                                 MontsText(
                                     text = place.type,
-                                    style = MaterialTheme.typography.labelMedium
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
 
-                            Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.heightIn(15.dp))
 
                             TwoGisButton(doubleGisLink = place.doubleGisLink)
 
@@ -207,6 +222,8 @@ fun PlaceInfoBottomSheet(
                             }
                         }
 
+                        Spacer(modifier = Modifier.width(10.dp))
+
                         Column(verticalArrangement = Arrangement.spacedBy(13.dp)) {
 
                             if (place.address != null) {
@@ -216,7 +233,9 @@ fun PlaceInfoBottomSheet(
                                 ) {
                                     MontsText(
                                         text = place.address,
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        modifier = Modifier.basicMarquee()
                                     )
                                     CopyIcon(
                                         data = place.address,
@@ -239,10 +258,12 @@ fun PlaceInfoBottomSheet(
                                 )
                             }
 
-                            MontsText(
-                                text = stringResource(id = R.string.avg_receipt) + " " + place.cost + "₽",
-                                style = MaterialTheme.typography.labelSmall
-                            )
+                            if (place.cost != null) {
+                                MontsText(
+                                    text = stringResource(id = R.string.avg_receipt) + " " + place.cost + "₽",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
                         }
                     }
 

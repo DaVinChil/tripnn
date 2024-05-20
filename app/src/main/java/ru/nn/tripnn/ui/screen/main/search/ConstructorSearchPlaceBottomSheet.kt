@@ -2,9 +2,7 @@ package ru.nn.tripnn.ui.screen.main.search
 
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,22 +19,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.LazyPagingItems
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import ru.nn.tripnn.R
-import ru.nn.tripnn.data.datasource.stubdata.ui.PLACE_1
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.card.PlaceCard
 import ru.nn.tripnn.ui.common.rippleClickable
-import ru.nn.tripnn.ui.theme.TripNNTheme
 import ru.nn.tripnn.ui.theme.TripNnTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +79,7 @@ fun ConstructorSearchBottomSheet(
             ) {
                 ConstructorSearchResultScreen(
                     sort = placesViewModel::sort,
-                    result = placesViewModel.searchResult.collectAsStateWithLifecycle().value,
+                    result = placesViewModel.searchResult,
                     removeFromFavourite = placesViewModel::removeFromFavourite,
                     addToFavourite = placesViewModel::addToFavourite,
                     popBack = { navController.popBackStack() },
@@ -102,7 +98,7 @@ fun ConstructorSearchBottomSheet(
 @Composable
 fun ConstructorSearchResultScreen(
     sort: (SortState) -> Unit,
-    result: ResState<List<Place>>,
+    result: LazyPagingItems<StateFlow<ResState<Place>>>,
     removeFromFavourite: (Place) -> Unit,
     addToFavourite: (Place) -> Unit,
     popBack: () -> Unit,
@@ -166,22 +162,5 @@ fun CardWithRadioButton(
                 TripNnTheme.colorScheme.onMinor
             }
         )
-    }
-}
-
-@Preview
-@Composable
-fun ConstructorSearchPreview() {
-    TripNNTheme {
-        Box(modifier = Modifier.background(TripNnTheme.colorScheme.background)) {
-            ConstructorSearchResultScreen(
-                sort = {},
-                result = ResState.Success(listOf(PLACE_1)),
-                removeFromFavourite = {},
-                addToFavourite = {},
-                popBack = { /*TODO*/ },
-                toPhotos = { _, _ -> }
-            ) {}
-        }
     }
 }

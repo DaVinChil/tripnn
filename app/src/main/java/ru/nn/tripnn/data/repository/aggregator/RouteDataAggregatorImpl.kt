@@ -2,7 +2,6 @@ package ru.nn.tripnn.data.repository.aggregator
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -46,7 +45,7 @@ class RouteDataAggregatorImpl(
             } else {
                 resultFlow = resultFlow.combine(flow) { _, route ->
                     resultRoutes.also { resultRoutes[i] = route.getOrThrow() }
-                }.catch { e -> throw e }
+                }
             }
         }
 

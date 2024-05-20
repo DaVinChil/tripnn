@@ -3,7 +3,7 @@ package ru.nn.tripnn.domain
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-data class Place(
+data class Place constructor (
     val id: String,
     val photos: List<String> = listOf(),
     val name: String = "",
@@ -17,10 +17,11 @@ data class Place(
     val doubleGisLink: String = "",
     val favourite: Boolean = false,
     val visited: Boolean = false,
-    val lonLatLocation: String? = null
+    val lon: Double? = null,
+    val lat: Double? = null
 ) {
     fun isClosed(): Boolean {
-        if (workTime == null || workTime == "24/7") return true
+        if (workTime == null || workTime == "24/7") return false
 
         val format = DateTimeFormatter.ofPattern("HH:mm")
 

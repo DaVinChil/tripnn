@@ -8,8 +8,9 @@ data class SearchFilters(
     val previousPlaceId: String? = null,
     val minRating: Float = 0f,
     val price: Int = -1,
-    val maxDistance: Int? = null,
-    val sortBy: Sort = Sort.RELEVANCE
+    val maxDistance: Int = Int.MAX_VALUE,
+    val sortBy: Sort = Sort.RELEVANCE,
+    val isWorkingNow: Boolean = true
 )
 
 enum class Sort {

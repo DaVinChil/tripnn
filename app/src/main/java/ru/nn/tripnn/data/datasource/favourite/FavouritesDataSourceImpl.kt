@@ -21,8 +21,7 @@ class FavouritesDataSourceImpl(
     ioDispatcher: CoroutineDispatcher
 ) : FavouritesDataSource, AbstractDataSource(ioDispatcher) {
     override fun getAllFavouritePlaces(): Flow<Result<List<FavouritePlace>>> {
-        return favouritePlacesDao.getPlaces()
-            .onCompletion { emit(listOf()); throw CancellationException() }.toResultFlow()
+        return favouritePlacesDao.getPlaces().toResultFlow()
     }
 
     override suspend fun deleteAllFavouritePlaces(): Result<Unit> {
@@ -42,8 +41,7 @@ class FavouritesDataSourceImpl(
     }
 
     override fun getAllFavouriteRoutes(): Flow<Result<List<FavouriteRoute>>> {
-        return favouriteRoutesDao.getRoutes()
-            .onCompletion { emit(listOf()); throw CancellationException() }.toResultFlow()
+        return favouriteRoutesDao.getRoutes().toResultFlow()
     }
 
     override suspend fun deleteAllFavouriteRoutes(): Result<Unit> {

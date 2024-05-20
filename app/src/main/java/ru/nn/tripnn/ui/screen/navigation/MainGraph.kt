@@ -292,7 +292,7 @@ fun NavGraphBuilder.constructor(
             addPlace = constructorViewModel::addPlace,
             removePlaceFromRoute = constructorViewModel::removePlace,
             takeRoute = {
-                constructorViewModel.finishConstructing()
+                constructorViewModel.takeCurrentRoute()
             },
             toPhotos = navigateToPhotos,
             removePlaceFromFavourite = constructorViewModel::removePlaceFromFavourite,

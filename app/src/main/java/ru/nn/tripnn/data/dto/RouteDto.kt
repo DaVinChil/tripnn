@@ -9,14 +9,14 @@ data class RouteDto (
     val id: Long,
     val title: String,
     val desc: String,
-    val imageUrl: String,
+    val image: String,
     val places: List<PlaceDto>
 ): RouteReference {
     fun toRoute(places: List<Place>, favourite: Boolean, wasTakenAt: Date?): Route {
         return Route(
             title = title,
             desc = desc,
-            imageUrl = imageUrl,
+            imageUrl = image,
             places = places,
             favourite = favourite,
             wasTakenAt = wasTakenAt,

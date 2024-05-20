@@ -166,7 +166,7 @@ fun SearchPlaceBuilderScreen(
                             price = pickedPrice,
                             minRating = MIN_RATINGS.getOrNull(pickedMinRating) ?: 0f,
                             previousPlaceId = previousPlaceId,
-                            maxDistance = DISTANCES.getOrNull(pickedDistance)
+                            maxDistance = DISTANCES.getOrNull(pickedDistance) ?: 0
                         )
                     )
                     toResultScreen()

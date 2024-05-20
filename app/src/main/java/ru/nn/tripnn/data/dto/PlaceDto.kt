@@ -17,7 +17,7 @@ data class PlaceDto (
     val cost: String? = null,
     val rating: Double = 0.0,
     val reviews: Int = 0,
-    val doubleGisLink: String? = null,
+    val doubleGisLink: String? = null
 ) {
     fun toPlace(favourite: Boolean, visited: Boolean): Place {
         return Place(
@@ -32,7 +32,9 @@ data class PlaceDto (
             phone = phone,
             cost = cost,
             rating = rating,
-            reviews = reviews
+            reviews = reviews,
+            lon = lon,
+            lat = lat
         )
     }
 }
