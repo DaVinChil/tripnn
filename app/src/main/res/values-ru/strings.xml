@@ -183,4 +183,8 @@
     <string name="clear_history_text">Вы действительно хотите очистить историю данной категории? Восстановить ее будет не возможно.</string>
     <string name="closed">Закрыто</string>
     <string name="already_visited">Уже посещено</string>
+
+    <string name="add_route_to_favourite">Добавить маршрут в избранное</string>
+    <string name="remove_route_from_favourite">Убрать маршрут из избранного</string>
+    <string name="finish_the_route">Закончить маршрут</string>
 </resources>

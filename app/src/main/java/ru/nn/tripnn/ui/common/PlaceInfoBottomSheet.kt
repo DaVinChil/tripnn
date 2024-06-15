@@ -200,7 +200,7 @@ fun PlaceInfoBottomSheet(
                                 )
                             }
 
-                            Spacer(modifier = Modifier.heightIn(15.dp))
+                            Spacer(modifier = Modifier.weight(1f))
 
                             TwoGisButton(doubleGisLink = place.doubleGisLink)
 

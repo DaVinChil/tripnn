@@ -22,8 +22,7 @@ class RouteRecommendationsRepositoryImpl(
             emit(recommendationsDataSource.getRouteRecommendations())
         }
 
-        return routesFlow.map { routeDataAggregator.routes(it.getOrThrow()) }
-            .flattenConcat()
+        return routesFlow.map { routeDataAggregator.routes(it.getOrThrow()) }.flattenConcat()
     }
 
     override fun getRecommendationsByWord(word: String): Flow<Result<List<Route>>> {

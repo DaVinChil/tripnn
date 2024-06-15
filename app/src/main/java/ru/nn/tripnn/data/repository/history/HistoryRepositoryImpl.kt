@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import ru.nn.tripnn.data.database.place.history.VisitedPlace
+import ru.nn.tripnn.data.database.route.RouteReference
 import ru.nn.tripnn.data.datasource.history.HistoryDataSource
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
 import ru.nn.tripnn.data.repository.aggregator.RouteDataAggregator
@@ -41,11 +42,11 @@ class HistoryRepositoryImpl(
         }
     }
 
-    override suspend fun removeRouteFromHistory(route: Route): Result<Unit> {
+    override suspend fun removeRouteFromHistory(route: RouteReference): Result<Unit> {
         return historyDataSource.removeRouteFromHistory(route)
     }
 
-    override suspend fun addRouteToHistory(route: Route): Result<Unit> {
+    override suspend fun addRouteToHistory(route: RouteReference): Result<Unit> {
         return historyDataSource.addRouteToHistory(route)
     }
 

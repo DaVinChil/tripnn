@@ -2,25 +2,35 @@ package ru.nn.tripnn.data.repository.currentroute
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteEntity
+import ru.nn.tripnn.data.database.route.RouteReference
+import ru.nn.tripnn.data.database.route.localroute.LocalRoute
 import ru.nn.tripnn.data.datasource.currentroute.CurrentRouteDataSource
+import ru.nn.tripnn.data.datasource.favourite.FavouritesDataSource
+import ru.nn.tripnn.data.datasource.localroute.LocalRouteDataSource
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
 import ru.nn.tripnn.data.repository.routebuilder.RouteBuilderService
 import ru.nn.tripnn.data.toResultFlow
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.WalkInfo
+import java.time.LocalDate
 
-class CurrentRouteRepository(
+open class CurrentRouteRepository(
     private val currentRouteDataSource: CurrentRouteDataSource,
+    private val localRouteDataSource: LocalRouteDataSource,
+    private val favouritesDataSource: FavouritesDataSource,
     private val placeDataAggregator: PlaceDataAggregator,
     private val routeBuilderService: RouteBuilderService
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getCurrentRoute(createIfAbsent: Boolean = false): Flow<Result<CurrentRoute?>> {
+    open fun getCurrentRoute(createIfAbsent: Boolean = false): Flow<Result<CurrentRoute?>> {
         return currentRouteDataSource.getCurrentRoute().flatMapLatest { currentRoute ->
             val currentRouteEntity = if (createIfAbsent) {
                 getOrCreateNewRoute(currentRoute)
@@ -31,11 +41,43 @@ class CurrentRouteRepository(
     }
 
     private suspend fun currentRouteFlowFrom(currentRouteEntity: CurrentRouteEntity): Flow<CurrentRoute> {
+        val favouriteFlow =
+            if (currentRouteEntity.localRouteId != null || currentRouteEntity.remoteRouteId != null) {
+                favouritesDataSource.isRouteFavourite(currentRouteEntity)
+            } else {
+                flowOf(Result.success(false))
+            }
+
         return placeDataAggregator.placesFromIds(currentRouteEntity.places).map {
             val places = it.getOrThrow()
-            val timeToWalk = calcTimeToWalk(places)
+            val walkInfo = calcWalkInfo(places)
+            Pair(places, walkInfo)
+        }.combine(favouriteFlow) { placesAndWalkInfo, fav ->
+            currentRouteEntity.toCurrentRoute(
+                places = placesAndWalkInfo.first,
+                walkInfo = placesAndWalkInfo.second,
+                favourite = fav.getOrThrow()
+            )
+        }
+    }
 
-            currentRouteEntity.toCurrentRoute(places = places, timeToWalk = timeToWalk)
+    open suspend fun addCurrentRouteToFavourite(): Result<Unit> {
+        return try {
+            getCurrentRoute().first().getOrThrow()?.let {
+                favouritesDataSource.addRouteToFavourite(it)
+            } ?: Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    open suspend fun removeCurrentRouteFromFavourite(): Result<Unit> {
+        return try {
+            getCurrentRoute().first().getOrThrow()?.let {
+                favouritesDataSource.removeRouteFromFavourite(it)
+            } ?: Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
@@ -43,53 +85,88 @@ class CurrentRouteRepository(
         return result.getOrThrow() ?: CurrentRouteEntity().also { createNewRoute() }
     }
 
-    private suspend fun calcTimeToWalk(places: List<Place>): List<Int> {
-        val timeToWalk = mutableListOf<Int>()
+    private suspend fun calcWalkInfo(places: List<Place>): List<WalkInfo> {
+        val walkInfo = mutableListOf<WalkInfo>()
 
         for (i in 1 until places.size) {
-            timeToWalk.add(
-                routeBuilderService.timeToWalk(places[i - 1], places[i]).getOrThrow()
+            walkInfo.add(
+                routeBuilderService.walkInfo(places[i - 1], places[i]).getOrThrow()
             )
         }
 
-        return timeToWalk
+        return walkInfo
     }
 
     private suspend fun createNewRoute(): Result<Unit> =
         currentRouteDataSource.createNewCurrentRoute()
 
-    fun currentRouteExists(): Flow<Result<Boolean>> {
+    open fun currentRouteExists(): Flow<Result<Boolean>> {
         return getCurrentRoute().map { it.getOrThrow() != null }.toResultFlow()
     }
 
-    suspend fun addPlaceToRoute(id: String): Result<Unit> =
+    open suspend fun addPlaceToRoute(id: String): Result<Unit> =
         currentRouteDataSource.addPlaceToRoute(id)
 
-    suspend fun removePlaceFromRoute(index: Int): Result<Unit> =
+    open suspend fun removePlaceFromRoute(index: Int): Result<Unit> =
         currentRouteDataSource.removePlaceFromRoute(index)
 
-    suspend fun takeCurrentRoute(): Result<Unit> =
-        currentRouteDataSource.takeCurrentRoute()
+    open suspend fun takeCurrentRoute(): Result<Unit> {
+        return try {
+            val route = getCurrentRoute().first().getOrThrow() ?: return Result.success(Unit)
 
-    suspend fun deleteCurrentRoute(): Result<Unit> =
+            val id = localRouteDataSource.saveRoute(route.toLocalRoute()).getOrThrow()
+            currentRouteDataSource.addRouteReference(object : RouteReference {
+                override fun localRouteId() = id.toLong()
+                override fun remoteRouteId() = null
+            })
+
+            currentRouteDataSource.takeCurrentRoute()
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    open suspend fun deleteCurrentRoute(): Result<Unit> =
         currentRouteDataSource.deleteCurrentRoute()
 
-    suspend fun clearCurrentRoute(): Result<Unit> =
+    open suspend fun clearCurrentRoute(): Result<Unit> =
         currentRouteDataSource.clearCurrentRoute()
 
-    suspend fun takeTheRoute(route: Route): Result<Unit> =
+    open suspend fun takeTheRoute(route: Route): Result<Unit> =
         currentRouteDataSource.setCurrentRoute(route.toEntity())
+
+    open suspend fun rateCurrentRoute(rating: Int): Result<Unit> {
+        return currentRouteDataSource.getCurrentRoute().first().getOrNull()?.let {
+            it.localRouteId?.let { routeId -> localRouteDataSource.rateRoute(rating, routeId) }
+        } ?: Result.failure(NoSuchElementException())
+    }
+
+    open suspend fun goToNextPlace(): Result<Unit> {
+        return currentRouteDataSource.goToNextPlace()
+    }
 
     private fun CurrentRouteEntity.toCurrentRoute(
         places: List<Place>,
-        timeToWalk: List<Int>
+        walkInfo: List<WalkInfo>,
+        favourite: Boolean,
     ): CurrentRoute {
         return CurrentRoute(
             places = places,
-            timeToWalk = timeToWalk,
+            walkInfo = walkInfo,
             currentPlaceIndex = currentPlaceIndex,
             remoteRouteId = remoteRouteId,
-            buildInProgress = buildInProgress
+            buildInProgress = buildInProgress,
+            localRouteId = localRouteId,
+            favourite = favourite,
+            finished = finished
+        )
+    }
+
+    private fun CurrentRoute.toLocalRoute(): LocalRoute {
+        return LocalRoute(
+            name = LocalDate.now().toString(),
+            placeIds = places.map { it.id },
+            imageUrl = places.first { it.photos.isNotEmpty() }.photos.first()
         )
     }
 

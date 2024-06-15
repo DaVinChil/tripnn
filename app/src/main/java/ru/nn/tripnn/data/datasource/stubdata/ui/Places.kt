@@ -16,12 +16,12 @@ val PLACE_1 = Place(
     type = "Пышечная",
     favourite = true,
     address = "Алексеевская, 11",
-    workTime = "Ежедневно с 10:00 до 21:00",
+    workTime = "10:00 - 21:00",
     phone = "+7-963-231-96-17",
     reviews = 199,
     doubleGisLink = "https://go.2gis.com/wrht0",
-    lon = 0.0,
-    lat = 0.0
+    lon = 43.998981,
+    lat = 56.321021
 )
 
-val PLACES = listOf(PLACE_1, PLACE_1, PLACE_1)
+val PLACES = listOf(PLACE_1, PLACE_1.copy(lon = 44.005360, lat = 56.326023), PLACE_1.copy(lon = 44.023798, lat = 56.319480))

@@ -13,6 +13,7 @@ import ru.nn.tripnn.data.datasource.recommendations.RecommendedRoutesDataSourceI
 import ru.nn.tripnn.data.datasource.remoteroute.RemoteRouteDataSource
 import ru.nn.tripnn.data.datasource.remoteroute.RemoteRouteDataSourceImpl
 import ru.nn.tripnn.data.repository.aggregator.RouteDataAggregator
+import ru.nn.tripnn.data.repository.route.FakeRecommendationsRepository
 import ru.nn.tripnn.data.repository.route.RouteRecommendationsRepository
 import ru.nn.tripnn.data.repository.route.RouteRecommendationsRepositoryImpl
 import javax.inject.Singleton
@@ -56,4 +57,5 @@ object RemoteRouteModule {
         routeDataAggregator: RouteDataAggregator
     ): RouteRecommendationsRepository =
         RouteRecommendationsRepositoryImpl(recommendationsDataSource, routeDataAggregator)
+        /*FakeRecommendationsRepository()*/
 }

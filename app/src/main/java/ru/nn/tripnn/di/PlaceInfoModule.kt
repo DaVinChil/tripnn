@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import retrofit2.Retrofit
 import ru.nn.tripnn.data.api.PlaceInfoApi
+import ru.nn.tripnn.data.datasource.placeinfo.FakePlaceInfoDataSource
 import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoDataSource
 import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoDataSourceImpl
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
@@ -29,7 +30,7 @@ object PlaceInfoModule {
         placeInfoApi: PlaceInfoApi,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): PlaceInfoDataSource =
-        PlaceInfoDataSourceImpl(placeInfoApi, ioDispatcher)
+        PlaceInfoDataSourceImpl(placeInfoApi, ioDispatcher) /*FakePlaceInfoDataSource()*/
 
     @Provides
     @Singleton

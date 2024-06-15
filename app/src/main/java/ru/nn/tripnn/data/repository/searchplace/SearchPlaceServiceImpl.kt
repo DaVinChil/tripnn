@@ -5,7 +5,6 @@ import androidx.paging.PagingConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
 import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoDataSource
 import ru.nn.tripnn.data.datasource.placeinfo.PlaceInfoPagingSource
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
@@ -23,12 +22,6 @@ class SearchPlaceServiceImpl(
         searchState: SearchFilters,
         scope: CoroutineScope
     ): Pager<Int, StateFlow<ResState<Place>>> {
-
-        flow {
-            emit(1)
-
-        }
-
         return Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = false),
             pagingSourceFactory = {

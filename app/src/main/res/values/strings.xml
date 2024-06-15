@@ -181,4 +181,8 @@
     <string name="clear_history_text">Are you sure you want to clear history of this category? There would be no way to restore it</string>
     <string name="closed">Closed</string>
     <string name="already_visited">Already visited</string>
+
+    <string name="add_route_to_favourite">Add route to favourite</string>
+    <string name="remove_route_from_favourite">Remove route from favourite</string>
+    <string name="finish_the_route">Finish the route</string>
 </resources>

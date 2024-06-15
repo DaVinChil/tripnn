@@ -20,4 +20,12 @@ class LocalRouteDataSourceImpl(
             }
         }
     }
+
+    override suspend fun saveRoute(localRoute: LocalRoute): Result<Long> = dispatchedRequest {
+        localRouteDao.saveRoute(route = localRoute)
+    }
+
+    override suspend fun rateRoute(rating: Int, routeId: Long): Result<Unit> = dispatchedRequest {
+        localRouteDao.rateRoute(rating, routeId)
+    }
 }

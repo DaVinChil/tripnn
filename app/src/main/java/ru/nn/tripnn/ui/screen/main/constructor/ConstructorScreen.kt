@@ -236,9 +236,8 @@ fun RouteColumn(
         state = lazyState,
         contentPadding = PaddingValues(
             top = 10.dp,
-            bottom = 90.dp + WindowInsets.systemBars.asPaddingValues(
-                density
-            ).calculateBottomPadding()
+            bottom = 90.dp + WindowInsets.systemBars.asPaddingValues(density)
+                .calculateBottomPadding()
         ),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -266,7 +265,7 @@ fun RouteColumn(
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         MontsText(
-                            text = (currentRoute?.timeToWalk?.get(index - 1) ?: 0).toString()
+                            text = (currentRoute?.walkInfo?.get(index - 1)?.timeToWalk ?: 0).toString()
                                     + " " + stringResource(id = R.string.minute_short),
                             style = MaterialTheme.typography.labelSmall
                         )

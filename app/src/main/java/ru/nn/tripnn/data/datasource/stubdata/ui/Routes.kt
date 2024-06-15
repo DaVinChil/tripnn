@@ -2,6 +2,7 @@ package ru.nn.tripnn.data.datasource.stubdata.ui
 
 import ru.nn.tripnn.domain.CurrentRoute
 import ru.nn.tripnn.domain.Route
+import ru.nn.tripnn.domain.WalkInfo
 import java.util.Date
 
 val ROUTE_1 = Route(
@@ -22,7 +23,8 @@ val ROUTE_1 = Route(
 val ROUTES = listOf(ROUTE_1, ROUTE_1.copy(remoteId = 2), ROUTE_1.copy(remoteId = 3))
 
 val CURRENT_ROUTE = CurrentRoute(
-    places = listOf(PLACE_1, PLACE_1, PLACE_1),
-    currentPlaceIndex = 0,
+    places = PLACES,
+    walkInfo = listOf(WalkInfo(10, 300), WalkInfo(10, 300), WalkInfo(10, 300), WalkInfo(10, 300)),
+    currentPlaceIndex = 1,
     buildInProgress = false
 )

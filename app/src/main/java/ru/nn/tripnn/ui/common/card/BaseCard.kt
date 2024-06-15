@@ -53,6 +53,7 @@ fun BaseCard(
     hideIndication: Boolean = false,
     onCardClick: () -> Unit,
     shadowColor: Color = Color(0x00FFFFFF),
+    grayPhoto: Boolean = false,
     info: (@Composable () -> Unit)? = null
 ) {
     Box(
@@ -75,7 +76,8 @@ fun BaseCard(
                 imageUrl = imageUrl,
                 closed = closed,
                 visited = visited,
-                hideIndication = hideIndication
+                hideIndication = hideIndication,
+                grayPhoto = grayPhoto
             )
 
             Column(
@@ -106,10 +108,11 @@ fun ImageWithIndications(
     imageUrl: String?,
     closed: Boolean?,
     visited: Boolean?,
-    hideIndication: Boolean
+    hideIndication: Boolean,
+    grayPhoto: Boolean
 ) {
     Box(modifier = modifier) {
-        ImageOrDefault(modifier = Modifier.fillMaxSize(), imageUrl = imageUrl)
+        ImageOrDefault(modifier = Modifier.fillMaxSize(), imageUrl = imageUrl, grayPhoto = grayPhoto)
 
         if (closed == true && !hideIndication) {
             ClosedIndication(

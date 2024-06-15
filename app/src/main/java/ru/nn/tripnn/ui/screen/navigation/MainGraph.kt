@@ -30,6 +30,7 @@ import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsScreen
 import ru.nn.tripnn.ui.screen.main.recommendations.RecommendationsViewModel
 import ru.nn.tripnn.ui.screen.main.settings.SettingsScreen
 import ru.nn.tripnn.ui.screen.main.settings.UserSettingsViewModel
+import ru.nn.tripnn.ui.screen.main.takingroute.TakingRouteViewModel
 import ru.nn.tripnn.ui.screen.main.takingroute.TakingTheRouteScreen
 import ru.nn.tripnn.ui.util.changeLocales
 import ru.nn.tripnn.ui.util.getIsoLang
@@ -75,9 +76,9 @@ fun NavGraphBuilder.addAppGraph(
         favourites(onBack, navigateToPhotos, navigateTo)
         recommendations(onBack, navigateToPhotos, navigateTo)
         history(onBack, navigateToPhotos, navigateTo)
-        constructor(onBack, navigateToPhotos)
+        constructor(onBack, navigateToPhotos, navigateTo)
         photos(onBack)
-        takingTheRoute()
+        takingTheRoute(onBack, navigateToPhotos)
     }
 }
 
@@ -166,7 +167,7 @@ fun NavGraphBuilder.account(
 
         AccountScreen(
             onBackClick = onBack,
-            userInfoData = accountViewModel.userInfoData.value,
+            userInfoData = accountViewModel.userInfoData.collectAsStateWithLifecycle().value,
             onUserNameChange = accountViewModel::changeUserName,
             onClearHistory = accountViewModel::clearHistory,
             onDeleteAccount = accountViewModel::deleteAccount,
@@ -205,7 +206,8 @@ fun NavGraphBuilder.favourites(
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
             toPhotos = navigateToPhotos,
-            alreadyHasRoute = favouriteViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull() ?: false
+            alreadyHasRoute = favouriteViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull()
+                ?: false
         )
     }
 }
@@ -231,7 +233,8 @@ fun NavGraphBuilder.recommendations(
             removePlaceFromFavourite = recommendationsViewModel::removePlaceFromFavourite,
             addPlaceToFavourite = recommendationsViewModel::addPlaceToFavourite,
             toPhotos = navigateToPhotos,
-            alreadyHasRoute = recommendationsViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull() ?: false,
+            alreadyHasRoute = recommendationsViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull()
+                ?: false,
             onTakeTheRoute = {
                 recommendationsViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
@@ -266,7 +269,8 @@ fun NavGraphBuilder.history(
                 historyViewModel.setCurrentRoute(it)
                 navigateTo(AppRoutes.CUR_ROUTE.route)
             },
-            alreadyHasRoute = historyViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull() ?: false,
+            alreadyHasRoute = historyViewModel.hasCurrentRoute.collectAsStateWithLifecycle().value.getOrNull()
+                ?: false,
             clearRoutesHistory = historyViewModel::clearRoutesHistory,
             clearPlacesHistory = historyViewModel::clearPlacesHistory,
             removeRouteFromHistory = historyViewModel::removeRouteFromFavourite,
@@ -277,7 +281,8 @@ fun NavGraphBuilder.history(
 
 fun NavGraphBuilder.constructor(
     onBack: () -> Unit,
-    navigateToPhotos: (String, Int) -> Unit
+    navigateToPhotos: (String, Int) -> Unit,
+    navigateTo: (String) -> Unit
 ) {
     composable(
         route = AppRoutes.CONSTRUCTOR_ROUTE.route,
@@ -293,6 +298,7 @@ fun NavGraphBuilder.constructor(
             removePlaceFromRoute = constructorViewModel::removePlace,
             takeRoute = {
                 constructorViewModel.takeCurrentRoute()
+                navigateTo(AppRoutes.CUR_ROUTE.route)
             },
             toPhotos = navigateToPhotos,
             removePlaceFromFavourite = constructorViewModel::removePlaceFromFavourite,
@@ -324,12 +330,38 @@ fun NavGraphBuilder.photos(onBack: () -> Unit) {
     }
 }
 
-fun NavGraphBuilder.takingTheRoute() {
+fun NavGraphBuilder.takingTheRoute(
+    onBack: () -> Unit,
+    toPhotos: (String, Int) -> Unit
+) {
     composable(
         route = AppRoutes.CUR_ROUTE.route,
         enterTransition = fullSlideInVertical(),
         exitTransition = fullSlideOutVertical()
     ) {
-        TakingTheRouteScreen()
+        val viewModel = hiltViewModel<TakingRouteViewModel>()
+
+        val currentRoute = viewModel.currentRoute.collectAsStateWithLifecycle().value
+        TakingTheRouteScreen(
+            currentRoute = currentRoute,
+            onBack = onBack,
+            onNextPlaceClick = {
+                val routeValue = currentRoute.getOrNull()
+                if (routeValue != null) {
+                    if (routeValue.places.lastIndex == routeValue.currentPlaceIndex) {
+                        viewModel.finishCurrentRoute()
+                        onBack()
+                    } else {
+                        viewModel.nextPlace()
+                    }
+                }
+            },
+            addCurrentRouteToFavourite = viewModel::addCurrentRouteToFavourite,
+            removeCurrentRouteFromFavourite = viewModel::removeCurrentRouteFromFavourite,
+            addPlaceToFavourite = viewModel::addPlaceToFavourite,
+            removePlaceFromFavourite = viewModel::removePlaceFromFavourite,
+            removePlaceFromRoute = viewModel::removePlaceFromRoute,
+            toPlacePhotos = toPhotos
+        )
     }
 }

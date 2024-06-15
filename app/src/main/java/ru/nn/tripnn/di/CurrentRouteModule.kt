@@ -15,8 +15,12 @@ import ru.nn.tripnn.data.database.currentroute.CurrentRouteDatabase
 import ru.nn.tripnn.data.datasource.currentroute.CurrentRouteDataSource
 import ru.nn.tripnn.data.datasource.currentroute.CurrentRouteDataSourceImpl
 import ru.nn.tripnn.data.datasource.distance.DistanceDataSource
+import ru.nn.tripnn.data.datasource.favourite.FavouritesDataSource
+import ru.nn.tripnn.data.datasource.localroute.LocalRouteDataSource
 import ru.nn.tripnn.data.repository.aggregator.PlaceDataAggregator
 import ru.nn.tripnn.data.repository.currentroute.CurrentRouteRepository
+import ru.nn.tripnn.data.repository.currentroute.FakeCurrentRouteRepository
+import ru.nn.tripnn.data.repository.routebuilder.FakeRouteBuilderServiceImpl
 import ru.nn.tripnn.data.repository.routebuilder.RouteBuilderService
 import ru.nn.tripnn.data.repository.routebuilder.RouteBuilderServiceImpl
 import javax.inject.Singleton
@@ -65,8 +69,10 @@ object CurrentRouteModule {
     @Singleton
     fun currentRouteRepository(
         currentRouteDataSource: CurrentRouteDataSource,
+        localRouteDataSource: LocalRouteDataSource,
+        favouritesDataSource: FavouritesDataSource,
         placeDataAggregator: PlaceDataAggregator,
         routeBuilderService: RouteBuilderService
     ): CurrentRouteRepository =
-        CurrentRouteRepository(currentRouteDataSource, placeDataAggregator, routeBuilderService)
+        CurrentRouteRepository(currentRouteDataSource, localRouteDataSource, favouritesDataSource, placeDataAggregator, routeBuilderService)
 }

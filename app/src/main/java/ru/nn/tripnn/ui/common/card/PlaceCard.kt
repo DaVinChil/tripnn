@@ -23,8 +23,9 @@ fun PlaceCard(
     onCardClick: () -> Unit,
     shadowColor: Color = TripNnTheme.colorScheme.shadow,
     hideIndication: Boolean = false,
+    grayPhoto: Boolean = false,
     option1: @Composable () -> Unit,
-    option2: @Composable (() -> Unit)? = null,
+    option2: @Composable (() -> Unit)? = null
 ) {
     DraggableCard(modifier = modifier, option1 = option1, option2 = option2) {
         PlaceCard(
@@ -32,7 +33,8 @@ fun PlaceCard(
             place = place,
             onCardClick = onCardClick,
             shadowColor = shadowColor,
-            hideIndication = hideIndication
+            hideIndication = hideIndication,
+            grayPhoto = grayPhoto
         )
     }
 }
@@ -43,7 +45,8 @@ fun PlaceCard(
     place: Place,
     onCardClick: () -> Unit,
     shadowColor: Color = Color(0x00FFFFFF),
-    hideIndication: Boolean = false
+    hideIndication: Boolean = false,
+    grayPhoto: Boolean = false
 ) {
     BaseCard(
         modifier = modifier,
@@ -54,7 +57,8 @@ fun PlaceCard(
         shadowColor = shadowColor,
         visited = place.visited,
         closed = place.isClosed(),
-        hideIndication = hideIndication
+        hideIndication = hideIndication,
+        grayPhoto = grayPhoto
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             RatingInfo(rating = place.rating)

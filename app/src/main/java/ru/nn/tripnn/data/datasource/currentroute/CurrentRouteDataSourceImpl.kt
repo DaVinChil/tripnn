@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteDao
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteEntity
+import ru.nn.tripnn.data.database.route.RouteReference
 import ru.nn.tripnn.data.datasource.AbstractDataSource
 import ru.nn.tripnn.data.toResultFlow
 
@@ -15,6 +16,19 @@ class CurrentRouteDataSourceImpl(
     override fun getCurrentRoute(): Flow<Result<CurrentRouteEntity?>> {
         return currentRouteDao.getCurrentRoute().toResultFlow()
     }
+
+    override suspend fun addRouteReference(routeReference: RouteReference): Result<Unit> =
+        dispatchedRequest {
+            getCurrentRoute().first().getOrThrow()?.let { route ->
+                val newRoute = when {
+                    routeReference.remoteRouteId() != null -> route.copy(remoteRouteId = routeReference.remoteRouteId())
+                    routeReference.localRouteId() != null -> route.copy(localRouteId = routeReference.localRouteId())
+                    else -> throw IllegalStateException()
+                }
+
+                currentRouteDao.saveCurrentRoute(newRoute)
+            }
+        }
 
     override suspend fun deleteCurrentRoute(): Result<Unit> = dispatchedRequest {
         currentRouteDao.deleteCurrentRoute()
@@ -51,7 +65,8 @@ class CurrentRouteDataSourceImpl(
         currentRouteDao.nextPlace()
     }
 
-    override suspend fun setCurrentRoute(currentRouteEntity: CurrentRouteEntity): Result<Unit> = dispatchedRequest {
-        currentRouteDao.saveCurrentRoute(currentRouteEntity)
-    }
+    override suspend fun setCurrentRoute(currentRouteEntity: CurrentRouteEntity): Result<Unit> =
+        dispatchedRequest {
+            currentRouteDao.saveCurrentRoute(currentRouteEntity)
+        }
 }
