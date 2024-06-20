@@ -1,6 +1,7 @@
 package ru.nn.tripnn.data.datasource.currentroute
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteDao
@@ -69,4 +70,8 @@ class CurrentRouteDataSourceImpl(
         dispatchedRequest {
             currentRouteDao.saveCurrentRoute(currentRouteEntity)
         }
+
+    override suspend fun finishCurrentRoute(): Result<Unit> = dispatchedRequest {
+        currentRouteDao.setFinished()
+    }
 }

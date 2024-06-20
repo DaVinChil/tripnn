@@ -22,4 +22,7 @@ interface CurrentRouteDao {
 
     @Query("delete from current_route")
     fun deleteCurrentRoute()
+
+    @Query("update current_route set finished = true")
+    fun setFinished()
 }

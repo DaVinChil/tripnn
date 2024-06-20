@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +44,7 @@ import ru.nn.tripnn.domain.Place
 import ru.nn.tripnn.domain.state.ResState
 import ru.nn.tripnn.ui.common.DragHandle
 import ru.nn.tripnn.ui.common.InternetProblemScreen
+import ru.nn.tripnn.ui.common.LoadingCircleScreen
 import ru.nn.tripnn.ui.common.MontsText
 import ru.nn.tripnn.ui.common.shadow
 import ru.nn.tripnn.ui.screen.main.takingroute.map.CurrentRouteMap
@@ -64,8 +66,15 @@ fun TakingTheRouteScreen(
     removePlaceFromRoute: (Int) -> Unit,
     toPlacePhotos: (String, Int) -> Unit
 ) {
+    val currentRouteValue = currentRoute.getOrNull()
+
     if (currentRoute.isError()) {
         InternetProblemScreen()
+        return
+    }
+
+    if (currentRoute.isLoading() || currentRouteValue == null) {
+        LoadingCircleScreen()
         return
     }
 
@@ -77,65 +86,70 @@ fun TakingTheRouteScreen(
     val scaffoldState = rememberBottomSheetScaffoldState(sheetState)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        val currentRouteValue = currentRoute.getOrNull()
-        BottomSheetScaffold(
-            modifier = Modifier.fillMaxSize(),
-            scaffoldState = scaffoldState,
-            sheetContent = {
-                CurrentRouteBottomSheetContent(
-                    currentRoute = currentRouteValue ?: CURRENT_ROUTE,
-                    expanded = expended,
-                    onNextPlaceClick = onNextPlaceClick,
-                    addCurrentRouteToFavourite = addCurrentRouteToFavourite,
-                    addPlaceToFavourite = addPlaceToFavourite,
-                    removePlaceFromFavourite = removePlaceFromFavourite,
-                    removePlaceFromRoute = removePlaceFromRoute,
-                    toPlacePhotos = toPlacePhotos,
-                    removeCurrentRouteFromFavourite = removeCurrentRouteFromFavourite
-                )
-            },
-            sheetTonalElevation = 0.dp,
-            sheetShadowElevation = 0.dp,
-            sheetPeekHeight = CURRENT_PLACE_CARD_HEIGHT + 110.dp,
-            sheetContainerColor = Color.Transparent,
-            sheetDragHandle = { DragHandle() }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(TripNnTheme.colorScheme.undefined)
+        if (currentRouteValue.finished) {
+            FinishScreen(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                toMainScreen = onBack,
+                addToFavourite = addCurrentRouteToFavourite,
+                removeFromFavourite = removeCurrentRouteFromFavourite,
+                currentRoute = currentRouteValue
+            )
+        } else {
+            BottomSheetScaffold(
+                modifier = Modifier.fillMaxSize(),
+                scaffoldState = scaffoldState,
+                sheetContent = {
+                    CurrentRouteBottomSheetContent(
+                        currentRoute = currentRouteValue,
+                        expanded = expended,
+                        onNextPlaceClick = onNextPlaceClick,
+                        addCurrentRouteToFavourite = addCurrentRouteToFavourite,
+                        addPlaceToFavourite = addPlaceToFavourite,
+                        removePlaceFromFavourite = removePlaceFromFavourite,
+                        removePlaceFromRoute = removePlaceFromRoute,
+                        toPlacePhotos = toPlacePhotos,
+                        removeCurrentRouteFromFavourite = removeCurrentRouteFromFavourite
+                    )
+                },
+                sheetTonalElevation = 0.dp,
+                sheetShadowElevation = 0.dp,
+                sheetPeekHeight = CURRENT_PLACE_CARD_HEIGHT + 110.dp,
+                sheetContainerColor = Color.Transparent,
+                sheetDragHandle = { DragHandle() }
             ) {
-                if (currentRouteValue != null) {
-                    CurrentRouteMap(currentRoute = currentRouteValue)
-                }
-
                 Box(
                     modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(10.dp)
+                        .fillMaxSize()
+                        .background(TripNnTheme.colorScheme.undefined)
                 ) {
-                    IconButton(
-                        onClick = onBack,
+                    CurrentRouteMap(currentRoute = currentRouteValue)
+
+                    Box(
                         modifier = Modifier
-                            .shadow(
-                                color = TripNnTheme.colorScheme.shadow,
-                                borderRadius = 100.dp,
-                                blurRadius = 2.dp
-                            )
-                            .clip(RoundedCornerShape(100))
-                            .background(TripNnTheme.colorScheme.background)
+                            .statusBarsPadding()
+                            .padding(10.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.back_arrow),
-                            contentDescription = "",
-                            tint = TripNnTheme.colorScheme.tertiary
-                        )
+                        IconButton(
+                            onClick = onBack,
+                            modifier = Modifier
+                                .shadow(
+                                    color = TripNnTheme.colorScheme.shadow,
+                                    borderRadius = 100.dp,
+                                    blurRadius = 2.dp
+                                )
+                                .clip(RoundedCornerShape(100))
+                                .background(TripNnTheme.colorScheme.background)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.back_arrow),
+                                contentDescription = "",
+                                tint = TripNnTheme.colorScheme.tertiary
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        if (currentRouteValue != null) {
             RouteProgressBottomIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -165,8 +179,8 @@ fun CurrentRouteBottomSheetContent(
         CurrentPlaceCard(
             modifier = Modifier.fillMaxWidth(),
             place = currentRoute.places[curPlaceInd],
-            timeToWalk = currentRoute.walkInfo[curPlaceInd].timeToWalk,
-            distance = currentRoute.walkInfo[curPlaceInd].distance,
+            timeToWalk = currentRoute.walkInfo.getOrNull(curPlaceInd)?.timeToWalk ?: 0,
+            distance = currentRoute.walkInfo.getOrNull(curPlaceInd)?.distance ?: 0,
             buttonType = if (currentRoute.currentPlaceIndex != currentRoute.places.lastIndex) {
                 CurrentPlaceButtonType.NEXT_PLACE
             } else {

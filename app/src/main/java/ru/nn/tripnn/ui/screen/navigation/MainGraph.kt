@@ -350,7 +350,6 @@ fun NavGraphBuilder.takingTheRoute(
                 if (routeValue != null) {
                     if (routeValue.places.lastIndex == routeValue.currentPlaceIndex) {
                         viewModel.finishCurrentRoute()
-                        onBack()
                     } else {
                         viewModel.nextPlace()
                     }

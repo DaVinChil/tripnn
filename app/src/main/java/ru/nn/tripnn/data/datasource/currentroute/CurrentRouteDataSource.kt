@@ -15,4 +15,5 @@ interface CurrentRouteDataSource {
     suspend fun takeCurrentRoute(): Result<Unit>
     suspend fun goToNextPlace(): Result<Unit>
     suspend fun setCurrentRoute(currentRouteEntity: CurrentRouteEntity): Result<Unit>
+    suspend fun finishCurrentRoute(): Result<Unit>
 }

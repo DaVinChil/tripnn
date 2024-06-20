@@ -56,6 +56,8 @@
     <string name="culture">Культура</string>
     <string name="leisure">Досуг</string>
     <string name="to_eat">Поесть</string>
+    <string name="route_finished">Маршрут пройден!</string>
+    <string name="to_main_screen">На главную</string>
 
     <string name="all_types">Все</string>
     <string name="home_cook">Домашняя кухня</string>

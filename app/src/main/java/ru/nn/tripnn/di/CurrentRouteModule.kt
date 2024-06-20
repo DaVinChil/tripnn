@@ -8,6 +8,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import retrofit2.Retrofit
 import ru.nn.tripnn.data.api.DistanceApi
 import ru.nn.tripnn.data.database.currentroute.CurrentRouteDao
@@ -46,7 +48,10 @@ object CurrentRouteModule {
     fun currentRouteDataSource(
         currentRouteDao: CurrentRouteDao,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
-    ): CurrentRouteDataSource = CurrentRouteDataSourceImpl(currentRouteDao, ioDispatcher)
+    ): CurrentRouteDataSource = CurrentRouteDataSourceImpl(
+        currentRouteDao,
+        ioDispatcher
+    )
 
     @Provides
     @Singleton
@@ -63,7 +68,8 @@ object CurrentRouteModule {
     @Singleton
 //    @Fake
     fun routeBuilderService(distanceDataSource: DistanceDataSource): RouteBuilderService =
-        /*FakeRouteBuilderServiceImpl()*/ RouteBuilderServiceImpl(distanceDataSource)
+        FakeRouteBuilderServiceImpl()
+//        RouteBuilderServiceImpl(distanceDataSource)
 
     @Provides
     @Singleton
@@ -74,5 +80,12 @@ object CurrentRouteModule {
         placeDataAggregator: PlaceDataAggregator,
         routeBuilderService: RouteBuilderService
     ): CurrentRouteRepository =
-        CurrentRouteRepository(currentRouteDataSource, localRouteDataSource, favouritesDataSource, placeDataAggregator, routeBuilderService)
+        CurrentRouteRepository(
+            currentRouteDataSource,
+            localRouteDataSource,
+            favouritesDataSource,
+            placeDataAggregator,
+            routeBuilderService,
+            CoroutineScope(Dispatchers.IO)
+        )
 }

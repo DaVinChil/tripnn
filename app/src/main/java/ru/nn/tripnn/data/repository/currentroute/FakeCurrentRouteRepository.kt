@@ -1,5 +1,7 @@
 package ru.nn.tripnn.data.repository.currentroute
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import ru.nn.tripnn.data.datasource.currentroute.CurrentRouteDataSource
@@ -18,7 +20,7 @@ class FakeCurrentRouteRepository(
     private val placeDataAggregator: PlaceDataAggregator,
     private val routeBuilderService: RouteBuilderService
 ) : CurrentRouteRepository(
-    currentRouteDataSource, localRouteDataSource, favouritesDataSource, placeDataAggregator, routeBuilderService
+    currentRouteDataSource, localRouteDataSource, favouritesDataSource, placeDataAggregator, routeBuilderService, CoroutineScope(Dispatchers.IO)
 ) {
     override fun getCurrentRoute(createIfAbsent: Boolean): Flow<Result<CurrentRoute?>> {
         return flowOf(Result.success(CURRENT_ROUTE));

@@ -30,7 +30,8 @@ object PlaceInfoModule {
         placeInfoApi: PlaceInfoApi,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
     ): PlaceInfoDataSource =
-        PlaceInfoDataSourceImpl(placeInfoApi, ioDispatcher) /*FakePlaceInfoDataSource()*/
+        PlaceInfoDataSourceImpl(placeInfoApi, ioDispatcher)
+//        FakePlaceInfoDataSource()
 
     @Provides
     @Singleton

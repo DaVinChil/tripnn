@@ -236,7 +236,7 @@ fun SearchResultScreen(
             } else if (resultPlaces.itemCount == 0) {
                 SearchEmptyResult(popBack)
             } else {
-                LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp)) {
+                LazyColumn(state = lazyState, contentPadding = PaddingValues(vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(
                         count = resultPlaces.itemCount,
                         key = { it }

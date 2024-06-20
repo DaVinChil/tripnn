@@ -68,8 +68,14 @@ fun CurrentRoutePlaceColumn(
     var showCardInfo by remember { mutableStateOf(false) }
     var pickedPlace by remember { mutableStateOf(PLACE_1) }
 
-    val orderIds = remember { (0 until currentRoute.places.size).toMutableList() }
-    val getKey = remember(orderIds) { { index: Int, _: Place -> orderIds[index] } }
+    val orderIds = remember(currentRoute.places.size) {
+        (0 until currentRoute.places.size).toMutableList()
+    }
+    val getKey = remember(orderIds) {
+        { index: Int, _: Place ->
+            orderIds[index]
+        }
+    }
 
     LazyColumn(
         state = listState,

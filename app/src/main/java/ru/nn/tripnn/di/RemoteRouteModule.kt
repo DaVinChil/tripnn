@@ -8,8 +8,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import retrofit2.Retrofit
 import ru.nn.tripnn.data.api.RecommendedRoutesApi
 import ru.nn.tripnn.data.api.RouteInfoApi
+import ru.nn.tripnn.data.datasource.recommendations.FakeRecommendationsDataSource
 import ru.nn.tripnn.data.datasource.recommendations.RecommendationsDataSource
 import ru.nn.tripnn.data.datasource.recommendations.RecommendedRoutesDataSourceImpl
+import ru.nn.tripnn.data.datasource.remoteroute.FakeRemoteRouteDataSource
 import ru.nn.tripnn.data.datasource.remoteroute.RemoteRouteDataSource
 import ru.nn.tripnn.data.datasource.remoteroute.RemoteRouteDataSourceImpl
 import ru.nn.tripnn.data.repository.aggregator.RouteDataAggregator
@@ -32,9 +34,9 @@ object RemoteRouteModule {
     fun recommendationDataSource(
         recommendedRoutesApi: RecommendedRoutesApi,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
-    ): RecommendationsDataSource = RecommendedRoutesDataSourceImpl(
-        recommendedRoutesApi, ioDispatcher
-    )
+    ): RecommendationsDataSource =
+        RecommendedRoutesDataSourceImpl(recommendedRoutesApi, ioDispatcher)
+//        FakeRecommendationsDataSource()
 
     @Provides
     @Singleton
@@ -46,9 +48,9 @@ object RemoteRouteModule {
     fun remoteRouteDataSource(
         remoteRoutesApi: RouteInfoApi,
         @IoDispatcher ioDispatcher: CoroutineDispatcher
-    ): RemoteRouteDataSource = RemoteRouteDataSourceImpl(
-        remoteRoutesApi, ioDispatcher
-    )
+    ): RemoteRouteDataSource =
+        RemoteRouteDataSourceImpl(remoteRoutesApi, ioDispatcher)
+//        FakeRemoteRouteDataSource()
 
     @Provides
     @Singleton
@@ -57,5 +59,5 @@ object RemoteRouteModule {
         routeDataAggregator: RouteDataAggregator
     ): RouteRecommendationsRepository =
         RouteRecommendationsRepositoryImpl(recommendationsDataSource, routeDataAggregator)
-        /*FakeRecommendationsRepository()*/
+//        FakeRecommendationsRepository()
 }

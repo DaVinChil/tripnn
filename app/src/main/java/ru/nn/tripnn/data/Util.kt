@@ -13,7 +13,11 @@ inline fun <T> request(request: () -> T) = try {
 }
 
 fun <T> Flow<T>.toResultFlow(): Flow<Result<T>> {
-    return map { Result.success(it) }.catch { e -> emit(Result.failure(e)) }
+    return map {
+        Result.success(it)
+    }.catch { e ->
+        emit(Result.failure(e))
+    }
 }
 
 fun <T> Response<T>.getOrThrow(): T =

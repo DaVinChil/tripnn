@@ -169,6 +169,7 @@ fun HomeContent(
             return@Scaffold
         }
 
+        val currentRouteValue = currentRoute.getOrNull()
         Column(
             modifier = Modifier
                 .padding(paddings)
@@ -222,11 +223,14 @@ fun HomeContent(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
+                val hasDraft =
+                    currentRouteValue?.buildInProgress == true && !currentRouteValue.finished
+                val hasCurrentRoute = currentRouteValue?.buildInProgress == false && !currentRouteValue.finished
                 NewRouteButton(
                     modifier = Modifier.align(Alignment.Center),
-                    hasDraft = currentRoute.getOrNull()?.buildInProgress == true,
+                    hasDraft = hasDraft,
                     onClick = {
-                        if (currentRoute.getOrNull()?.buildInProgress == false) {
+                        if (hasCurrentRoute) {
                             showDeleteCurrentRouteDialog = true
                         } else {
                             onNewRouteClick()
@@ -235,13 +239,13 @@ fun HomeContent(
                 )
 
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = currentRoute.getOrNull()?.buildInProgress == false,
+                    visible = hasCurrentRoute,
                     enter = slideInVertically { it } + fadeIn(),
                     exit = slideOutVertically { it } + fadeOut(),
                     modifier = Modifier.align(Alignment.BottomCenter)
                 ) {
                     CurrentRouteBar(
-                        route = currentRoute.getOrNull(),
+                        route = currentRouteValue,
                         onClick = onCurrentRouteClick
                     )
                 }
@@ -269,7 +273,7 @@ fun HomeContent(
                     route = recommendedRoutes.value[pickedRoute],
                     onTakeTheRoute = onTakeTheRoute,
                     toPhotos = toPhotos,
-                    alreadyHasRoute = currentRoute.getOrNull() != null
+                    alreadyHasRoute = currentRouteValue != null && !currentRouteValue.finished
                 )
             }
         }

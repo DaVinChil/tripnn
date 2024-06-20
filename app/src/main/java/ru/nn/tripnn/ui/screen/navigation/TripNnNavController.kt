@@ -32,6 +32,13 @@ class TripNnNavController(
 
         if (authRoutes.contains(route) xor authRoutes.contains(currentRoute)) {
             navigateToAndPopAll(route)
+        } else if (route == AppRoutes.CUR_ROUTE.route && currentRoute == AppRoutes.CONSTRUCTOR_ROUTE.route) {
+            navController.navigate(route) {
+                launchSingleTop = true
+                popUpTo(currentRoute ?: route) {
+                    inclusive = true
+                }
+            }
         } else {
             navController.navigate(route) {
                 launchSingleTop = true

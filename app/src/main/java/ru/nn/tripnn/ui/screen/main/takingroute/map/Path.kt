@@ -27,7 +27,7 @@ fun Path(currentRoute: CurrentRoute) {
 
     LaunchedEffect(currentRoute.places) {
         withContext(Dispatchers.IO) {
-            directionResult = getDirections(currentRoute.places, currentRoute.currentPlaceIndex)
+            directionResult = getDirections(currentRoute.places, maxOf(currentRoute.currentPlaceIndex - 1, 0))
         }
     }
 

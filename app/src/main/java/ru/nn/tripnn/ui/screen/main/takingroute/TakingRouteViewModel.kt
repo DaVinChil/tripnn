@@ -49,9 +49,11 @@ class TakingRouteViewModel @Inject constructor(
     fun finishCurrentRoute() {
         viewModelScope.launch {
             _currentRoute.current.getOrNull()?.let {
+                val curPlace = it.places.last()
+                historyRepository.addPlaceToHistory(curPlace)
                 historyRepository.addRouteToHistory(it)
+                currentRouteRepository.finishCurrentRoute()
             }
-            currentRouteRepository.deleteCurrentRoute()
         }
     }
 

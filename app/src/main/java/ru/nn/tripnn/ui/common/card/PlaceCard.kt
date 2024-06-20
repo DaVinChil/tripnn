@@ -50,7 +50,7 @@ fun PlaceCard(
 ) {
     BaseCard(
         modifier = modifier,
-        imageUrl = place.photos[0],
+        imageUrl = place.photos.getOrNull(0),
         type = place.type,
         name = place.name,
         onCardClick = onCardClick,
